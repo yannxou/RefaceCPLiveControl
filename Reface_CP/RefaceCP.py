@@ -54,17 +54,22 @@ class RefaceCP(ControlSurface):
             button.add_value_listener(self._reface_type_select_changed)
             self._type_select_buttons.append(button)
 
+
     def _setup_device_control(self):
         self._device = DeviceComponent()
         self._device.name = 'Device_Component'
+        self._update_device_control_channel(0) # TODO: Initialize with current reface channel
+        self._on_device_changed.subject = self._device
+        self.set_device_component(self._device)
+
+
+    def _update_device_control_channel(self, channel):
         device_controls = []
         for index in range(8):
-            control = EncoderElement(MIDI_CC_TYPE, 0, ENCODER_MSG_IDS[index], Live.MidiMap.MapMode.absolute)
+            control = EncoderElement(MIDI_CC_TYPE, channel, ENCODER_MSG_IDS[index], Live.MidiMap.MapMode.absolute)
             control.name = 'Ctrl_' + str(index)
             device_controls.append(control)
         self._device.set_parameter_controls(device_controls)
-        self._on_device_changed.subject = self._device
-        self.set_device_component(self._device)
 
 # --- Listeners
 
@@ -80,6 +85,7 @@ class RefaceCP(ControlSurface):
         channel = reface_type_map.get(value, 0)
         self.log_message(f"Type changed: {value} -> {channel}")
         self._setRefaceTransmitChannel(channel)
+        self._update_device_control_channel(channel)
 
 # --- Reface Sysex commands
 # Specs: https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
