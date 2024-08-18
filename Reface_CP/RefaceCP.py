@@ -12,6 +12,8 @@ from _Framework.DeviceComponent import DeviceComponent
 from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 #from _Framework.ChannelStripComponent import ChannelStripComponent
 
+# Reface CP elements:
+TYPE_SELECT_KNOB = 80
 ENCODER_MSG_IDS = (81, 18, 19, 86, 87, 89, 90, 91) # Reface CP knobs from Drive to Reverb Depth
 
 class RefaceCP(ControlSurface):
@@ -25,9 +27,14 @@ class RefaceCP(ControlSurface):
             self._suggested_input_port = "reface CP"
             self._suggested_output_port = "reface CP"
 
+            self._setup_buttons()
             self._setup_device_control()
 
             self.log_message("RefaceCP Init Succeeded.")
+
+    def _setup_buttons(self):
+        self.type_select_button = ButtonElement(1, MIDI_CC_TYPE, 0, TYPE_SELECT_KNOB)
+        self.type_select_button.add_value_listener(self._type_select_changed)
 
     def _setup_device_control(self):
         self._device = DeviceComponent()
@@ -50,10 +57,12 @@ class RefaceCP(ControlSurface):
             self.log_message("No device selected")
 
     def _type_select_changed(self, value):
-        self.log_message("Type: {value}")
+        self.log_message(f"Type changed: {value}")
 
     def disconnect(self):
         self.log_message("RefaceCP Disconnected")
+        self.type_select_button.remove_value_listener(self._type_select_changed)
+
         super(RefaceCP, self).disconnect()
 
 """
