@@ -16,6 +16,8 @@ from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 TYPE_SELECT_KNOB = 80
 ENCODER_MSG_IDS = (81, 18, 19, 86, 87, 89, 90, 91) # Reface CP knobs from Drive to Reverb Depth
 TREMOLO_WAH_SWITCH = 17
+TREMOLO_ON_VALUE = 64
+WAH_ON_VALUE = 127
 CHORUS_PHASER_SWITCH = 85
 DELAY_SWITCH = 88
 
@@ -35,6 +37,7 @@ class RefaceCP(ControlSurface):
         with self.component_guard():
             self.log_message("RefaceCP Init Started")
             # self._suppress_send_midi = True
+            self._is_device_locked = False
 
             # FIXME: not working? try manually setting those?
             self._suggested_input_port = "reface CP"
@@ -83,8 +86,9 @@ class RefaceCP(ControlSurface):
     @subject_slot('device')
     def _on_device_changed(self):
         if liveobj_valid(self._device):
-            # self.log_message("New device selected")
-            self.set_device_to_selected()
+            self.log_message("on_device_changed")
+            if not self._is_device_locked:
+                self.set_device_to_selected()
 
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
@@ -94,27 +98,53 @@ class RefaceCP(ControlSurface):
 
     def _reface_tremolo_switch_changed(self, value):
         self.log_message(f"Tremolo changed: {value}")
-        self.set_device_to_selected()
+        selected_device = self.get_selected_device()
+        self._is_device_locked = value == TREMOLO_ON_VALUE
+        if value == TREMOLO_ON_VALUE:
+            self.set_device_component(self._device)
+            self.lock_to_device(selected_device)
+        elif value == WAH_ON_VALUE:
+            self.log_message("Wah enabled")
+            self._device.set_lock_to_device(False, selected_device)
+            self._device.set_parameter_controls(None)
+            self.set_device_component(None)
+        else:
+            self.log_message("Nothing yet")
+            self._update_device_control_channel(0) # use current_channel
+            self._device.set_lock_to_device(False, selected_device)
+            self.set_device_to_selected()
+            self.set_device_component(self._device)
 
 # --- Other functions
+
+    def get_selected_device(self):
+        selected_track = self.song().view.selected_track
+        device_to_select = selected_track.view.selected_device
+        if device_to_select is None and len(selected_track.devices) > 0:
+            device_to_select = selected_track.devices[0]
+        return device_to_select
 
     def set_device_to_selected(self):
         """
         Set the DeviceComponent to manage the currently selected device in Ableton Live.
         """
-        selected_track = self.song().view.selected_track
-        device_to_select = selected_track.view.selected_device
-        if device_to_select is None and len(selected_track.devices) > 0:
-            device_to_select = selected_track.devices[0]
+        device_to_select = self.get_selected_device()
         if device_to_select is not None:
             self.log_message(f"Select Device: {device_to_select.name}")
             # self.log_message(f"Appointed: {self.song().appointed_device.name}")
             self._device.set_device(device_to_select)
-            self._device.update()            
-            self.request_rebuild_midi_map()  # This tells Live to refresh the MIDI mappings and the blue hand
-            # self._device.notify_device()
+            #self._device.update()
+            #self._device.notify_device() # creates an infinite loop!?!
+            #self.request_rebuild_midi_map()  # This tells Live to refresh the MIDI mappings and the blue hand. Not needed
         else:
             self.log_message("No device to select.")
+
+    def lock_to_device(self, device):
+        if device is not None:
+            self.log_message(f"Locking to device {device.name}")
+            self._is_device_locked = True
+            self._device.set_device(device)
+            self._device.set_lock_to_device(True, device)
 
 # --- Reface Sysex commands
 # Specs: https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
