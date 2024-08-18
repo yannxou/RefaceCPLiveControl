@@ -1,0 +1,7 @@
+TODO:
+
+* Request midi channel on startup to setup correctly
+
+* Add identity request on script start (find device number)
+	https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
+
