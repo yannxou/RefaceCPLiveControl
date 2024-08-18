@@ -1,37 +1,58 @@
 from __future__ import absolute_import, print_function, unicode_literals
 import Live
-from _Framework.SessionComponent import SessionComponent
 from _Framework.ControlSurface import ControlSurface
-from _Framework.InputControlElement import * # MIDI_CC_TYPE
-#from _Framework.InputControlElement import MIDI_NOTE_TYPE
+from _Framework.MixerComponent import MixerComponent
+from _Framework.TransportComponent import TransportComponent
+from _Framework.SessionComponent import SessionComponent
+from _Framework.EncoderElement import *
+from _Framework.ButtonElement import ButtonElement
 from _Framework.SliderElement import SliderElement
-from _Framework.EncoderElement import EncoderElement
-from _Framework.ChannelStripComponent import ChannelStripComponent
-#from _Framework.ButtonElement import ButtonElement
+from _Framework.InputControlElement import MIDI_NOTE_TYPE, MIDI_NOTE_ON_STATUS, MIDI_NOTE_OFF_STATUS, MIDI_CC_TYPE
+from _Framework.DeviceComponent import DeviceComponent
+from ableton.v2.base import listens, liveobj_valid, liveobj_changed
+#from _Framework.ChannelStripComponent import ChannelStripComponent
+
+ENCODER_MSG_IDS = (81, 18, 19, 86, 87, 89, 90, 91) # Reface CP knobs from Drive to Reverb Depth
 
 class RefaceCP(ControlSurface):
     def __init__(self, c_instance):
         ControlSurface.__init__(self, c_instance)
-        self.log_message("RefaceCP Init Started")
-        # self._suppress_send_midi = True
+        with self.component_guard():
+            self.log_message("RefaceCP Init Started")
+            # self._suppress_send_midi = True
 
-        # FIXME: not working? try manually setting those?
-        self._suggested_input_port = "reface CP"
-        self._suggested_output_port = "reface CP"
+            # FIXME: not working? try manually setting those?
+            self._suggested_input_port = "reface CP"
+            self._suggested_output_port = "reface CP"
 
-        channel = 0
-        #self.type_select_knob = SliderElement(MIDI_CC_TYPE, channel, 80, name='TypeKnob', send_midi=send_midi)
-        self.type_select_knob = EncoderElement(MIDI_CC_TYPE, channel, 80, Live.MidiMap.MapMode.absolute)
-        self.type_select_knob.add_value_listener(self._type_select_changed)
+            self._setup_device_control()
 
-        self.log_message("RefaceCP Init Succeeded.")
+            self.log_message("RefaceCP Init Succeeded.")
+
+    def _setup_device_control(self):
+        self._device = DeviceComponent()
+        self._device.name = 'Device_Component'
+        device_controls = []
+        for index in range(8):
+            control = EncoderElement(MIDI_CC_TYPE, 0, ENCODER_MSG_IDS[index], Live.MidiMap.MapMode.absolute)
+            control.name = 'Ctrl_' + str(index)
+            device_controls.append(control)
+        self._device.set_parameter_controls(device_controls)
+        self._on_device_changed.subject = self._device
+        self.set_device_component(self._device)
+
+    @subject_slot('device')
+    def _on_device_changed(self):
+        if liveobj_valid(self._device):
+            self.log_message("New device selected")
+        else:
+            # no device
+            self.log_message("No device selected")
 
     def _type_select_changed(self, value):
         self.log_message("Type: {value}")
 
     def disconnect(self):
-        self.type_select_knob.remove_value_listener(self.type_select_changed)
-
         self.log_message("RefaceCP Disconnected")
         super(RefaceCP, self).disconnect()
 
