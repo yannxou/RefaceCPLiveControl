@@ -37,7 +37,7 @@ class RefaceCP(ControlSurface):
         with self.component_guard():
             self.log_message("RefaceCP Init Started")
             # self._suppress_send_midi = True
-            self._is_device_locked = False
+            self._locked_device = None
 
             # FIXME: not working? try manually setting those?
             self._suggested_input_port = "reface CP"
@@ -66,8 +66,10 @@ class RefaceCP(ControlSurface):
 
 
     def _setup_device_control(self):
+        self._device_lock_button = ButtonElement(1, MIDI_CC_TYPE, 15, 100, name="DeviceLock")
         self._device = DeviceComponent()
         self._device.name = 'Device_Component'
+        self._device.set_lock_button(self._device_lock_button)
         self._update_device_control_channel(0) # TODO: Initialize with current reface channel
         self._on_device_changed.subject = self._device
         self.set_device_component(self._device)
@@ -85,12 +87,9 @@ class RefaceCP(ControlSurface):
 
     @subject_slot('device')
     def _on_device_changed(self):
+        # self.log_message("on_device_changed")
         if liveobj_valid(self._device):
-            if not self._is_device_locked:
-                self.log_message("on_device_changed. unlocked")
-                self.set_device_to_selected()
-            else:
-                self.log_message("on_device_changed. locked")
+            self.set_device_to_selected()
 
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
@@ -99,23 +98,24 @@ class RefaceCP(ControlSurface):
         self._update_device_control_channel(channel)
 
     def _reface_tremolo_switch_changed(self, value):
-        self.log_message(f"Tremolo changed: {value}")
-        selected_device = self.get_selected_device()
-        self._is_device_locked = value == TREMOLO_ON_VALUE
         if value == TREMOLO_ON_VALUE:
+            selected_device = self.get_selected_device()
+            self.log_message(f"Device locked: {selected_device.name}")
+            self._update_device_control_channel(0) # use current_channel
             self.set_device_component(self._device)
-            self.lock_to_device(selected_device)
+            self._lock_to_device(selected_device)
         elif value == WAH_ON_VALUE:
-            self.log_message("Wah enabled")
-            self._device.set_lock_to_device(False, selected_device)
+            # self.log_message("Not implemented yet.")
+            self._unlock_from_device()
             self._device.set_parameter_controls(None)
             self.set_device_component(None)
         else:
-            self.log_message("Nothing yet")
+            self.log_message("Device lock off. Following selected device.")
             self._update_device_control_channel(0) # use current_channel
-            self._device.set_lock_to_device(False, selected_device)
+            self._unlock_from_device()
             self.set_device_component(self._device)
             self.set_device_to_selected()
+            self.request_rebuild_midi_map()
 
 # --- Other functions
 
@@ -133,20 +133,41 @@ class RefaceCP(ControlSurface):
         device_to_select = self.get_selected_device()
         if device_to_select is not None:
             self.log_message(f"Select Device: {device_to_select.name}")
-            # self.log_message(f"Appointed: {self.song().appointed_device.name}")
             self._device.set_device(device_to_select)
-            #self._device.update()
-            #self._device.notify_device() # creates an infinite loop!?!
-            #self.request_rebuild_midi_map()  # This tells Live to refresh the MIDI mappings and the blue hand. Not needed
+            self.song().appointed_device = device_to_select
+            self._device.update()
         else:
             self.log_message("No device to select.")
 
-    def lock_to_device(self, device):
+    def _lock_to_device(self, device):
         if device is not None:
             self.log_message(f"Locking to device {device.name}")
-            self._is_device_locked = True
-            self._device.set_device(device)
+            self._locked_device = device
+            self.song().appointed_device = device
+            self._device_lock_button.receive_value(127)
             self._device.set_lock_to_device(True, device)
+            self._device.update()
+
+    def _unlock_from_device(self):
+        device = self._locked_device
+        if device is not None:
+            self.log_message(f"Unlocking from device {device.name}")
+            self._device.set_lock_to_device(False, device)
+
+            # workaround to update device correctly when locked on another track. Probably doing something wrong here but this works.
+            current_selection = self.song().view.selected_track.view.selected_device
+            self.log_message(f"appointed device: {self.song().appointed_device.name}. current: {current_selection.name}")
+            self.song().view.select_device(device)
+
+            self._device_lock_button.receive_value(127)
+            self._device_lock_button.receive_value(0)
+            self._device.update()
+
+            if current_selection is not None:
+                self.song().view.select_device(current_selection)
+
+        self._locked_device = None
+
 
 # --- Reface Sysex commands
 # Specs: https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
