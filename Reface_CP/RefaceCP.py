@@ -86,9 +86,11 @@ class RefaceCP(ControlSurface):
     @subject_slot('device')
     def _on_device_changed(self):
         if liveobj_valid(self._device):
-            self.log_message("on_device_changed")
             if not self._is_device_locked:
+                self.log_message("on_device_changed. unlocked")
                 self.set_device_to_selected()
+            else:
+                self.log_message("on_device_changed. locked")
 
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
@@ -112,8 +114,8 @@ class RefaceCP(ControlSurface):
             self.log_message("Nothing yet")
             self._update_device_control_channel(0) # use current_channel
             self._device.set_lock_to_device(False, selected_device)
-            self.set_device_to_selected()
             self.set_device_component(self._device)
+            self.set_device_to_selected()
 
 # --- Other functions
 
