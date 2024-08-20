@@ -128,7 +128,6 @@ class RefaceCP(ControlSurface):
         if value == TREMOLO_ON_VALUE:
             selected_device = self.get_selected_device()
             self.log_message(f"Device locked: {selected_device.name}")
-            self._update_device_control_channel(self._channel)
             self.set_device_component(self._device)
             self._lock_to_device(selected_device)
         elif value == WAH_ON_VALUE:
@@ -138,7 +137,6 @@ class RefaceCP(ControlSurface):
             self.set_device_component(None)
         else:
             self.log_message("Device lock off. Following selected device.")
-            self._update_device_control_channel(self._channel)
             self._unlock_from_device()
             self.set_device_component(self._device)
             self.set_device_to_selected()
