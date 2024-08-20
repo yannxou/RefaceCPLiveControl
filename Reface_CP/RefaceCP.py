@@ -184,9 +184,15 @@ class RefaceCP(ControlSurface):
         index = int(sender.name.split('_')[-1])
         self.log_message(f"_reface_knob_changed. sender: {index}, value: {value}")
         if index == 0 and self._selected_parameter:
-            self._selected_parameter.value = value
+            self._selected_parameter.value = self.map_midi_to_parameter_value(value, self._selected_parameter)
 
 # --- Other functions
+
+    def map_midi_to_parameter_value(self, midi_value, parameter):
+        midi_value = max(0, min(127, midi_value))
+        param_min = parameter.min
+        param_max = parameter.max
+        return param_min + ((midi_value / 127.0) * (param_max - param_min))
 
     def get_selected_device(self):
         selected_track = self.song().view.selected_track
