@@ -64,8 +64,12 @@ class RefaceCP(ControlSurface):
             self.log_message("RefaceCP Init Started")
             # self._suppress_send_midi = True
             self._locked_device = None
+            self._selected_parameter = None
             self._channel = 0
             self._tremolo_toggle_value = REFACE_TOGGLE_OFF
+            self._type_select_buttons = []
+            self._tremolo_toggle_buttons = []
+            self._custom_knob_controls = []
 
             # FIXME: not working? try manually setting those?
             self._suggested_input_port = "reface CP"
@@ -74,6 +78,7 @@ class RefaceCP(ControlSurface):
             self._setup_initial_values()
             self._setup_buttons()
             self._setup_device_control()
+            self._setup_song_listeners()
 
             self.log_message("RefaceCP Init Succeeded.")
 
@@ -89,8 +94,6 @@ class RefaceCP(ControlSurface):
 
     def _setup_buttons(self):
         # Add listeners for each channel (so they keep working as channel changes)
-        self._type_select_buttons = []
-        self._tremolo_toggle_buttons = []
         for index in range(len(reface_type_map)):
             # Type select knob
             button = ButtonElement(1, MIDI_CC_TYPE, index, TYPE_SELECT_KNOB)
@@ -101,7 +104,6 @@ class RefaceCP(ControlSurface):
             toggle.add_value_listener(self._reface_tremolo_toggle_changed)
             self._tremolo_toggle_buttons.append(toggle)
 
-
     def _setup_device_control(self):
         self._device_lock_button = ButtonElement(1, MIDI_CC_TYPE, 15, 100, name="DeviceLock")
         self._device = DeviceComponent()
@@ -110,6 +112,8 @@ class RefaceCP(ControlSurface):
         self._on_device_changed.subject = self._device
         self.set_device_component(self._device)
 
+    def _setup_song_listeners(self):
+        self.song().view.add_selected_parameter_listener(self._on_selected_parameter_changed)
 
     def _update_device_control_channel(self, channel):
         device_controls = []
@@ -122,25 +126,30 @@ class RefaceCP(ControlSurface):
     def set_channel(self, channel):
         self._channel = channel
         self._setRefaceTransmitChannel(channel)
-        self._update_device_control_channel(channel)
+        if self._tremolo_toggle_value == REFACE_TOGGLE_DOWN:
+            self.enable_custom_knob_controls(channel)
+        else:
+            self._update_device_control_channel(channel)
 
     def set_tremolo_toggle(self, value):
         self.log_message(f"set_tremolo_toggle: {value}")
         self._tremolo_toggle_value = value
 
         if value == REFACE_TOGGLE_UP:
+            self.disable_custom_knob_controls()
             selected_device = self.get_selected_device()
             self.log_message(f"Device locked: {selected_device.name}")
             self._update_device_control_channel(self._channel)
             self.set_device_component(self._device)
             self._lock_to_device(selected_device)
         elif value == REFACE_TOGGLE_DOWN:
-            # self.log_message("Not implemented yet.")
             self._unlock_from_device()
             self._device.set_parameter_controls(None)
             self.set_device_component(None)
+            self.enable_custom_knob_controls(self._channel)
         else:
             self.log_message("Device lock off. Following selected device.")
+            self.disable_custom_knob_controls()
             self._update_device_control_channel(self._channel)
             self._unlock_from_device()
             self.set_device_component(self._device)
@@ -155,6 +164,13 @@ class RefaceCP(ControlSurface):
         if liveobj_valid(self._device):
             self.set_device_to_selected()
 
+    def _on_selected_parameter_changed(self):
+        self._selected_parameter = self.song().view.selected_parameter
+        if self._selected_parameter:
+            self.log_message(f"_on_selected_parameter_changed: {self._selected_parameter.name}")
+        else:
+            self.log_message("No parameter selected.")
+
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
         self.log_message(f"Type changed: {value} -> {channel}")
@@ -164,6 +180,11 @@ class RefaceCP(ControlSurface):
         toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
         self.set_tremolo_toggle(toggle_value)
 
+    def _reface_knob_changed(self, value, sender):
+        index = int(sender.name.split('_')[-1])
+        self.log_message(f"_reface_knob_changed. sender: {index}, value: {value}")
+        if index == 0 and self._selected_parameter:
+            self._selected_parameter.value = value
 
 # --- Other functions
 
@@ -214,6 +235,21 @@ class RefaceCP(ControlSurface):
 
         self._locked_device = None
 
+    def disable_custom_knob_controls(self):
+        for button in self._custom_knob_controls:
+            button.remove_value_listener(self._reface_knob_changed)
+        self._custom_knob_controls = []
+
+    def enable_custom_knob_controls(self, channel):
+        self.log_message(f"enable_custom_knob_controls. channel: {channel}")
+        self.disable_custom_knob_controls()
+
+        for index in range(8):
+            control = EncoderElement(MIDI_CC_TYPE, channel, ENCODER_MSG_IDS[index], Live.MidiMap.MapMode.absolute)
+            control.name = 'Knob_' + str(index)
+            control.add_value_listener(self._reface_knob_changed, identify_sender=True)
+            self._custom_knob_controls.append(control)
+
 
 # --- Reface Sysex commands
 # Specs: https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
@@ -248,6 +284,10 @@ class RefaceCP(ControlSurface):
 
     def disconnect(self):
         self.log_message("RefaceCP Disconnected")
+
+        self.song().view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
+
+        self.disable_custom_knob_controls()
 
         for button in self._type_select_buttons:
             button.remove_value_listener(self._reface_type_select_changed)
