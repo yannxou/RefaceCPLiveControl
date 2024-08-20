@@ -26,15 +26,18 @@ MODEL_ID = 0x04 # Model ID
 # Reface CP MIDI CCs:
 TYPE_SELECT_KNOB = 80
 ENCODER_MSG_IDS = (81, 18, 19, 86, 87, 89, 90, 91) # Reface CP knobs from Drive to Reverb Depth
-TREMOLO_WAH_SWITCH = 17
-TREMOLO_ON_VALUE = 64
-WAH_ON_VALUE = 127
-CHORUS_PHASER_SWITCH = 85
-DELAY_SWITCH = 88
+TREMOLO_WAH_TOGGLE = 17
+CHORUS_PHASER_TOGGLE = 85
+DELAY_TOGGLE = 88
 
 # Reface CP Parameter IDs:
 REFACE_PARAM_TYPE = 0x02
 REFACE_PARAM_TREMOLO = 0x04
+
+# Reface toggle constants
+REFACE_TOGGLE_OFF = 0
+REFACE_TOGGLE_UP = 1
+REFACE_TOGGLE_DOWN = 2
 
 
 # Reface type knob CC value to MIDI channel map
@@ -47,6 +50,13 @@ reface_type_map = {
     127: 5
 }
 
+# Reface toggle CC value to parameter value
+reface_toggle_map = {
+    0: REFACE_TOGGLE_OFF,
+    64: REFACE_TOGGLE_UP,
+    127: REFACE_TOGGLE_DOWN
+}
+
 class RefaceCP(ControlSurface):
     def __init__(self, c_instance):
         ControlSurface.__init__(self, c_instance)
@@ -55,13 +65,13 @@ class RefaceCP(ControlSurface):
             # self._suppress_send_midi = True
             self._locked_device = None
             self._channel = 0
+            self._tremolo_toggle_value = REFACE_TOGGLE_OFF
 
             # FIXME: not working? try manually setting those?
             self._suggested_input_port = "reface CP"
             self._suggested_output_port = "reface CP"
 
-            self._setup_current_values()
-
+            self._setup_initial_values()
             self._setup_buttons()
             self._setup_device_control()
 
@@ -69,24 +79,27 @@ class RefaceCP(ControlSurface):
 
 # --- Setup
 
-    def _setup_current_values(self):
+    def _setup_initial_values(self):
         self._waiting_for_first_response = True
-        # Request current values from reface
-        self.schedule_message(25, self.request_reface_parameter, REFACE_PARAM_TYPE)
+        self.schedule_message(25, self._request_initial_values) # delay call otherwise it silently fails during init stage
+
+    def _request_initial_values(self):
+        self.request_reface_parameter(REFACE_PARAM_TYPE)
+        self.request_reface_parameter(REFACE_PARAM_TREMOLO)
 
     def _setup_buttons(self):
         # Add listeners for each channel (so they keep working as channel changes)
         self._type_select_buttons = []
-        self._tremolo_switch_buttons = []
+        self._tremolo_toggle_buttons = []
         for index in range(len(reface_type_map)):
             # Type select knob
             button = ButtonElement(1, MIDI_CC_TYPE, index, TYPE_SELECT_KNOB)
             button.add_value_listener(self._reface_type_select_changed)
             self._type_select_buttons.append(button)
-            # Tremolo switch button
-            switch = ButtonElement(1, MIDI_CC_TYPE, index, TREMOLO_WAH_SWITCH)
-            switch.add_value_listener(self._reface_tremolo_switch_changed)
-            self._tremolo_switch_buttons.append(switch)
+            # Tremolo toggle button
+            toggle = ButtonElement(1, MIDI_CC_TYPE, index, TREMOLO_WAH_TOGGLE)
+            toggle.add_value_listener(self._reface_tremolo_toggle_changed)
+            self._tremolo_toggle_buttons.append(toggle)
 
 
     def _setup_device_control(self):
@@ -111,6 +124,29 @@ class RefaceCP(ControlSurface):
         self._setRefaceTransmitChannel(channel)
         self._update_device_control_channel(channel)
 
+    def set_tremolo_toggle(self, value):
+        self.log_message(f"set_tremolo_toggle: {value}")
+        self._tremolo_toggle_value = value
+
+        if value == REFACE_TOGGLE_UP:
+            selected_device = self.get_selected_device()
+            self.log_message(f"Device locked: {selected_device.name}")
+            self._update_device_control_channel(self._channel)
+            self.set_device_component(self._device)
+            self._lock_to_device(selected_device)
+        elif value == REFACE_TOGGLE_DOWN:
+            # self.log_message("Not implemented yet.")
+            self._unlock_from_device()
+            self._device.set_parameter_controls(None)
+            self.set_device_component(None)
+        else:
+            self.log_message("Device lock off. Following selected device.")
+            self._update_device_control_channel(self._channel)
+            self._unlock_from_device()
+            self.set_device_component(self._device)
+            self.set_device_to_selected()
+        self.request_rebuild_midi_map()
+
 # --- Listeners
 
     @subject_slot('device')
@@ -124,23 +160,10 @@ class RefaceCP(ControlSurface):
         self.log_message(f"Type changed: {value} -> {channel}")
         self.set_channel(channel)
 
-    def _reface_tremolo_switch_changed(self, value):
-        if value == TREMOLO_ON_VALUE:
-            selected_device = self.get_selected_device()
-            self.log_message(f"Device locked: {selected_device.name}")
-            self.set_device_component(self._device)
-            self._lock_to_device(selected_device)
-        elif value == WAH_ON_VALUE:
-            # self.log_message("Not implemented yet.")
-            self._unlock_from_device()
-            self._device.set_parameter_controls(None)
-            self.set_device_component(None)
-        else:
-            self.log_message("Device lock off. Following selected device.")
-            self._unlock_from_device()
-            self.set_device_component(self._device)
-            self.set_device_to_selected()
-            self.request_rebuild_midi_map()
+    def _reface_tremolo_toggle_changed(self, value):
+        toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
+        self.set_tremolo_toggle(toggle_value)
+
 
 # --- Other functions
 
@@ -219,6 +242,8 @@ class RefaceCP(ControlSurface):
             self.log_message(f"parameter sysex response. id: {param_id}, value: {param_value}")
             if param_id == REFACE_PARAM_TYPE:
                 self.set_channel(param_value)
+            elif param_id == REFACE_PARAM_TREMOLO:
+                self.set_tremolo_toggle(param_value)
 
 
     def disconnect(self):
@@ -228,9 +253,9 @@ class RefaceCP(ControlSurface):
             button.remove_value_listener(self._reface_type_select_changed)
         self._type_select_buttons = []
 
-        for button in self._tremolo_switch_buttons:
-            button.remove_value_listener(self._reface_tremolo_switch_changed)
-        self._tremolo_switches = []
+        for button in self._tremolo_toggle_buttons:
+            button.remove_value_listener(self._reface_tremolo_toggle_changed)
+        self._tremolo_toggles = []
 
         # TODO: Restore previous reface midi transmit channel ?
 
