@@ -12,6 +12,17 @@ from _Framework.DeviceComponent import DeviceComponent
 from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 #from _Framework.ChannelStripComponent import ChannelStripComponent
 
+# Reface constants
+# https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
+
+# Reface Sysex
+SYSEX_START = 0xF0
+SYSEX_END = 0xF7
+DEVICE_ID = 0x43 # Yamaha ID
+GROUP_HIGH = 0x7F # Group number high
+GROUP_LOW = 0x1C # Group number low
+MODEL_ID = 0x04 # Model ID
+
 # Reface CP MIDI CCs:
 TYPE_SELECT_KNOB = 80
 ENCODER_MSG_IDS = (81, 18, 19, 86, 87, 89, 90, 91) # Reface CP knobs from Drive to Reverb Depth
@@ -20,6 +31,11 @@ TREMOLO_ON_VALUE = 64
 WAH_ON_VALUE = 127
 CHORUS_PHASER_SWITCH = 85
 DELAY_SWITCH = 88
+
+# Reface CP Parameter IDs:
+REFACE_PARAM_TYPE = 0x02
+REFACE_PARAM_TREMOLO = 0x04
+
 
 # Reface type knob CC value to MIDI channel map
 reface_type_map = {
@@ -38,10 +54,13 @@ class RefaceCP(ControlSurface):
             self.log_message("RefaceCP Init Started")
             # self._suppress_send_midi = True
             self._locked_device = None
+            self._channel = 0
 
             # FIXME: not working? try manually setting those?
             self._suggested_input_port = "reface CP"
             self._suggested_output_port = "reface CP"
+
+            self._setup_current_values()
 
             self._setup_buttons()
             self._setup_device_control()
@@ -49,6 +68,11 @@ class RefaceCP(ControlSurface):
             self.log_message("RefaceCP Init Succeeded.")
 
 # --- Setup
+
+    def _setup_current_values(self):
+        self._waiting_for_first_response = True
+        # Request current values from reface
+        self.schedule_message(25, self.request_reface_parameter, REFACE_PARAM_TYPE)
 
     def _setup_buttons(self):
         # Add listeners for each channel (so they keep working as channel changes)
@@ -70,7 +94,6 @@ class RefaceCP(ControlSurface):
         self._device = DeviceComponent()
         self._device.name = 'Device_Component'
         self._device.set_lock_button(self._device_lock_button)
-        self._update_device_control_channel(0) # TODO: Initialize with current reface channel
         self._on_device_changed.subject = self._device
         self.set_device_component(self._device)
 
@@ -83,6 +106,11 @@ class RefaceCP(ControlSurface):
             device_controls.append(control)
         self._device.set_parameter_controls(device_controls)
 
+    def set_channel(self, channel):
+        self._channel = channel
+        self._setRefaceTransmitChannel(channel)
+        self._update_device_control_channel(channel)
+
 # --- Listeners
 
     @subject_slot('device')
@@ -94,14 +122,13 @@ class RefaceCP(ControlSurface):
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
         self.log_message(f"Type changed: {value} -> {channel}")
-        self._setRefaceTransmitChannel(channel)
-        self._update_device_control_channel(channel)
+        self.set_channel(channel)
 
     def _reface_tremolo_switch_changed(self, value):
         if value == TREMOLO_ON_VALUE:
             selected_device = self.get_selected_device()
             self.log_message(f"Device locked: {selected_device.name}")
-            self._update_device_control_channel(0) # use current_channel
+            self._update_device_control_channel(self._channel)
             self.set_device_component(self._device)
             self._lock_to_device(selected_device)
         elif value == WAH_ON_VALUE:
@@ -111,7 +138,7 @@ class RefaceCP(ControlSurface):
             self.set_device_component(None)
         else:
             self.log_message("Device lock off. Following selected device.")
-            self._update_device_control_channel(0) # use current_channel
+            self._update_device_control_channel(self._channel)
             self._unlock_from_device()
             self.set_device_component(self._device)
             self.set_device_to_selected()
@@ -156,13 +183,11 @@ class RefaceCP(ControlSurface):
 
             # workaround to update device correctly when locked on another track. Probably doing something wrong here but this works.
             current_selection = self.song().view.selected_track.view.selected_device
-            self.log_message(f"appointed device: {self.song().appointed_device.name}. current: {current_selection.name}")
+            # self.log_message(f"appointed device: {self.song().appointed_device.name}. current: {current_selection.name}")
             self.song().view.select_device(device)
-
             self._device_lock_button.receive_value(127)
             self._device_lock_button.receive_value(0)
             self._device.update()
-
             if current_selection is not None:
                 self.song().view.select_device(current_selection)
 
@@ -172,16 +197,30 @@ class RefaceCP(ControlSurface):
 # --- Reface Sysex commands
 # Specs: https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
 
+    def _reface_sysex_header(self, device_number):
+        # Returns the sysex prefix up to the address field
+        return (SYSEX_START, DEVICE_ID, device_number, GROUP_HIGH, GROUP_LOW, MODEL_ID)
+
     def _setRefaceTransmitChannel(self, channel):
-        sysex_start = 0xF0  # SysEx message start
-        sysex_end = 0xF7  # SysEx message end
-        device_id = 0x43 # Yamaha ID
-        device_number = 0x10 # Device Number
-        group_high = 0x7F # Group number high
-        group_low = 0x1C # Group number low
-        model_id = 0x04 # Model ID
-        sys_ex_message = (sysex_start, device_id, device_number, group_high, group_low, model_id, 0x00, 0x00, 0x00, channel, sysex_end)
+        sys_ex_message = self._reface_sysex_header(0x10) + (0x00, 0x00, 0x00, channel, SYSEX_END)
         self._send_midi(sys_ex_message)
+
+    def request_reface_parameter(self, parameter):
+        sys_ex_message = self._reface_sysex_header(0x30) + (0x30, 0x00, parameter, SYSEX_END)
+        self._send_midi(sys_ex_message)
+
+# --- MIDI sysex handling
+
+    def handle_sysex(self, midi_bytes):
+        param_change_header = self._reface_sysex_header(0x10)
+        self.log_message(f"handle_sysex: {midi_bytes}. param_change_header: {param_change_header}")
+        if midi_bytes[:len(param_change_header)] == param_change_header:
+            self._waiting_for_first_response = False
+            param_id = midi_bytes[-3]
+            param_value = midi_bytes[-2]
+            self.log_message(f"parameter sysex response. id: {param_id}, value: {param_value}")
+            if param_id == REFACE_PARAM_TYPE:
+                self.set_channel(param_value)
 
 
     def disconnect(self):
@@ -193,5 +232,9 @@ class RefaceCP(ControlSurface):
         for button in self._tremolo_switch_buttons:
             button.remove_value_listener(self._reface_tremolo_switch_changed)
         self._tremolo_switches = []
+
+        # TODO: Restore previous reface midi transmit channel ?
+
+        # TODO: Why the device state changes on disconnection?
 
         super(RefaceCP, self).disconnect()
