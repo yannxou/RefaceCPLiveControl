@@ -225,6 +225,7 @@ class RefaceCP(ControlSurface):
 
     def disconnect(self):
         self.log_message("RefaceCP Disconnected")
+
         for button in self._type_select_buttons:
             button.remove_value_listener(self._reface_type_select_changed)
         self._type_select_buttons = []
@@ -235,6 +236,5 @@ class RefaceCP(ControlSurface):
 
         # TODO: Restore previous reface midi transmit channel ?
 
-        # TODO: Why the device state changes on disconnection?
-
-        super(RefaceCP, self).disconnect()
+        # Calling disconnect on parent sends some MIDI that messes up or resets the reface. Why?
+        # super(RefaceCP, self).disconnect()
