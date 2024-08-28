@@ -158,20 +158,23 @@ class RefaceCP(ControlSurface):
             self._device.set_parameter_controls(None)
             self.set_device_component(None)
             self.enable_custom_knob_controls(self._channel)
+            self._c_instance.show_message("Track mode enabled.")
         else:
-            self._c_instance.show_message("Device lock off. Following device selection.")
             self.disable_custom_knob_controls()
             self._update_device_control_channel(self._channel)
             self._unlock_from_device()
             self.set_device_component(self._device)
             self.set_device_to_selected()
+            self._c_instance.show_message("Device lock off. Following device selection.")
         self.request_rebuild_midi_map()
 
     def _update_chorus_toggle(self, value):
         self.log_message(f"_update_chorus_toggle: {value}")
+        self._chorus_toggle_value = value
 
     def _update_delay_toggle(self, value):
         self.log_message(f"_update_delay_toggle: {value}")
+        self._delay_toggle_value = value
 
 # --- Listeners
 
