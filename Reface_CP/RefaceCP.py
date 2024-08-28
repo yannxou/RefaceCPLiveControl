@@ -75,8 +75,8 @@ class RefaceCP(ControlSurface):
             # self._suppress_send_midi = True
             self._all_controls = []
             self._locked_device = None
-            self._selected_track = None
-            self._selected_parameter = None
+            self._selected_track = self.song().view.selected_track
+            self._selected_parameter = self.song().view.selected_parameter
             self._channel = 0
             self._tremolo_toggle_value = REFACE_TOGGLE_OFF
             self._chorus_toggle_value = REFACE_TOGGLE_OFF
@@ -166,7 +166,7 @@ class RefaceCP(ControlSurface):
             control.set_channel(channel)
 
         if self.is_track_mode_selected:
-            self.enable_track_mode(channel)
+            self.enable_track_mode()
         else:
             self._update_device_control_channel(channel)
 
@@ -185,7 +185,7 @@ class RefaceCP(ControlSurface):
             self._unlock_from_device()
             self._device.set_parameter_controls(None)
             self.set_device_component(None)
-            self.enable_track_mode(self._channel)
+            self.enable_track_mode()
         else:
             self.disable_track_mode()
             self._update_device_control_channel(self._channel)
@@ -297,11 +297,13 @@ class RefaceCP(ControlSurface):
     def is_track_mode_selected(self):
         return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN
 
-    def enable_track_mode(self, channel):
+    def enable_track_mode(self):
         self._c_instance.show_message("Track mode enabled.")
         self.disable_track_mode()
         self._drive_knob.connect_to(self._selected_parameter)
-        self._tremolo_depth_knob.connect_to(self._selected_track.mixer_device.volume if self._selected_track is not None else None)
+        if self._selected_track:
+            self._tremolo_depth_knob.connect_to(self._selected_track.mixer_device.volume)
+            self._tremolo_rate_knob.connect_to(self._selected_track.mixer_device.panning)
 
     def disable_track_mode(self):
         for knob in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
@@ -344,7 +346,7 @@ class RefaceCP(ControlSurface):
         super()._on_selected_track_changed()
         self._selected_track = self.song().view.selected_track
         if self.is_track_mode_selected:
-            self._tremolo_depth_knob.connect_to(self._selected_track.mixer_device.volume)
+            self.enable_track_mode()
 
     def handle_sysex(self, midi_bytes):
         param_change_header = self._reface_sysex_header(0x10)
