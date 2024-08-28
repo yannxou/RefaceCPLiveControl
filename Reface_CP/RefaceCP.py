@@ -304,6 +304,11 @@ class RefaceCP(ControlSurface):
         if self._selected_track:
             self._tremolo_depth_knob.connect_to(self._selected_track.mixer_device.volume)
             self._tremolo_rate_knob.connect_to(self._selected_track.mixer_device.panning)
+            sends = self._selected_track.mixer_device.sends
+            if len(sends) > 0:
+                self._chorus_depth_knob.connect_to(sends[0])
+                if len(sends) > 1:
+                    self._chorus_speed_knob.connect_to(sends[1])
 
     def disable_track_mode(self):
         for knob in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
