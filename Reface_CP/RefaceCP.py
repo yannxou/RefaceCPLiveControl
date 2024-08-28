@@ -73,6 +73,7 @@ class RefaceCP(ControlSurface):
             self._c_instance = c_instance
 
             # self._suppress_send_midi = True
+            self._all_controls = []
             self._locked_device = None
             self._selected_parameter = None
             self._channel = 0
@@ -107,17 +108,22 @@ class RefaceCP(ControlSurface):
     def _setup_buttons(self):
         self._type_select_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TYPE_SELECT_KNOB)
         self._type_select_button.add_value_listener(self._reface_type_select_changed)
+        self._all_controls.append(self._type_select_button)
 
         self._drive_knob = EncoderElement(MIDI_CC_TYPE, self._channel, DRIVE_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(self._drive_knob)
 
         self._tremolo_toggle_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TREMOLO_WAH_TOGGLE)
         self._tremolo_toggle_button.add_value_listener(self._reface_tremolo_toggle_changed)
+        self._all_controls.append(self._tremolo_toggle_button)
 
         self._chorus_toggle_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, CHORUS_PHASER_TOGGLE)
         self._chorus_toggle_button.add_value_listener(self._reface_chorus_toggle_changed)
+        self._all_controls.append(self._chorus_toggle_button)
 
         self._delay_toggle_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, DELAY_TOGGLE)
         self._delay_toggle_button.add_value_listener(self._reface_delay_toggle_changed)
+        self._all_controls.append(self._delay_toggle_button)
 
     def _setup_device_control(self):
         self._device_lock_button = ButtonElement(1, MIDI_CC_TYPE, 15, 100, name="DeviceLock")
@@ -141,12 +147,10 @@ class RefaceCP(ControlSurface):
     def set_channel(self, channel):
         self._channel = channel
         self._setRefaceTransmitChannel(channel)
-        self._type_select_button.set_channel(channel)
-        self._tremolo_toggle_button.set_channel(channel)
-        self._chorus_toggle_button.set_channel(channel)
-        self._delay_toggle_button.set_channel(channel)
+        for control in self._all_controls:
+            control.set_channel(channel)
 
-        if self._tremolo_toggle_value == REFACE_TOGGLE_DOWN:
+        if self.is_track_mode_selected:
             self.enable_track_mode(channel)
         else:
             self._update_device_control_channel(channel)
@@ -195,7 +199,7 @@ class RefaceCP(ControlSurface):
 
     def _on_selected_parameter_changed(self):
         self._selected_parameter = self.song().view.selected_parameter
-        if self.is_track_mode_enabled:
+        if self.is_track_mode_selected:
             self._drive_knob.connect_to(self._selected_parameter)
         if self._selected_parameter:
             self.log_message(f"_on_selected_parameter_changed: {self._selected_parameter.name}")
@@ -225,7 +229,7 @@ class RefaceCP(ControlSurface):
 
 # --- Other functions
 
-    def is_track_mode_enabled(self):
+    def is_track_mode_selected(self):
         return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN
 
     def map_midi_to_parameter_value(self, midi_value, parameter):
@@ -347,6 +351,8 @@ class RefaceCP(ControlSurface):
         self._chorus_toggle_button.remove_value_listener(self._reface_chorus_toggle_changed)
         self._delay_toggle_button.remove_value_listener(self._reface_delay_toggle_changed)
 
+        self._all_controls = []
+         
         # TODO: Restore previous reface midi transmit channel ?
 
         # Calling disconnect on parent sends some MIDI that messes up or resets the reface. Why?
