@@ -25,7 +25,15 @@ MODEL_ID = 0x04 # Model ID
 
 # Reface CP MIDI CCs:
 TYPE_SELECT_KNOB = 80
-ENCODER_MSG_IDS = (81, 18, 19, 86, 87, 89, 90, 91) # Reface CP knobs from Drive to Reverb Depth
+DRIVE_KNOB = 81
+TREMOLO_DEPTH_KNOB = 18
+TREMOLO_RATE_KNOB = 19
+CHORUS_DEPTH_KNOB = 86
+CHORUS_SPEED_KNOB = 87
+DELAY_DEPTH_KNOB = 89
+DELAY_TIME_KNOB = 90
+REVERB_DEPTH_KNOB = 91
+ENCODER_MSG_IDS = (DRIVE_KNOB, TREMOLO_DEPTH_KNOB, TREMOLO_RATE_KNOB, CHORUS_DEPTH_KNOB, CHORUS_SPEED_KNOB, DELAY_DEPTH_KNOB, DELAY_TIME_KNOB, REVERB_DEPTH_KNOB) # Reface CP knobs from Drive to Reverb Depth
 TREMOLO_WAH_TOGGLE = 17
 CHORUS_PHASER_TOGGLE = 85
 DELAY_TOGGLE = 88
@@ -213,9 +221,9 @@ class RefaceCP(ControlSurface):
         self._update_delay_toggle(toggle_value)
 
     def _reface_knob_changed(self, value, sender):
-        index = sender._msg_identifier
-        self.log_message(f"_reface_knob_changed. sender: {index}, value: {value}")
-        if index == 0 and self._selected_parameter:
+        cc = sender._msg_identifier
+        self.log_message(f"_reface_knob_changed. cc: {cc}, value: {value}")
+        if cc == DRIVE_KNOB and self._selected_parameter:
             # TODO: Implement takeover or value-scaling?
             self._selected_parameter.value = self.map_midi_to_parameter_value(value, self._selected_parameter)
 
