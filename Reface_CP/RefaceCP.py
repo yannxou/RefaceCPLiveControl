@@ -7,7 +7,7 @@ from _Framework.SessionComponent import SessionComponent
 from _Framework.EncoderElement import *
 from _Framework.ButtonElement import ButtonElement
 from _Framework.SliderElement import SliderElement
-from _Framework.InputControlElement import MIDI_NOTE_TYPE, MIDI_NOTE_ON_STATUS, MIDI_NOTE_OFF_STATUS, MIDI_CC_TYPE
+from _Framework.InputControlElement import MIDI_NOTE_TYPE, MIDI_NOTE_ON_STATUS, MIDI_NOTE_OFF_STATUS, MIDI_CC_STATUS, MIDI_CC_TYPE
 from _Framework.DeviceComponent import DeviceComponent
 from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 #from _Framework.ChannelStripComponent import ChannelStripComponent
@@ -62,6 +62,8 @@ class RefaceCP(ControlSurface):
         ControlSurface.__init__(self, c_instance)
         with self.component_guard():
             self.log_message("RefaceCP Init Started")
+            self._c_instance = c_instance
+
             # self._suppress_send_midi = True
             self._locked_device = None
             self._selected_parameter = None
@@ -70,6 +72,7 @@ class RefaceCP(ControlSurface):
             self._type_select_buttons = []
             self._tremolo_toggle_buttons = []
             self._custom_knob_controls = []
+            self._note_key_buttons = []
 
             # FIXME: not working? try manually setting those?
             self._suggested_input_port = "reface CP"
@@ -79,6 +82,8 @@ class RefaceCP(ControlSurface):
             self._setup_buttons()
             self._setup_device_control()
             self._setup_song_listeners()
+
+            #self._enable_note_key_buttons()
 
             self.log_message("RefaceCP Init Succeeded.")
 
@@ -148,7 +153,7 @@ class RefaceCP(ControlSurface):
             self.set_device_component(None)
             self.enable_custom_knob_controls(self._channel)
         else:
-            self.log_message("Device lock off. Following selected device.")
+            self._c_instance.show_message("Device lock off. Following device selection.")
             self.disable_custom_knob_controls()
             self._update_device_control_channel(self._channel)
             self._unlock_from_device()
@@ -171,6 +176,10 @@ class RefaceCP(ControlSurface):
         else:
             self.log_message("No parameter selected.")
 
+    def _on_note_key(self, value, sender):
+        key = sender._msg_identifier
+        self.log_message(f"_on_note_on: {key}, {value}")
+
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
         self.log_message(f"Type changed: {value} -> {channel}")
@@ -181,9 +190,10 @@ class RefaceCP(ControlSurface):
         self.set_tremolo_toggle(toggle_value)
 
     def _reface_knob_changed(self, value, sender):
-        index = int(sender.name.split('_')[-1])
+        index = sender._msg_identifier
         self.log_message(f"_reface_knob_changed. sender: {index}, value: {value}")
         if index == 0 and self._selected_parameter:
+            # TODO: Implement takeover or value-scaling?
             self._selected_parameter.value = self.map_midi_to_parameter_value(value, self._selected_parameter)
 
 # --- Other functions
@@ -252,9 +262,20 @@ class RefaceCP(ControlSurface):
 
         for index in range(8):
             control = EncoderElement(MIDI_CC_TYPE, channel, ENCODER_MSG_IDS[index], Live.MidiMap.MapMode.absolute)
-            control.name = 'Knob_' + str(index)
             control.add_value_listener(self._reface_knob_changed, identify_sender=True)
             self._custom_knob_controls.append(control)
+
+    def _enable_note_key_buttons(self):
+        self._disable_note_key_buttons()
+        for index in range(127):
+            button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
+            button.add_value_listener(self._on_note_key, identify_sender=True)
+            self._note_key_buttons.append(button)
+
+    def _disable_note_key_buttons(self):
+        for button in self._note_key_buttons:
+            button.remove_value_listener(self._on_note_key)
+        self._note_key_buttons = []
 
 
 # --- Reface Sysex commands
@@ -272,7 +293,7 @@ class RefaceCP(ControlSurface):
         sys_ex_message = self._reface_sysex_header(0x30) + (0x30, 0x00, parameter, SYSEX_END)
         self._send_midi(sys_ex_message)
 
-# --- MIDI sysex handling
+# --- Live (Inherited)
 
     def handle_sysex(self, midi_bytes):
         param_change_header = self._reface_sysex_header(0x10)
@@ -287,13 +308,13 @@ class RefaceCP(ControlSurface):
             elif param_id == REFACE_PARAM_TREMOLO:
                 self.set_tremolo_toggle(param_value)
 
-
     def disconnect(self):
         self.log_message("RefaceCP Disconnected")
 
         self.song().view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
 
         self.disable_custom_knob_controls()
+        self._disable_note_key_buttons()
 
         for button in self._type_select_buttons:
             button.remove_value_listener(self._reface_type_select_changed)
