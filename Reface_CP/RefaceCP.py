@@ -69,8 +69,8 @@ class RefaceCP(ControlSurface):
             self._selected_parameter = None
             self._channel = 0
             self._tremolo_toggle_value = REFACE_TOGGLE_OFF
-            self._type_select_buttons = []
-            self._tremolo_toggle_buttons = []
+            self._chorus_toggle_value = REFACE_TOGGLE_OFF
+            self._delay_toggle_value = REFACE_TOGGLE_OFF
             self._custom_knob_controls = []
             self._note_key_buttons = []
 
@@ -98,16 +98,17 @@ class RefaceCP(ControlSurface):
         self.request_reface_parameter(REFACE_PARAM_TREMOLO)
 
     def _setup_buttons(self):
-        # Add listeners for each channel (so they keep working as channel changes)
-        for index in range(len(reface_type_map)):
-            # Type select knob
-            button = ButtonElement(1, MIDI_CC_TYPE, index, TYPE_SELECT_KNOB)
-            button.add_value_listener(self._reface_type_select_changed)
-            self._type_select_buttons.append(button)
-            # Tremolo toggle button
-            toggle = ButtonElement(1, MIDI_CC_TYPE, index, TREMOLO_WAH_TOGGLE)
-            toggle.add_value_listener(self._reface_tremolo_toggle_changed)
-            self._tremolo_toggle_buttons.append(toggle)
+        self._type_select_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TYPE_SELECT_KNOB)
+        self._type_select_button.add_value_listener(self._reface_type_select_changed)
+
+        self._tremolo_toggle_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TREMOLO_WAH_TOGGLE)
+        self._tremolo_toggle_button.add_value_listener(self._reface_tremolo_toggle_changed)
+
+        self._chorus_toggle_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, CHORUS_PHASER_TOGGLE)
+        self._chorus_toggle_button.add_value_listener(self._reface_chorus_toggle_changed)
+
+        self._delay_toggle_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, DELAY_TOGGLE)
+        self._delay_toggle_button.add_value_listener(self._reface_delay_toggle_changed)
 
     def _setup_device_control(self):
         self._device_lock_button = ButtonElement(1, MIDI_CC_TYPE, 15, 100, name="DeviceLock")
@@ -131,6 +132,11 @@ class RefaceCP(ControlSurface):
     def set_channel(self, channel):
         self._channel = channel
         self._setRefaceTransmitChannel(channel)
+        self._type_select_button.set_channel(channel)
+        self._tremolo_toggle_button.set_channel(channel)
+        self._chorus_toggle_button.set_channel(channel)
+        self._delay_toggle_button.set_channel(channel)
+
         if self._tremolo_toggle_value == REFACE_TOGGLE_DOWN:
             self.enable_custom_knob_controls(channel)
         else:
@@ -161,6 +167,12 @@ class RefaceCP(ControlSurface):
             self.set_device_to_selected()
         self.request_rebuild_midi_map()
 
+    def _update_chorus_toggle(self, value):
+        self.log_message(f"_update_chorus_toggle: {value}")
+
+    def _update_delay_toggle(self, value):
+        self.log_message(f"_update_delay_toggle: {value}")
+
 # --- Listeners
 
     @subject_slot('device')
@@ -188,6 +200,14 @@ class RefaceCP(ControlSurface):
     def _reface_tremolo_toggle_changed(self, value):
         toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
         self.set_tremolo_toggle(toggle_value)
+
+    def _reface_chorus_toggle_changed(self, value):
+        toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
+        self._update_chorus_toggle(toggle_value)
+
+    def _reface_delay_toggle_changed(self, value):
+        toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
+        self._update_delay_toggle(toggle_value)
 
     def _reface_knob_changed(self, value, sender):
         index = sender._msg_identifier
@@ -316,13 +336,10 @@ class RefaceCP(ControlSurface):
         self.disable_custom_knob_controls()
         self._disable_note_key_buttons()
 
-        for button in self._type_select_buttons:
-            button.remove_value_listener(self._reface_type_select_changed)
-        self._type_select_buttons = []
-
-        for button in self._tremolo_toggle_buttons:
-            button.remove_value_listener(self._reface_tremolo_toggle_changed)
-        self._tremolo_toggles = []
+        self._type_select_button.remove_value_listener(self._reface_type_select_changed)
+        self._tremolo_toggle_button.remove_value_listener(self._reface_tremolo_toggle_changed)
+        self._chorus_toggle_button.remove_value_listener(self._reface_chorus_toggle_changed)
+        self._delay_toggle_button.remove_value_listener(self._reface_delay_toggle_changed)
 
         # TODO: Restore previous reface midi transmit channel ?
 
