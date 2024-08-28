@@ -75,6 +75,7 @@ class RefaceCP(ControlSurface):
             # self._suppress_send_midi = True
             self._all_controls = []
             self._locked_device = None
+            self._selected_track = None
             self._selected_parameter = None
             self._channel = 0
             self._tremolo_toggle_value = REFACE_TOGGLE_OFF
@@ -112,6 +113,20 @@ class RefaceCP(ControlSurface):
 
         self._drive_knob = EncoderElement(MIDI_CC_TYPE, self._channel, DRIVE_KNOB, Live.MidiMap.MapMode.absolute)
         self._all_controls.append(self._drive_knob)
+        self._tremolo_depth_knob = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(self._tremolo_depth_knob)
+        self._tremolo_rate_knob = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_RATE_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(self._tremolo_rate_knob)
+        self._chorus_depth_knob = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(self._chorus_depth_knob)
+        self._chorus_speed_knob = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_SPEED_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(self._chorus_speed_knob)
+        self._delay_depth_knob = EncoderElement(MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(self._delay_depth_knob)
+        self._delay_time_knob = EncoderElement(MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(self._delay_time_knob)
+        self._reverb_depth_knob = EncoderElement(MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(self._reverb_depth_knob)
 
         self._tremolo_toggle_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TREMOLO_WAH_TOGGLE)
         self._tremolo_toggle_button.add_value_listener(self._reface_tremolo_toggle_changed)
@@ -171,7 +186,6 @@ class RefaceCP(ControlSurface):
             self._device.set_parameter_controls(None)
             self.set_device_component(None)
             self.enable_track_mode(self._channel)
-            self._c_instance.show_message("Track mode enabled.")
         else:
             self.disable_track_mode()
             self._update_device_control_channel(self._channel)
@@ -201,10 +215,6 @@ class RefaceCP(ControlSurface):
         self._selected_parameter = self.song().view.selected_parameter
         if self.is_track_mode_selected:
             self._drive_knob.connect_to(self._selected_parameter)
-        if self._selected_parameter:
-            self.log_message(f"_on_selected_parameter_changed: {self._selected_parameter.name}")
-        else:
-            self.log_message("No parameter selected.")
 
     def _on_note_key(self, value, sender):
         key = sender._msg_identifier
@@ -228,9 +238,6 @@ class RefaceCP(ControlSurface):
         self._update_delay_toggle(toggle_value)
 
 # --- Other functions
-
-    def is_track_mode_selected(self):
-        return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN
 
     def map_midi_to_parameter_value(self, midi_value, parameter):
         midi_value = max(0, min(127, midi_value))
@@ -287,13 +294,20 @@ class RefaceCP(ControlSurface):
 
 # -- Track mode
 
-    def disable_track_mode(self):
-        self._drive_knob.connect_to(None)
+    def is_track_mode_selected(self):
+        return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN
 
     def enable_track_mode(self, channel):
-        self.log_message(f"enable_track_mode. channel: {channel}")
+        self._c_instance.show_message("Track mode enabled.")
         self.disable_track_mode()
         self._drive_knob.connect_to(self._selected_parameter)
+        self._tremolo_depth_knob.connect_to(self._selected_track.mixer_device.volume if self._selected_track is not None else None)
+
+    def disable_track_mode(self):
+        for knob in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
+            knob.connect_to(None)
+
+# -- 
 
     def _enable_note_key_buttons(self):
         self._disable_note_key_buttons()
@@ -323,7 +337,14 @@ class RefaceCP(ControlSurface):
         sys_ex_message = self._reface_sysex_header(0x30) + (0x30, 0x00, parameter, SYSEX_END)
         self._send_midi(sys_ex_message)
 
-# --- Live (Inherited)
+# --- Live (ControlSurface Inherited)
+
+    def _on_selected_track_changed(self):
+        self.log_message("_on_selected_track_changed")
+        super()._on_selected_track_changed()
+        self._selected_track = self.song().view.selected_track
+        if self.is_track_mode_selected:
+            self._tremolo_depth_knob.connect_to(self._selected_track.mixer_device.volume)
 
     def handle_sysex(self, midi_bytes):
         param_change_header = self._reface_sysex_header(0x10)
@@ -352,7 +373,7 @@ class RefaceCP(ControlSurface):
         self._delay_toggle_button.remove_value_listener(self._reface_delay_toggle_changed)
 
         self._all_controls = []
-         
+
         # TODO: Restore previous reface midi transmit channel ?
 
         # Calling disconnect on parent sends some MIDI that messes up or resets the reface. Why?
