@@ -195,6 +195,8 @@ class RefaceCP(ControlSurface):
 
     def _on_selected_parameter_changed(self):
         self._selected_parameter = self.song().view.selected_parameter
+        if self.is_track_mode_enabled:
+            self._drive_knob.connect_to(self._selected_parameter)
         if self._selected_parameter:
             self.log_message(f"_on_selected_parameter_changed: {self._selected_parameter.name}")
         else:
@@ -222,6 +224,9 @@ class RefaceCP(ControlSurface):
         self._update_delay_toggle(toggle_value)
 
 # --- Other functions
+
+    def is_track_mode_enabled(self):
+        return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN
 
     def map_midi_to_parameter_value(self, midi_value, parameter):
         midi_value = max(0, min(127, midi_value))
@@ -279,18 +284,12 @@ class RefaceCP(ControlSurface):
 # -- Track mode
 
     def disable_track_mode(self):
-        self._drive_knob.remove_value_listener(self._update_selected_parameter)
+        self._drive_knob.connect_to(None)
 
     def enable_track_mode(self, channel):
         self.log_message(f"enable_track_mode. channel: {channel}")
         self.disable_track_mode()
-        self._drive_knob.add_value_listener(self._update_selected_parameter)
-
-    def _update_selected_parameter(self, value):
-        if self._selected_parameter:
-            self.log_message(f"_update_selected_parameter. value: {value}")
-            # TODO: Implement takeover or value-scaling?
-            self._selected_parameter.value = self.map_midi_to_parameter_value(value, self._selected_parameter)
+        self._drive_knob.connect_to(self._selected_parameter)
 
     def _enable_note_key_buttons(self):
         self._disable_note_key_buttons()
