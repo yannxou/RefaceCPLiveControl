@@ -79,7 +79,6 @@ class RefaceCP(ControlSurface):
             self._tremolo_toggle_value = REFACE_TOGGLE_OFF
             self._chorus_toggle_value = REFACE_TOGGLE_OFF
             self._delay_toggle_value = REFACE_TOGGLE_OFF
-            self._custom_knob_controls = []
             self._note_key_buttons = []
 
             # FIXME: not working? try manually setting those?
@@ -108,6 +107,8 @@ class RefaceCP(ControlSurface):
     def _setup_buttons(self):
         self._type_select_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TYPE_SELECT_KNOB)
         self._type_select_button.add_value_listener(self._reface_type_select_changed)
+
+        self._drive_knob = EncoderElement(MIDI_CC_TYPE, self._channel, DRIVE_KNOB, Live.MidiMap.MapMode.absolute)
 
         self._tremolo_toggle_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TREMOLO_WAH_TOGGLE)
         self._tremolo_toggle_button.add_value_listener(self._reface_tremolo_toggle_changed)
@@ -146,7 +147,7 @@ class RefaceCP(ControlSurface):
         self._delay_toggle_button.set_channel(channel)
 
         if self._tremolo_toggle_value == REFACE_TOGGLE_DOWN:
-            self.enable_custom_knob_controls(channel)
+            self.enable_track_mode(channel)
         else:
             self._update_device_control_channel(channel)
 
@@ -155,7 +156,7 @@ class RefaceCP(ControlSurface):
         self._tremolo_toggle_value = value
 
         if value == REFACE_TOGGLE_UP:
-            self.disable_custom_knob_controls()
+            self.disable_track_mode()
             selected_device = self.get_selected_device()
             self.log_message(f"Device locked: {selected_device.name}")
             self._update_device_control_channel(self._channel)
@@ -165,10 +166,10 @@ class RefaceCP(ControlSurface):
             self._unlock_from_device()
             self._device.set_parameter_controls(None)
             self.set_device_component(None)
-            self.enable_custom_knob_controls(self._channel)
+            self.enable_track_mode(self._channel)
             self._c_instance.show_message("Track mode enabled.")
         else:
-            self.disable_custom_knob_controls()
+            self.disable_track_mode()
             self._update_device_control_channel(self._channel)
             self._unlock_from_device()
             self.set_device_component(self._device)
@@ -219,13 +220,6 @@ class RefaceCP(ControlSurface):
     def _reface_delay_toggle_changed(self, value):
         toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
         self._update_delay_toggle(toggle_value)
-
-    def _reface_knob_changed(self, value, sender):
-        cc = sender._msg_identifier
-        self.log_message(f"_reface_knob_changed. cc: {cc}, value: {value}")
-        if cc == DRIVE_KNOB and self._selected_parameter:
-            # TODO: Implement takeover or value-scaling?
-            self._selected_parameter.value = self.map_midi_to_parameter_value(value, self._selected_parameter)
 
 # --- Other functions
 
@@ -282,19 +276,21 @@ class RefaceCP(ControlSurface):
 
         self._locked_device = None
 
-    def disable_custom_knob_controls(self):
-        for button in self._custom_knob_controls:
-            button.remove_value_listener(self._reface_knob_changed)
-        self._custom_knob_controls = []
+# -- Track mode
 
-    def enable_custom_knob_controls(self, channel):
-        self.log_message(f"enable_custom_knob_controls. channel: {channel}")
-        self.disable_custom_knob_controls()
+    def disable_track_mode(self):
+        self._drive_knob.remove_value_listener(self._update_selected_parameter)
 
-        for index in range(8):
-            control = EncoderElement(MIDI_CC_TYPE, channel, ENCODER_MSG_IDS[index], Live.MidiMap.MapMode.absolute)
-            control.add_value_listener(self._reface_knob_changed, identify_sender=True)
-            self._custom_knob_controls.append(control)
+    def enable_track_mode(self, channel):
+        self.log_message(f"enable_track_mode. channel: {channel}")
+        self.disable_track_mode()
+        self._drive_knob.add_value_listener(self._update_selected_parameter)
+
+    def _update_selected_parameter(self, value):
+        if self._selected_parameter:
+            self.log_message(f"_update_selected_parameter. value: {value}")
+            # TODO: Implement takeover or value-scaling?
+            self._selected_parameter.value = self.map_midi_to_parameter_value(value, self._selected_parameter)
 
     def _enable_note_key_buttons(self):
         self._disable_note_key_buttons()
@@ -344,7 +340,7 @@ class RefaceCP(ControlSurface):
 
         self.song().view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
 
-        self.disable_custom_knob_controls()
+        self.disable_track_mode()
         self._disable_note_key_buttons()
 
         self._type_select_button.remove_value_listener(self._reface_type_select_changed)
