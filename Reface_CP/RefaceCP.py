@@ -11,6 +11,7 @@ from _Framework.InputControlElement import MIDI_NOTE_TYPE, MIDI_NOTE_ON_STATUS, 
 from _Framework.DeviceComponent import DeviceComponent
 from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 from _Framework.ChannelStripComponent import ChannelStripComponent
+from .RotaryToggleElement import RotaryToggleElement
 
 # Reface constants
 # https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
@@ -91,7 +92,7 @@ class RefaceCP(ControlSurface):
             self._setup_buttons()
             self._setup_device_control()
             self._setup_song_listeners()
-            self._channel_strip = ChannelStripComponent()
+            self._setup_channel_strip()
 
             #self._enable_note_key_buttons()
 
@@ -151,6 +152,16 @@ class RefaceCP(ControlSurface):
 
     def _setup_song_listeners(self):
         self.song().view.add_selected_parameter_listener(self._on_selected_parameter_changed)
+
+    def _setup_channel_strip(self):
+        self._channel_strip = ChannelStripComponent()
+        self._channel_strip.set_volume_control(self._tremolo_depth_knob)
+        self._channel_strip.set_pan_control(self._tremolo_rate_knob)
+        self._channel_strip.set_send_controls([self._chorus_depth_knob, self._chorus_speed_knob])
+        # TODO: Setup mute button as reverse on/off directions
+        self._channel_strip.set_mute_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB))
+        self._channel_strip.set_solo_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB))
+        self._channel_strip.set_arm_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB))
 
     def _update_device_control_channel(self, channel):
         device_controls = []
@@ -301,24 +312,13 @@ class RefaceCP(ControlSurface):
     def enable_track_mode(self):
         self._c_instance.show_message("Track mode enabled.")
         self.disable_track_mode()
-
         self._drive_knob.connect_to(self._selected_parameter)
         self._channel_strip.set_track(self._selected_track)
-        self._channel_strip.set_volume_control(self._tremolo_depth_knob)
-        self._channel_strip.set_pan_control(self._tremolo_rate_knob)
-        self._channel_strip.set_send_controls([self._chorus_depth_knob, self._chorus_speed_knob])
-        # Use a ProxiedButton to map value from device to button type (0/1) as it turns to left/right
-        self._channel_strip.set_mute_button(ButtonElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB))
-        self._channel_strip.set_solo_button(ButtonElement(0, MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB))
-        self._channel_strip.set_arm_button(ButtonElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB))
 
     def disable_track_mode(self):
         for element in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
             element.connect_to(None)
         self._channel_strip.set_track(None)
-
-    def _track_arm(self, value, sender):
-        self.log_message(f"_track_arm: value: {value}")
 
 # -- 
 
