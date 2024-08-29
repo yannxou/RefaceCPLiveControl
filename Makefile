@@ -16,6 +16,9 @@ define HELP_BODY
 
 \033[1mclean\033[0m
     Removes Log.txt file from Ableton's Preferences directory.
+
+\033[1mopen-log\033[0m
+	Opens a Terminal window with a content stream of Ableton's Live Log.txt file.
 endef
 
 help:
@@ -26,7 +29,13 @@ all:
 	$(MAKE) setup
 
 clean:
-	rm "$(ABLETON_PREFS_DIR)/Log.txt"
+	#rm "$(ABLETON_PREFS_DIR)/Log.txt"
+	cat /dev/null > "$(ABLETON_PREFS_DIR)/Log.txt"
+	# Open a new terminal with the following command to see realtime logs from Ableton:
+	# tail -f -n 20 Log.txt 
 
 setup:
 	rsync -av --exclude=".*" "$(SOURCE_SCRIPT_DIR)" "$(TARGET_SCRIPT_DIR)"
+
+open-log:
+	osascript -e 'tell app "Terminal" to do script "cd \"$(ABLETON_PREFS_DIR)\" && tail -f -n 20 Log.txt"'
