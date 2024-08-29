@@ -372,6 +372,8 @@ class RefaceCP(ControlSurface):
             elif param_id == REFACE_PARAM_TREMOLO:
                 self.set_tremolo_toggle(param_value)
 
+## TODO! Use virtual buttons to enable arm,etc.. from the knob movement, compare last value and turn the button on/off if it's greater/lower
+
     def disconnect(self):
         self.log_message("RefaceCP Disconnected")
 
