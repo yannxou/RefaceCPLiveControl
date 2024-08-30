@@ -8,6 +8,10 @@ TARGET_SCRIPT_DIR          := $(ABLETON_APP_DIR)/Contents/App-Resources/MIDI Rem
 
 
 define HELP_BODY
+\033[31mMake sure the following constants from this file point to the correct Live installation folder:\033[0m
+* ABLETON_APP_DIR=$(ABLETON_APP_DIR)
+* ABLETON_PREFS_DIR=$(ABLETON_PREFS_DIR)
+
 \033[1mall\033[0m
     Cleans log and updates the script.
 
@@ -31,8 +35,6 @@ all:
 clean:
 	#rm "$(ABLETON_PREFS_DIR)/Log.txt"
 	cat /dev/null > "$(ABLETON_PREFS_DIR)/Log.txt"
-	# Open a new terminal with the following command to see realtime logs from Ableton:
-	# tail -f -n 20 Log.txt 
 
 setup:
 	rsync -av --exclude=".*" "$(SOURCE_SCRIPT_DIR)" "$(TARGET_SCRIPT_DIR)"
