@@ -155,10 +155,11 @@ class RefaceCP(ControlSurface):
 
     def _setup_channel_strip(self):
         self._channel_strip = ChannelStripComponent()
+        self._channel_strip.set_invert_mute_feedback(True)
         self._channel_strip.set_volume_control(self._tremolo_depth_knob)
         self._channel_strip.set_pan_control(self._tremolo_rate_knob)
         self._channel_strip.set_send_controls([self._chorus_depth_knob, self._chorus_speed_knob])
-        self._channel_strip.set_mute_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB, reverse=True))
+        self._channel_strip.set_mute_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB))
         self._channel_strip.set_solo_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB))
         self._channel_strip.set_arm_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB))
 
