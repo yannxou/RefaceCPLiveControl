@@ -176,7 +176,7 @@ class RefaceCP(ControlSurface):
         for control in self._all_controls:
             control.set_channel(channel)
 
-        if self.is_track_mode_selected:
+        if self.is_track_mode_selected():
             self.enable_track_mode()
         else:
             self._update_device_control_channel(channel)
@@ -224,7 +224,7 @@ class RefaceCP(ControlSurface):
 
     def _on_selected_parameter_changed(self):
         self._selected_parameter = self.song().view.selected_parameter
-        if self.is_track_mode_selected:
+        if self.is_track_mode_selected():
             self._drive_knob.connect_to(self._selected_parameter)
 
     def _on_note_key(self, value, sender):
@@ -309,12 +309,15 @@ class RefaceCP(ControlSurface):
         return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN
 
     def enable_track_mode(self):
+        self.log_message("Track mode enabled.")
         self._c_instance.show_message("Track mode enabled.")
-        self.disable_track_mode()
+        self.disable_track_mode(debug=False)
         self._drive_knob.connect_to(self._selected_parameter)
         self._channel_strip.set_track(self._selected_track)
 
-    def disable_track_mode(self):
+    def disable_track_mode(self, debug=True):
+        if debug:
+            self.log_message("Track mode disabled.")
         for element in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
             element.connect_to(None)
         self._channel_strip.set_track(None)
@@ -355,7 +358,7 @@ class RefaceCP(ControlSurface):
         self.log_message("_on_selected_track_changed")
         super()._on_selected_track_changed()
         self._selected_track = self.song().view.selected_track
-        if self.is_track_mode_selected:
+        if self.is_track_mode_selected():
             self.enable_track_mode()
 
     def handle_sysex(self, midi_bytes):
