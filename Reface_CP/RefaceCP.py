@@ -73,7 +73,7 @@ class RefaceCP(ControlSurface):
             self.log_message("RefaceCP Init Started")
             self._c_instance = c_instance
 
-            # self._suppress_send_midi = True
+            self._suppress_send_midi = True
             self._all_controls = []
             self._locked_device = None
             self._selected_track = self.song().view.selected_track
@@ -101,7 +101,7 @@ class RefaceCP(ControlSurface):
 
     def _setup_initial_values(self):
         self._waiting_for_first_response = True
-        self.schedule_message(25, self._request_initial_values) # delay call otherwise it silently fails during init stage
+        self.schedule_message(10, self._request_initial_values) # delay call otherwise it silently fails during init stage
 
     def _request_initial_values(self):
         self.request_reface_parameter(REFACE_PARAM_TYPE)
@@ -365,7 +365,9 @@ class RefaceCP(ControlSurface):
         param_change_header = self._reface_sysex_header(0x10)
         self.log_message(f"handle_sysex: {midi_bytes}. param_change_header: {param_change_header}")
         if midi_bytes[:len(param_change_header)] == param_change_header:
-            self._waiting_for_first_response = False
+            if self._waiting_for_first_response:
+                self._waiting_for_first_response = False
+                self._suppress_send_midi = False
             param_id = midi_bytes[-3]
             param_value = midi_bytes[-2]
             self.log_message(f"parameter sysex response. id: {param_id}, value: {param_value}")
