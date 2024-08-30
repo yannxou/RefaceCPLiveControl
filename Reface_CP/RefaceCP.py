@@ -84,7 +84,6 @@ class RefaceCP(ControlSurface):
             self._delay_toggle_value = REFACE_TOGGLE_OFF
             self._note_key_buttons = []
 
-            # FIXME: not working? try manually setting those?
             self._suggested_input_port = "reface CP"
             self._suggested_output_port = "reface CP"
 
