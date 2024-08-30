@@ -15,7 +15,7 @@ define HELP_BODY
 \033[1mall\033[0m
     Cleans log and updates the script.
 
-\033[1msetup\033[0m
+\033[1minstall\033[0m
     Copy required files to Ableton's directory.
 
 \033[1mclean\033[0m
@@ -30,13 +30,13 @@ help:
 
 all:
 	$(MAKE) clean
-	$(MAKE) setup
+	$(MAKE) install
 
 clean:
 	#rm "$(ABLETON_PREFS_DIR)/Log.txt"
 	cat /dev/null > "$(ABLETON_PREFS_DIR)/Log.txt"
 
-setup:
+install:
 	rsync -av --exclude=".*" "$(SOURCE_SCRIPT_DIR)" "$(TARGET_SCRIPT_DIR)"
 
 open-log:
