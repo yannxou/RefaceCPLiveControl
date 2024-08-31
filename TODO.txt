@@ -1,8 +1,6 @@
 TODO:
 
-* Request midi channel on startup to setup correctly
-
-* show messages to Live status
+* Fix midi channel after type change on mute/solo/arm buttons
 
 * Remember/restore locked device on channel change
 

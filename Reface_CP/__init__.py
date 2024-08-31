@@ -1,10 +1,10 @@
 from __future__ import absolute_import, print_function, unicode_literals
 import Live
 from _Framework.Capabilities import *
-from .RefaceCP import RefaceCP
+from .RefaceCPControlSurface import RefaceCPControlSurface
 
 def create_instance(c_instance):
-    return RefaceCP(c_instance)
+    return RefaceCPControlSurface(c_instance)
 
 def get_capabilities():
     return {CONTROLLER_ID_KEY: (controller_id(vendor_id=5667,
