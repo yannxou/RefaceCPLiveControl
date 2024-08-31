@@ -287,7 +287,7 @@ class RefaceCP(ControlSurface):
 
     def _unlock_from_device(self):
         device = self._locked_device
-        if device is not None:
+        if device is not None and liveobj_valid(device):
             self.log_message(f"Unlocking from device {device.name}")
             self._device.set_lock_to_device(False, device)
 
