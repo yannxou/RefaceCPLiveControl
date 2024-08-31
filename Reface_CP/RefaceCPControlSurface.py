@@ -111,9 +111,15 @@ class RefaceCPControlSurface(ControlSurface):
         self._channel_strip.set_volume_control(self._tremolo_depth_knob)
         self._channel_strip.set_pan_control(self._tremolo_rate_knob)
         self._channel_strip.set_send_controls([self._chorus_depth_knob, self._chorus_speed_knob])
-        self._channel_strip.set_mute_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB)) # TODO: Fix channel update
-        self._channel_strip.set_solo_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB))
-        self._channel_strip.set_arm_button(RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB))
+        mute_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB)
+        self._channel_strip.set_mute_button(mute_button)
+        self._all_controls.append(mute_button)
+        solo_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB)
+        self._channel_strip.set_solo_button(solo_button)
+        self._all_controls.append(solo_button)
+        arm_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB)
+        self._channel_strip.set_arm_button(arm_button)
+        self._all_controls.append(arm_button)
 
     def _update_device_control_channel(self, channel):
         device_controls = []
@@ -127,7 +133,7 @@ class RefaceCPControlSurface(ControlSurface):
         if self._waiting_for_first_response:
             self._waiting_for_first_response = False
             self._suppress_send_midi = False
-            
+
         self._channel = channel
         self._refaceCP.setRefaceTransmitChannel(channel)
         for control in self._all_controls:
@@ -270,6 +276,7 @@ class RefaceCPControlSurface(ControlSurface):
         self.disable_track_mode(debug=False)
         self._drive_knob.connect_to(self._selected_parameter)
         self._channel_strip.set_track(self._selected_track)
+
 
     def disable_track_mode(self, debug=True):
         if debug:

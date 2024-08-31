@@ -1,7 +1,5 @@
 TODO:
 
-* Fix midi channel after type change on mute/solo/arm buttons
-
 * Remember/restore locked device on channel change
 
 * Save settings with Live set
