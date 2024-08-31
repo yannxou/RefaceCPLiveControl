@@ -1,0 +1,9 @@
+{
+    "python.autoComplete.extraPaths": [
+        "../AbletonLive12_MIDIRemoteScripts-main"
+    ],
+    "python.analysis.extraPaths": [
+        "../AbletonLive12_MIDIRemoteScripts-main"
+    ]
+  }
+  
