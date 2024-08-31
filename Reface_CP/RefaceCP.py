@@ -65,11 +65,11 @@ class RefaceCP:
         # Returns the sysex prefix up to the address field
         return (SYSEX_START, DEVICE_ID, device_number, GROUP_HIGH, GROUP_LOW, MODEL_ID)
 
-    def setRefaceTransmitChannel(self, channel):
+    def set_transmit_channel(self, channel):
         sys_ex_message = self._reface_sysex_header(0x10) + (0x00, 0x00, 0x00, channel, SYSEX_END)
         self._send_midi(sys_ex_message)
 
-    def request_reface_parameter(self, parameter):
+    def request_parameter(self, parameter):
         sys_ex_message = self._reface_sysex_header(0x30) + (0x30, 0x00, parameter, SYSEX_END)
         self._send_midi(sys_ex_message)
 

@@ -57,8 +57,8 @@ class RefaceCPControlSurface(ControlSurface):
         self.schedule_message(10, self._request_initial_values) # delay call otherwise it silently fails during init stage
 
     def _request_initial_values(self):
-        self._refaceCP.request_reface_parameter(REFACE_PARAM_TYPE)
-        self._refaceCP.request_reface_parameter(REFACE_PARAM_TREMOLO)
+        self._refaceCP.request_parameter(REFACE_PARAM_TYPE)
+        self._refaceCP.request_parameter(REFACE_PARAM_TREMOLO)
 
     def _setup_buttons(self):
         self._type_select_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TYPE_SELECT_KNOB)
@@ -135,7 +135,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._suppress_send_midi = False
 
         self._channel = channel
-        self._refaceCP.setRefaceTransmitChannel(channel)
+        self._refaceCP.set_transmit_channel(channel)
         for control in self._all_controls:
             control.set_channel(channel)
 
