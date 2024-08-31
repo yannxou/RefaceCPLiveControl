@@ -12,6 +12,7 @@ from _Framework.DeviceComponent import DeviceComponent
 from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 from _Framework.ChannelStripComponent import ChannelStripComponent
 from .RotaryToggleElement import RotaryToggleElement
+from .Logger import Logger
 
 # Reface constants
 # https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
@@ -69,9 +70,9 @@ reface_toggle_map = {
 class RefaceCP(ControlSurface):
     def __init__(self, c_instance):
         ControlSurface.__init__(self, c_instance)
+        self._logger = Logger(c_instance)
         with self.component_guard():
-            self.log_message("RefaceCP Init Started")
-            self._c_instance = c_instance
+            self._logger.log("RefaceCP Init Started")
 
             self._suppress_send_midi = True
             self._all_controls = []
@@ -95,7 +96,7 @@ class RefaceCP(ControlSurface):
 
             #self._enable_note_key_buttons()
 
-            self.log_message("RefaceCP Init Succeeded.")
+            self._logger.log("RefaceCP Init Succeeded.")
 
 # --- Setup
 
@@ -182,13 +183,13 @@ class RefaceCP(ControlSurface):
             self._update_device_control_channel(channel)
 
     def set_tremolo_toggle(self, value):
-        self.log_message(f"set_tremolo_toggle: {value}")
+        self._logger.log(f"set_tremolo_toggle: {value}")
         self._tremolo_toggle_value = value
 
         if value == REFACE_TOGGLE_UP:
             self.disable_track_mode()
             selected_device = self.get_selected_device()
-            self.log_message(f"Device locked: {selected_device.name}")
+            self._logger.log(f"Device locked: {selected_device.name}")
             self._update_device_control_channel(self._channel)
             self.set_device_component(self._device)
             self._lock_to_device(selected_device)
@@ -203,22 +204,22 @@ class RefaceCP(ControlSurface):
             self._unlock_from_device()
             self.set_device_component(self._device)
             self.set_device_to_selected()
-            self._c_instance.show_message("Device lock off. Following device selection.")
+            self._logger.show_message("Device lock off. Following device selection.")
         self.request_rebuild_midi_map()
 
     def _update_chorus_toggle(self, value):
-        self.log_message(f"_update_chorus_toggle: {value}")
+        self._logger.log(f"_update_chorus_toggle: {value}")
         self._chorus_toggle_value = value
 
     def _update_delay_toggle(self, value):
-        self.log_message(f"_update_delay_toggle: {value}")
+        self._logger.log(f"_update_delay_toggle: {value}")
         self._delay_toggle_value = value
 
 # --- Listeners
 
     @subject_slot('device')
     def _on_device_changed(self):
-        # self.log_message("on_device_changed")
+        # self._logger.log("on_device_changed")
         if liveobj_valid(self._device):
             self.set_device_to_selected()
 
@@ -229,11 +230,11 @@ class RefaceCP(ControlSurface):
 
     def _on_note_key(self, value, sender):
         key = sender._msg_identifier
-        self.log_message(f"_on_note_on: {key}, {value}")
+        self._logger.log(f"_on_note_on: {key}, {value}")
 
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
-        self.log_message(f"Type changed: {value} -> {channel}")
+        self._logger.log(f"Type changed: {value} -> {channel}")
         self.set_channel(channel)
 
     def _reface_tremolo_toggle_changed(self, value):
@@ -269,16 +270,16 @@ class RefaceCP(ControlSurface):
         """
         device_to_select = self.get_selected_device()
         if device_to_select is not None:
-            self.log_message(f"Select Device: {device_to_select.name}")
+            self._logger.log(f"Select Device: {device_to_select.name}")
             self._device.set_device(device_to_select)
             self.song().appointed_device = device_to_select
             self._device.update()
         else:
-            self.log_message("No device to select.")
+            self._logger.log("No device to select.")
 
     def _lock_to_device(self, device):
         if device is not None:
-            self.log_message(f"Locking to device {device.name}")
+            self._logger.log(f"Locking to device {device.name}")
             self._locked_device = device
             self.song().appointed_device = device
             self._device_lock_button.receive_value(127)
@@ -288,12 +289,12 @@ class RefaceCP(ControlSurface):
     def _unlock_from_device(self):
         device = self._locked_device
         if device is not None and liveobj_valid(device):
-            self.log_message(f"Unlocking from device {device.name}")
+            self._logger.log(f"Unlocking from device {device.name}")
             self._device.set_lock_to_device(False, device)
 
             # workaround to update device correctly when locked on another track. Probably doing something wrong here but this works.
             current_selection = self.song().view.selected_track.view.selected_device
-            # self.log_message(f"appointed device: {self.song().appointed_device.name}. current: {current_selection.name}")
+            # self._logger.log(f"appointed device: {self.song().appointed_device.name}. current: {current_selection.name}")
             self.song().view.select_device(device)
             self._device_lock_button.receive_value(127)
             self._device_lock_button.receive_value(0)
@@ -309,15 +310,14 @@ class RefaceCP(ControlSurface):
         return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN
 
     def enable_track_mode(self):
-        self.log_message("Track mode enabled.")
-        self._c_instance.show_message("Track mode enabled.")
+        self._logger.show_message("Track mode enabled.")
         self.disable_track_mode(debug=False)
         self._drive_knob.connect_to(self._selected_parameter)
         self._channel_strip.set_track(self._selected_track)
 
     def disable_track_mode(self, debug=True):
         if debug:
-            self.log_message("Track mode disabled.")
+            self._logger.log("Track mode disabled.")
         for element in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
             element.connect_to(None)
         self._channel_strip.set_track(None)
@@ -355,7 +355,7 @@ class RefaceCP(ControlSurface):
 # --- Live (ControlSurface Inherited)
 
     def _on_selected_track_changed(self):
-        self.log_message("_on_selected_track_changed")
+        self._logger.log("_on_selected_track_changed")
         super()._on_selected_track_changed()
         self._selected_track = self.song().view.selected_track
         if self.is_track_mode_selected():
@@ -363,14 +363,14 @@ class RefaceCP(ControlSurface):
 
     def handle_sysex(self, midi_bytes):
         param_change_header = self._reface_sysex_header(0x10)
-        self.log_message(f"handle_sysex: {midi_bytes}. param_change_header: {param_change_header}")
+        self._logger.log(f"handle_sysex: {midi_bytes}. param_change_header: {param_change_header}")
         if midi_bytes[:len(param_change_header)] == param_change_header:
             if self._waiting_for_first_response:
                 self._waiting_for_first_response = False
                 self._suppress_send_midi = False
             param_id = midi_bytes[-3]
             param_value = midi_bytes[-2]
-            self.log_message(f"parameter sysex response. id: {param_id}, value: {param_value}")
+            self._logger.log(f"parameter sysex response. id: {param_id}, value: {param_value}")
             if param_id == REFACE_PARAM_TYPE:
                 self.set_channel(param_value)
             elif param_id == REFACE_PARAM_TREMOLO:
@@ -379,7 +379,7 @@ class RefaceCP(ControlSurface):
 ## TODO! Use virtual buttons to enable arm,etc.. from the knob movement, compare last value and turn the button on/off if it's greater/lower
 
     def disconnect(self):
-        self.log_message("RefaceCP Disconnected")
+        self._logger.log("RefaceCP Disconnected")
 
         self.song().view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
 
