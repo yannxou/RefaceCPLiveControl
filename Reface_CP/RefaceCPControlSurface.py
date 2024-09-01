@@ -169,14 +169,6 @@ class RefaceCPControlSurface(ControlSurface):
             self._logger.show_message("Device lock off. Following device selection.")
         self.request_rebuild_midi_map()
 
-    def _update_chorus_toggle(self, value):
-        self._logger.log(f"_update_chorus_toggle: {value}")
-        self._chorus_toggle_value = value
-
-    def _update_delay_toggle(self, value):
-        self._logger.log(f"_update_delay_toggle: {value}")
-        self._delay_toggle_value = value
-
 # --- Listeners
 
     @subject_slot('device')
@@ -204,13 +196,13 @@ class RefaceCPControlSurface(ControlSurface):
         self.set_tremolo_toggle(toggle_value)
 
     def _reface_chorus_toggle_changed(self, value):
-        toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
-        self._update_chorus_toggle(toggle_value)
+        self._logger.log(f"_update_chorus_toggle: {self._chorus_toggle_value}")
+        self._chorus_toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
 
     def _reface_delay_toggle_changed(self, value):
-        toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
-        self._update_delay_toggle(toggle_value)
-
+        self._logger.log(f"_update_delay_toggle: {self._delay_toggle_value}")
+        self._delay_toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
+    
 # --- Other functions
 
     def map_midi_to_parameter_value(self, midi_value, parameter):
