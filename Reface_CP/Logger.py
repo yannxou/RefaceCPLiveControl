@@ -1,6 +1,8 @@
+from .Settings import *
+
 class Logger:
 	def __init__(self, c_instance):
-		self._enabled = True
+		self._enabled = DEBUG_ENABLED
 		self._c_instance = c_instance
 
 	def log(self, message):
