@@ -25,7 +25,7 @@ class RotaryToggleElement(ButtonElement):
             elif not self._compare(value) and self._last_sent == 0:
                 self._last_sent = 1
                 super().receive_value(1)
-        self._value = value
+            self._value = value
 
     def turn_on(self):
         self._last_sent = 1
