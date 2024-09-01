@@ -17,11 +17,11 @@ You can also do this automatically with the `make install` command after setting
 
 ### Wave type knob:
 
-Changes the MIDI transmit channel from 0 (Rdl type) to 5 (CP type). This is useful to quickly change and play instruments from tracks on to specific MIDI channels. 
+Changes the MIDI transmit channel from 1 (Rdl type) to 6 (CP type). This is useful to quickly change and play instruments from tracks on specific MIDI channels. 
 
 This also provides a lot more of flexibility to the custom MIDI mappings since each control can be mapped to any Live parameter across all 6 MIDI channels, effectively bringing up to 48 knobs, 18 toggles and 510 note keys for MIDI mapping in a Live Set.
 
-*Note*: When mapping a control or key from the Reface using the custom user mapping in Live it overrides any special behaviour added by the script but its functionality can still be reached by changing to any of the remaining unmapped MIDI channels for that control.
+*Note*: When mapping a control or key from the Reface using the custom user mapping Live overrides any special behaviour added by the script but in this case its functionality can still be reached by changing to any of the remaining unmapped MIDI channels for that control. Just prevent MIDI mapping the `type` knob so the channel can be changed.
 
 ### Tremolo/Wah switch:
 
