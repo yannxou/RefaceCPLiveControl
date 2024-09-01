@@ -17,7 +17,7 @@ You can also do this automatically with the `make install` command after setting
 
 ### Wave type knob:
 
-Changes the MIDI transmit channel from 1 (Rdl type) to 6 (CP type). This is useful to quickly change and play instruments from tracks on specific MIDI channels. 
+Changes the MIDI transmit channel from 1 (Rdl type) to 6 (CP type). MIDI tracks with an input routing from the `reface CP` source and the selected MIDI channel are automatically selected and armed. This is useful to quickly change and play instruments from tracks on specific MIDI channels. 
 
 This also provides a lot more of flexibility to the custom MIDI mappings since each control can be mapped to any Live parameter across all 6 MIDI channels, effectively bringing up to 48 knobs, 18 toggles and 510 note keys for MIDI mapping in a Live Set.
 
