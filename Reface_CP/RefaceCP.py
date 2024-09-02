@@ -104,3 +104,13 @@ class RefaceCP:
             elif param_id == REFACE_PARAM_DELAY_TOGGLE:
                 if self._receive_delay_toggle_value is not None:
                     self._receive_delay_toggle_value(param_value)
+
+# ---
+
+    def disconnect(self):
+        self._logger = None
+        self._send_midi = None
+        self._receive_type_value = None
+        self._receive_tremolo_toggle_value = None
+        self._receive_chorus_toggle_value = None
+        self._receive_delay_toggle_value = None

@@ -14,6 +14,7 @@ from _Framework.DeviceComponent import DeviceComponent
 from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 from _Framework.ChannelStripComponent import ChannelStripComponent
 from .RotaryToggleElement import RotaryToggleElement
+from .TransportController import TransportController
 
 # Live Routing Category values
 ROUTING_CATEGORY_NONE = 6
@@ -29,11 +30,13 @@ class RefaceCPControlSurface(ControlSurface):
         self._logger = Logger(c_instance)
         with self.component_guard():
             self._logger.log("RefaceCPControlSurface Init Started")
-            self._refaceCP = RefaceCP(self._logger, self._send_midi,
-                                      receive_type_value = self.set_channel,
-                                      receive_tremolo_toggle_value = self._set_tremolo_toggle,
-                                      receive_chorus_toggle_value = self._set_chorus_toggle,
-                                      receive_delay_toggle_value = self._set_delay_toggle)
+            self._refaceCP = RefaceCP(
+                self._logger, self._send_midi,
+                receive_type_value = self.set_channel,
+                receive_tremolo_toggle_value = self._set_tremolo_toggle,
+                receive_chorus_toggle_value = self._set_chorus_toggle,
+                receive_delay_toggle_value = self._set_delay_toggle
+            )
 
             self._suppress_send_midi = True
             self._all_controls = []
@@ -44,7 +47,6 @@ class RefaceCPControlSurface(ControlSurface):
             self._tremolo_toggle_value = REFACE_TOGGLE_OFF
             self._chorus_toggle_value = REFACE_TOGGLE_OFF
             self._delay_toggle_value = REFACE_TOGGLE_OFF
-            self._note_key_buttons = []
 
             self._suggested_input_port = "reface CP"
             self._suggested_output_port = "reface CP"
@@ -54,6 +56,10 @@ class RefaceCPControlSurface(ControlSurface):
             self._setup_device_control()
             self._setup_song_listeners()
             self._setup_channel_strip()
+            self._transport_controller = TransportController(
+                self._logger, 
+                channel=self._channel
+            )
 
             self._logger.log("RefaceCP Init Succeeded.")
 
@@ -174,8 +180,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._refaceCP.set_transmit_channel(channel)
         for control in self._all_controls:
             control.set_channel(channel)
-        for note_key in self._note_key_buttons:
-            note_key.set_channel(channel)
+        self._transport_controller.set_channel(channel)
 
         if self.is_track_mode_selected():
             self.setup_track_mode()
@@ -199,10 +204,6 @@ class RefaceCPControlSurface(ControlSurface):
         self._selected_parameter = self.song().view.selected_parameter
         if self.is_track_mode_selected():
             self._drive_knob.connect_to(self._selected_parameter)
-
-    def _on_note_key(self, value, sender):
-        key = sender._msg_identifier
-        self._logger.log(f"_on_note_on: {key}, {value}")
 
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
@@ -309,7 +310,6 @@ class RefaceCPControlSurface(ControlSurface):
         self._drive_knob.connect_to(self._selected_parameter)
         self._channel_strip.set_track(self._selected_track)
 
-
     def disable_track_mode(self, debug=True):
         if debug:
             self._logger.log("Track mode disabled.")
@@ -322,18 +322,11 @@ class RefaceCPControlSurface(ControlSurface):
     def _set_delay_toggle(self, value):
         self._logger.log(f"_set_delay_toggle: {value}")
         self._delay_toggle_value = value
-        
-    def _enable_note_key_buttons(self):
-        self._disable_note_key_buttons()
-        for index in range(127):
-            button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
-            button.add_value_listener(self._on_note_key, identify_sender=True)
-            self._note_key_buttons.append(button)
 
-    def _disable_note_key_buttons(self):
-        for button in self._note_key_buttons:
-            button.remove_value_listener(self._on_note_key)
-        self._note_key_buttons = []
+        if value == REFACE_TOGGLE_DOWN:
+            self._transport_controller.set_enabled(True)
+        else:
+            self._transport_controller.set_enabled(False)
 
 # --- Live (ControlSurface Inherited)
 
@@ -347,15 +340,13 @@ class RefaceCPControlSurface(ControlSurface):
     def handle_sysex(self, midi_bytes):
         self._refaceCP.handle_sysex(midi_bytes)
 
-## TODO! Use virtual buttons to enable arm,etc.. from the knob movement, compare last value and turn the button on/off if it's greater/lower
-
     def disconnect(self):
         self._logger.log("RefaceCP Disconnected")
 
         self.song().view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
 
         self.disable_track_mode()
-        self._disable_note_key_buttons()
+        self._transport_controller.disconnect()
 
         self._type_select_button.remove_value_listener(self._reface_type_select_changed)
         self._tremolo_toggle_button.remove_value_listener(self._reface_tremolo_toggle_changed)
@@ -365,6 +356,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._all_controls = []
 
         # TODO: Restore previous reface midi transmit channel ?
+        self._refaceCP.disconnect()
 
         # Calling disconnect on parent sends some MIDI that messes up or resets the reface. Why?
-        # super(RefaceCP, self).disconnect()
+        # super(RefaceCPControlSurface, self).disconnect()
