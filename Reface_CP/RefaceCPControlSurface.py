@@ -57,7 +57,8 @@ class RefaceCPControlSurface(ControlSurface):
             self._setup_song_listeners()
             self._setup_channel_strip()
             self._transport_controller = TransportController(
-                self._logger, 
+                self._logger,
+                self.song(),
                 channel=self._channel
             )
 
