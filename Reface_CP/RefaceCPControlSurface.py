@@ -55,8 +55,6 @@ class RefaceCPControlSurface(ControlSurface):
             self._setup_song_listeners()
             self._setup_channel_strip()
 
-            #self._enable_note_key_buttons()
-
             self._logger.log("RefaceCP Init Succeeded.")
 
 # --- Setup
@@ -180,42 +178,13 @@ class RefaceCPControlSurface(ControlSurface):
             note_key.set_channel(channel)
 
         if self.is_track_mode_selected():
-            self.enable_track_mode()
+            self.setup_track_mode()
         else:
             self._update_device_control_channel(channel)
-
-    def _set_tremolo_toggle(self, value):
-        self._logger.log(f"_set_tremolo_toggle: {value}")
-        self._tremolo_toggle_value = value
-
-        if value == REFACE_TOGGLE_UP:
-            self.disable_track_mode()
-            selected_device = self.get_selected_device()
-            self._logger.log(f"Device locked: {selected_device.name}")
-            self._update_device_control_channel(self._channel)
-            self.set_device_component(self._device)
-            self._lock_to_device(selected_device)
-        elif value == REFACE_TOGGLE_DOWN:
-            self._unlock_from_device()
-            self._device.set_parameter_controls(None)
-            self.set_device_component(None)
-            self.enable_track_mode()
-        else:
-            self.disable_track_mode()
-            self._update_device_control_channel(self._channel)
-            self._unlock_from_device()
-            self.set_device_component(self._device)
-            self.set_device_to_selected()
-            self._logger.show_message("Device lock off. Following device selection.")
-        self.request_rebuild_midi_map()
 
     def _set_chorus_toggle(self, value):
         self._logger.log(f"_set_chorus_toggle: {value}")
         self._chorus_toggle_value = value
-
-    def _set_delay_toggle(self, value):
-        self._logger.log(f"_set_delay_toggle: {value}")
-        self._delay_toggle_value = value
 
 
 # --- Listeners
@@ -306,10 +275,35 @@ class RefaceCPControlSurface(ControlSurface):
 
 # -- Track mode
 
+    def _set_tremolo_toggle(self, value):
+        self._logger.log(f"_set_tremolo_toggle: {value}")
+        self._tremolo_toggle_value = value
+
+        if value == REFACE_TOGGLE_UP:
+            self.disable_track_mode()
+            selected_device = self.get_selected_device()
+            self._logger.log(f"Device locked: {selected_device.name}")
+            self._update_device_control_channel(self._channel)
+            self.set_device_component(self._device)
+            self._lock_to_device(selected_device)
+        elif value == REFACE_TOGGLE_DOWN:
+            self._unlock_from_device()
+            self._device.set_parameter_controls(None)
+            self.set_device_component(None)
+            self.setup_track_mode()
+        else:
+            self.disable_track_mode()
+            self._update_device_control_channel(self._channel)
+            self._unlock_from_device()
+            self.set_device_component(self._device)
+            self.set_device_to_selected()
+            self._logger.show_message("Device lock off. Following device selection.")
+        self.request_rebuild_midi_map()
+
     def is_track_mode_selected(self):
         return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN
 
-    def enable_track_mode(self):
+    def setup_track_mode(self):
         self._logger.show_message("Track mode enabled.")
         self.disable_track_mode(debug=False)
         self._drive_knob.connect_to(self._selected_parameter)
@@ -323,8 +317,12 @@ class RefaceCPControlSurface(ControlSurface):
             element.connect_to(None)
         self._channel_strip.set_track(None)
 
-# -- 
+# -- Navigation/Transport Mode
 
+    def _set_delay_toggle(self, value):
+        self._logger.log(f"_set_delay_toggle: {value}")
+        self._delay_toggle_value = value
+        
     def _enable_note_key_buttons(self):
         self._disable_note_key_buttons()
         for index in range(127):
@@ -344,7 +342,7 @@ class RefaceCPControlSurface(ControlSurface):
         super()._on_selected_track_changed()
         self._selected_track = self.song().view.selected_track
         if self.is_track_mode_selected():
-            self.enable_track_mode()
+            self.setup_track_mode()
 
     def handle_sysex(self, midi_bytes):
         self._refaceCP.handle_sysex(midi_bytes)
