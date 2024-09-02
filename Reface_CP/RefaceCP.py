@@ -26,7 +26,9 @@ DELAY_TOGGLE = 88
 
 # Reface CP Parameter IDs:
 REFACE_PARAM_TYPE = 0x02
-REFACE_PARAM_TREMOLO = 0x04
+REFACE_PARAM_TREMOLO_TOGGLE = 0x04
+REFACE_PARAM_CHORUS_TOGGLE = 0x07
+REFACE_PARAM_DELAY_TOGGLE = 0x0A
 
 # Reface toggle constants
 REFACE_TOGGLE_OFF = 0
@@ -53,11 +55,21 @@ reface_toggle_map = {
 class RefaceCP:
     def __init__(self, logger, send_midi, 
                  receive_type_value = None,
-                 receive_tremolo_value = None):
+                 receive_tremolo_toggle_value = None,
+                 receive_chorus_toggle_value = None,
+                 receive_delay_toggle_value = None):
         self._logger = logger
         self._send_midi = send_midi
         self._receive_type_value = receive_type_value
-        self._receive_tremolo_value = receive_tremolo_value
+        self._receive_tremolo_toggle_value = receive_tremolo_toggle_value
+        self._receive_chorus_toggle_value = receive_chorus_toggle_value
+        self._receive_delay_toggle_value = receive_delay_toggle_value
+
+    def request_current_values(self):
+        self.request_parameter(REFACE_PARAM_TYPE)
+        self.request_parameter(REFACE_PARAM_TREMOLO_TOGGLE)
+        self.request_parameter(REFACE_PARAM_CHORUS_TOGGLE)
+        self.request_parameter(REFACE_PARAM_DELAY_TOGGLE)
 
 # --- Reface Sysex commands
 
@@ -83,6 +95,12 @@ class RefaceCP:
             if param_id == REFACE_PARAM_TYPE:
                 if self._receive_type_value is not None:
                     self._receive_type_value(param_value)
-            elif param_id == REFACE_PARAM_TREMOLO:
-                if self._receive_tremolo_value is not None:
-                    self._receive_tremolo_value(param_value)
+            elif param_id == REFACE_PARAM_TREMOLO_TOGGLE:
+                if self._receive_tremolo_toggle_value is not None:
+                    self._receive_tremolo_toggle_value(param_value)
+            elif param_id == REFACE_PARAM_CHORUS_TOGGLE:
+                if self._receive_chorus_toggle_value is not None:
+                    self._receive_chorus_toggle_value(param_value)
+            elif param_id == REFACE_PARAM_DELAY_TOGGLE:
+                if self._receive_delay_toggle_value is not None:
+                    self._receive_delay_toggle_value(param_value)

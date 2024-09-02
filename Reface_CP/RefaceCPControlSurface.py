@@ -31,7 +31,9 @@ class RefaceCPControlSurface(ControlSurface):
             self._logger.log("RefaceCPControlSurface Init Started")
             self._refaceCP = RefaceCP(self._logger, self._send_midi,
                                       receive_type_value = self.set_channel,
-                                      receive_tremolo_value = self.set_tremolo_toggle)
+                                      receive_tremolo_toggle_value = self._set_tremolo_toggle,
+                                      receive_chorus_toggle_value = self._set_chorus_toggle,
+                                      receive_delay_toggle_value = self._set_delay_toggle)
 
             self._suppress_send_midi = True
             self._all_controls = []
@@ -61,11 +63,7 @@ class RefaceCPControlSurface(ControlSurface):
 
     def _setup_initial_values(self):
         self._waiting_for_first_response = True
-        self.schedule_message(10, self._request_initial_values) # delay call otherwise it silently fails during init stage
-
-    def _request_initial_values(self):
-        self._refaceCP.request_parameter(REFACE_PARAM_TYPE)
-        self._refaceCP.request_parameter(REFACE_PARAM_TREMOLO)
+        self.schedule_message(10, self._refaceCP.request_current_values) # delay call otherwise it silently fails during init stage
 
     def _setup_buttons(self):
         self._type_select_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TYPE_SELECT_KNOB)
@@ -179,14 +177,16 @@ class RefaceCPControlSurface(ControlSurface):
         self._refaceCP.set_transmit_channel(channel)
         for control in self._all_controls:
             control.set_channel(channel)
+        for note_key in self._note_key_buttons:
+            note_key.set_channel(channel)
 
         if self.is_track_mode_selected():
             self.enable_track_mode()
         else:
             self._update_device_control_channel(channel)
 
-    def set_tremolo_toggle(self, value):
-        self._logger.log(f"set_tremolo_toggle: {value}")
+    def _set_tremolo_toggle(self, value):
+        self._logger.log(f"_set_tremolo_toggle: {value}")
         self._tremolo_toggle_value = value
 
         if value == REFACE_TOGGLE_UP:
@@ -209,6 +209,15 @@ class RefaceCPControlSurface(ControlSurface):
             self.set_device_to_selected()
             self._logger.show_message("Device lock off. Following device selection.")
         self.request_rebuild_midi_map()
+
+    def _set_chorus_toggle(self, value):
+        self._logger.log(f"_set_chorus_toggle: {value}")
+        self._chorus_toggle_value = value
+
+    def _set_delay_toggle(self, value):
+        self._logger.log(f"_set_delay_toggle: {value}")
+        self._delay_toggle_value = value
+
 
 # --- Listeners
 
@@ -233,16 +242,13 @@ class RefaceCPControlSurface(ControlSurface):
         self.set_channel(channel)
 
     def _reface_tremolo_toggle_changed(self, value):
-        toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
-        self.set_tremolo_toggle(toggle_value)
+        self._set_tremolo_toggle(reface_toggle_map.get(value, REFACE_TOGGLE_OFF))
 
     def _reface_chorus_toggle_changed(self, value):
-        self._logger.log(f"_update_chorus_toggle: {self._chorus_toggle_value}")
-        self._chorus_toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
+        self._set_chorus_toggle(reface_toggle_map.get(value, REFACE_TOGGLE_OFF))
 
     def _reface_delay_toggle_changed(self, value):
-        self._logger.log(f"_update_delay_toggle: {self._delay_toggle_value}")
-        self._delay_toggle_value = reface_toggle_map.get(value, REFACE_TOGGLE_OFF)
+        self._set_delay_toggle(reface_toggle_map.get(value, REFACE_TOGGLE_OFF))
     
 # --- Other functions
 
