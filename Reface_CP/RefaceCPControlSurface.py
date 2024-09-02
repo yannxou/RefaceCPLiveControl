@@ -136,33 +136,33 @@ class RefaceCPControlSurface(ControlSurface):
 
 # --- 
 
-    def _unarm_tracks_for_channel(self, channel):
-        for track in self._matching_input_tracks_for_channel(channel):
+    def _arm_tracks_for_channel(self, channel, select=False):
+        # Arms all MIDI tracks from reface input and the given channel, disabling arm on the other reface input tracks.
+        channel_tracks, other_channel_tracks = self._input_midi_tracks(channel)
+        for track in other_channel_tracks:
             track.arm = False
+        for track in channel_tracks:
+            track.arm = True
+        if select and len(channel_tracks) > 0:
+            self.song().view.selected_track = channel_tracks[0]
 
-    def _select_tracks_for_channel(self, channel, arm=False):
-        matching_tracks = self._matching_input_tracks_for_channel(channel)
-        if len(matching_tracks) > 0:
-            if arm:
-                for track in matching_tracks:
-                    track.arm = True
-            self.song().view.selected_track = matching_tracks[0]
-
-    def _matching_input_tracks_for_channel(self, channel):
-        # Return a list of MIDI tracks that have an input routing matching the reface input and the given channel.
+    def _input_midi_tracks(self, channel):
+        # Return two lists of MIDI tracks that have an input routing matching the reface input, one with tracks matching the given channel and another with non-matching.
         # Note: Track routing info is not available right away when the script starts. We need some delay before this is available.
-        tracks = []
+        channel_tracks = []
+        other_channel_tracks = []
         channel_prefix = "Ch. "
         for track in self.song().visible_tracks:
             input_routing_type = track.input_routing_type       # same as 'current_input_routing' which is now deprecated
             input_routing_channel = track.input_routing_channel # same as 'current_input_sub_routing' which is now deprecated
             if (input_routing_channel.layout == Live.Track.RoutingChannelLayout.midi 
                 and input_routing_type.category == ROUTING_CATEGORY_MIDI
-                and "reface CP" in input_routing_type.display_name
-                and input_routing_channel.display_name == f"{channel_prefix}{channel+1}"):
-                # self._logger.log(f"Found matching track {track.name} name:{input_routing_type.display_name} channel: {input_routing_channel.display_name}")
-                tracks.append(track)
-        return tracks
+                and "reface CP" in input_routing_type.display_name):
+                if input_routing_channel.display_name == f"{channel_prefix}{channel+1}":
+                    channel_tracks.append(track)
+                else:
+                    other_channel_tracks.append(track)
+        return channel_tracks, other_channel_tracks
 
     def set_channel(self, channel):
         if self._waiting_for_first_response:
@@ -170,8 +170,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._suppress_send_midi = False
         else:
             # Only do this once initialized to not interfere with saved state from Live Set
-            self._unarm_tracks_for_channel(self._channel) # Un-arm tracks from previous channel
-            self._select_tracks_for_channel(channel, arm=True)
+            self._arm_tracks_for_channel(channel, select=True)
 
         self._channel = channel
         self._refaceCP.set_transmit_channel(channel)
