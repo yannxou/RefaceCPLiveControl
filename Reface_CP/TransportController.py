@@ -93,11 +93,14 @@ class TransportController:
     def handle_subaction(self, action_key, subaction_key):
         action = action_key % 12
         subaction = subaction_key % 12
-        self._logger.log(f"handle_subaction: {action}, {subaction}")
+        # self._logger.log(f"handle_subaction: {action}, {subaction}")
         if action == ACTION_STOP:
             if subaction == Note.d:
                 self._logger.log("Stop current track clip")
                 self._song.view.selected_track.stop_all_clips()
+            elif subaction == Note.e:
+                self._logger.log("Stop all clips")
+                self._song.stop_all_clips()
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
             
     def disconnect(self):
