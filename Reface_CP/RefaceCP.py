@@ -1,3 +1,5 @@
+from .Logger import Logger
+
 # Reface constants
 # https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
 

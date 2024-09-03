@@ -1,4 +1,5 @@
 import Live
+from .Logger import Logger
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 
@@ -66,13 +67,15 @@ class TransportController:
         key = sender._msg_identifier
 
         if value > 0:
-            if len(self._pressed_keys) == 0:
-                self._current_action_key = key
             self._pressed_keys.append(key)
+            if len(self._pressed_keys) == 1:
+                self._current_action_key = key
+                self._begin_action(key)
+                return
 
         # self._logger.log(f"_on_note_on: {key}, {value}. current_action: {self._current_action}. pressed: {self._pressed_keys}")
 
-        if self._current_action_key != key and value > 0:
+        if self._current_action_key is not None and self._current_action_key != key and value > 0:
             self.handle_subaction(self._current_action_key, key)
 
         if value == 0:
@@ -81,13 +84,17 @@ class TransportController:
                 if self._current_action_key == key:
                     self.handle_action(key)
                 self._current_action_key = None  # Reset after all keys are released
-                self._logger.log("_on_note_on. reset action.")
+
+    def _begin_action(self, action_key):
+        action = action_key % 12
+        if action == ACTION_STOP:
+            self._logger.show_message("Release to stop playing. Hold+D: Stop clip in track. Hold+E: Stop all clips.")
 
     def handle_action(self, action_key):
         action = action_key % 12
         self._logger.log(f"handle_action: {action}")
         if action == ACTION_STOP:
-            self._logger.log("Stop playing")
+            self._logger.show_message("Stop playing.")
             self._song.stop_playing()
 
     def handle_subaction(self, action_key, subaction_key):
@@ -96,11 +103,13 @@ class TransportController:
         # self._logger.log(f"handle_subaction: {action}, {subaction}")
         if action == ACTION_STOP:
             if subaction == Note.d:
-                self._logger.log("Stop current track clip")
+                self._logger.show_message("Stop current track clip.")
                 self._song.view.selected_track.stop_all_clips()
             elif subaction == Note.e:
-                self._logger.log("Stop all clips")
+                self._logger.show_message("Stop all clips.")
                 self._song.stop_all_clips()
+            else:
+                self._logger.show_message("")
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
             
     def disconnect(self):

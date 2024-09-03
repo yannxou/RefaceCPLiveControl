@@ -326,6 +326,7 @@ class RefaceCPControlSurface(ControlSurface):
 
         if value == REFACE_TOGGLE_DOWN:
             self._transport_controller.set_enabled(True)
+            self._logger.show_message("Transport mode enabled.")
         else:
             self._transport_controller.set_enabled(False)
 
