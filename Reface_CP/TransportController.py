@@ -76,7 +76,7 @@ class TransportController:
     def _begin_action(self, action_key):
         action = action_key % 12
         if action == Note.c:
-            self._logger.show_message("⏹ Release to stop playing · Hold+D: Stop clip in track · Hold+E: Stop all clips")
+            self._logger.show_message("◼︎ Release to stop playing · Hold+D: Stop clip in track · Hold+E: Stop all clips")
         elif action == Note.d:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump")
 
