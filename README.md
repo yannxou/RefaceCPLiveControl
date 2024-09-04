@@ -44,6 +44,26 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 	<img src="Images/track_mode.jpg" alt="Track Mode" width="50%" />
 </p>
 
+### Delay switch:
+
+* **A.Delay On**: Enables the transport mode. In this mode the keyboard note keys have special functions and can be recalled from any octave in the keyboard for easiness of use.
+
+#### C note
+
+* Press and release the key to stop playing.
+* Press and hold + D to stop the current track clip (if any). 
+* Press and hold + E to stop all clips from all tracks. 
+
+#### C# note
+
+* Press and release the key to toggle the arrangement record.
+
+#### D note
+
+* Press and release the key to start playing.
+* Press and hold + use the white keys to change the song position (jump) according to the distance between the first key (D) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
+* Press and hold + D# to continue playback from the current position.
+
 ## Constraints
 
 Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders. It's also a pity that the Type knob is not an endless encoder. This limits the possibilities of what could be achieved when used as a controller but I hope this still brings a new dimension to your great Reface CP. 
