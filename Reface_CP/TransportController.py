@@ -1,5 +1,6 @@
 import Live
 from .Logger import Logger
+import math
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 
@@ -17,7 +18,52 @@ class Note:
     a_sharp = 10
     b = 11
 
-ACTION_STOP = Note.c
+    # White key positions in an octave mapped to their index (0 to 6)
+    white_key_mapping = {
+        0: 0,  # C
+        2: 1,  # D
+        4: 2,  # E
+        5: 3,  # F
+        7: 4,  # G
+        9: 5,  # A
+        11: 6  # B
+    }
+
+    @staticmethod
+    def is_black_key(note):
+        # Notes corresponding to black keys in an octave
+        return note % 12 not in Note.white_key_mapping
+    
+    @staticmethod
+    def is_white_key(note):
+        # Notes corresponding to white keys in an octave
+        return note % 12 in Note.white_key_mapping
+
+    @staticmethod
+    def white_key_index(note):
+        # Get the index of the white key in the white key sequence (0 to 6)
+        if Note.is_white_key(note):
+            return Note.white_key_mapping[note % 12]
+        return None
+
+    @staticmethod
+    def white_key_distance(note1, note2):
+        # Calculate the distance between two white keys without counting black keys
+        if not (Note.is_white_key(note1) and Note.is_white_key(note2)):
+            raise ValueError("Both notes must be white keys.")
+
+        # Calculate the octave difference
+        octave1, octave2 = note1 // 12, note2 // 12
+        
+        # Get the indices of the white keys within their respective octaves
+        index1 = Note.white_key_index(note1)
+        index2 = Note.white_key_index(note2)
+        
+        # Calculate the total distance
+        distance = (octave2 - octave1) * 7 + (index2 - index1)
+
+        return distance
+
 
 class TransportController:
     
@@ -29,6 +75,7 @@ class TransportController:
         self._note_key_buttons = []
         self._pressed_keys = []
         self._current_action_key = None
+        self._current_action_skips_ending = False
 
     def set_enabled(self, enabled):
         if self._enabled == enabled:
@@ -70,38 +117,46 @@ class TransportController:
             self._pressed_keys.append(key)
             if len(self._pressed_keys) == 1:
                 self._current_action_key = key
+                self._current_action_skips_ending = False
                 self._begin_action(key)
                 return
 
         # self._logger.log(f"_on_note_on: {key}, {value}. current_action: {self._current_action}. pressed: {self._pressed_keys}")
 
         if self._current_action_key is not None and self._current_action_key != key and value > 0:
-            self.handle_subaction(self._current_action_key, key)
+            self._handle_subaction(self._current_action_key, key)
 
         if value == 0:
             self._pressed_keys.remove(key)
             if len(self._pressed_keys) == 0:
-                if self._current_action_key == key:
-                    self.handle_action(key)
+                if self._current_action_key == key and not self._current_action_skips_ending:
+                    self._end_action(key)
                 self._current_action_key = None  # Reset after all keys are released
 
     def _begin_action(self, action_key):
         action = action_key % 12
-        if action == ACTION_STOP:
-            self._logger.show_message("Release to stop playing. Hold+D: Stop clip in track. Hold+E: Stop all clips.")
+        if action == Note.c:
+            self._logger.show_message("⏹ Release to stop playing · Hold+D: Stop clip in track · Hold+E: Stop all clips")
+        elif action == Note.d:
+            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump")
 
-    def handle_action(self, action_key):
+    def _end_action(self, action_key):
         action = action_key % 12
         self._logger.log(f"handle_action: {action}")
-        if action == ACTION_STOP:
+
+        if action == Note.c:
             self._logger.show_message("Stop playing.")
             self._song.stop_playing()
 
-    def handle_subaction(self, action_key, subaction_key):
+        elif action == Note.d:
+            self._logger.show_message("Play.")
+            self._song.start_playing()
+
+    def _handle_subaction(self, action_key, subaction_key):
         action = action_key % 12
         subaction = subaction_key % 12
         # self._logger.log(f"handle_subaction: {action}, {subaction}")
-        if action == ACTION_STOP:
+        if action == Note.c:
             if subaction == Note.d:
                 self._logger.show_message("Stop current track clip.")
                 self._song.view.selected_track.stop_all_clips()
@@ -111,6 +166,26 @@ class TransportController:
             else:
                 self._logger.show_message("")
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
+        
+        elif action == Note.d:
+            if Note.is_white_key(subaction):
+                # Jump playhead using white keys and distance to root.
+                distance = Note.white_key_distance(action_key, subaction_key)
+                jump_value = (2 ** abs(distance) / 4) * math.copysign(1, distance)
+                # self._logger.log(f"distance: {distance}. jump: {jump_value}")
+                # self._song.scrub_by(distance) 
+                self._song.jump_by(jump_value) # compred to scrub_by, this one keeps playback in sync
+                self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+            else:
+                # TODO: Other actions
+                self._logger.log("")
+            # song.continue_playing()   # Continue playing the song from the current position
+            # song.play_selection()     # Start playing the current set selection, or do nothing if no selection is set.
+            # song.jump_to_next_cue()   # Jump to the next cue (marker) if possible.
+            # song.jump_to_prev_cue()   # Jump to the prior cue (marker) if possible.
+            # song.can_jump_to_next_cue
+            # song.can_jump_to_prev_cue
+
             
     def disconnect(self):
         self.set_enabled(False)
