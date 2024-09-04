@@ -76,7 +76,9 @@ class TransportController:
     def _begin_action(self, action_key):
         action = action_key % 12
         if action == Note.c:
-            self._logger.show_message("◼︎ Release to stop playing · Hold+D: Stop clip in track · Hold+E: Stop all clips")
+            self._logger.show_message("◼︎ Release to stop playing │◼︎│ Hold+D: Stop track clips │◼︎◼︎◼︎│ Hold+E: Stop all clips")
+        elif action == Note.c_sharp:
+            self._logger.show_message("● Release to toggle arrangement record")
         elif action == Note.d:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump │▶ Hold+F#: Continue playback")
 
@@ -88,6 +90,10 @@ class TransportController:
             self._logger.show_message("Stop playing.")
             self._song.stop_playing()
 
+        elif action == Note.c_sharp:
+            self._logger.show_message("Toggle arrangement record.")
+            self._song.record_mode = not self._song.record_mode
+
         elif action == Note.d:
             self._logger.show_message("Play.")
             self._song.start_playing()
@@ -96,6 +102,7 @@ class TransportController:
         action = action_key % 12
         subaction = subaction_key % 12
         # self._logger.log(f"handle_subaction: {action}, {subaction}")
+
         if action == Note.c:
             if subaction == Note.d:
                 self._logger.show_message("Stop current track clip.")
@@ -106,7 +113,12 @@ class TransportController:
             else:
                 self._logger.show_message("")
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
-        
+
+
+        elif action == Note.c_sharp:
+            self._current_action_key = None  # Consume action (force to press again first note to redo action)
+
+
         elif action == Note.d:
             if Note.is_white_key(subaction):
                 # Jump playhead using white keys and distance to root.
