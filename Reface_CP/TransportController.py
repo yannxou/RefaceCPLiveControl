@@ -78,9 +78,11 @@ class TransportController:
         if action == Note.c:
             self._logger.show_message("◼︎ Release to stop playing. │◼︎│ Hold+D: Stop track clips. │◼︎◼︎◼︎│ Hold+E: Stop all clips.")
         elif action == Note.c_sharp:
-            self._logger.show_message("● Release to toggle arrangement record. ▶= Hold+D: Back to arranger. ✚ Hold+D#: Arrangement overdub. •-• Hold+E: Automation arm. ◀︎- Hold+F: Reenable automation.")
+            self._logger.show_message("● Release to toggle Arrangement record. ▶= Hold+D: Back to arranger. ✚ Hold+D#: Arrangement overdub. •-• Hold+E: Automation arm. ◀︎- Hold+F: Reenable automation.")
         elif action == Note.d:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. │▶ Hold+D#: Continue playback.")
+        elif action == Note.d_sharp:
+            self._logger.show_message("○ Release to toggle Session record.")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -97,6 +99,10 @@ class TransportController:
         elif action == Note.d:
             self._logger.show_message("Play.")
             self._song.start_playing()
+
+        elif action == Note.d_sharp:
+            self._logger.show_message("Toggle Session record.")
+            self._song.session_record = not self._song.session_record
 
     def _handle_subaction(self, action_key, subaction_key):
         action = action_key % 12
@@ -148,6 +154,9 @@ class TransportController:
                     self._song.continue_playing()   # Continue playing the song from the current position
                     self._current_action_key = None # Consume action (force to press again first note to redo action)
                 
+        
+        elif action == Note.d_sharp:
+            self._current_action_key = None # Consume action (force to press again first note to redo action)
             # song.jump_to_next_cue()   # Jump to the next cue (marker) if possible.
             # song.jump_to_prev_cue()   # Jump to the prior cue (marker) if possible.
             # song.can_jump_to_next_cue
