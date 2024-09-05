@@ -76,11 +76,11 @@ class TransportController:
     def _begin_action(self, action_key):
         action = action_key % 12
         if action == Note.c:
-            self._logger.show_message("◼︎ Release to stop playing │◼︎│ Hold+D: Stop track clips │◼︎◼︎◼︎│ Hold+E: Stop all clips")
+            self._logger.show_message("◼︎ Release to stop playing. │◼︎│ Hold+D: Stop track clips. │◼︎◼︎◼︎│ Hold+E: Stop all clips.")
         elif action == Note.c_sharp:
-            self._logger.show_message("● Release to toggle arrangement record ▶= Hold+D: Back to arranger")
+            self._logger.show_message("● Release to toggle arrangement record. ▶= Hold+D: Back to arranger. ✚ Hold+D#: MIDI arrangement overdub.")
         elif action == Note.d:
-            self._logger.show_message("▶ Release to start playing ◀︎┼▶︎ Hold+white keys to jump │▶ Hold+D#: Continue playback")
+            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. │▶ Hold+D#: Continue playback.")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -119,6 +119,9 @@ class TransportController:
             if subaction == Note.d:
                 self._logger.show_message("Back to arrangement.")
                 self._song.back_to_arranger = False
+            elif subaction == Note.d_sharp:
+                self._logger.show_message("Toggle MIDI arrangement overdub.")
+                self._song.arrangement_overdub = not self._song.arrangement_overdub
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
 
 
