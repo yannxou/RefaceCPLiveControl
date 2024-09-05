@@ -57,6 +57,7 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 #### C# note
 
 * Press and release the key to toggle the arrangement record.
+* Press and hold + D to go back to arrangement.
 
 #### D note
 
