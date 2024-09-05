@@ -1,7 +1,9 @@
+import math
+import threading
+import time
 import Live
 from .Logger import Logger
 from .Note import Note
-import math
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 
@@ -16,6 +18,7 @@ class TransportController:
         self._pressed_keys = []
         self._current_action_key = None
         self._current_action_skips_ending = False
+        self._action_timer = None
 
     def set_enabled(self, enabled):
         if self._enabled == enabled:
@@ -59,18 +62,21 @@ class TransportController:
                 self._current_action_key = key
                 self._current_action_skips_ending = False
                 self._begin_action(key)
+                self._start_action_timeout()
                 return
 
         # self._logger.log(f"_on_note_on: {key}, {value}. current_action: {self._current_action}. pressed: {self._pressed_keys}")
 
         if self._current_action_key is not None and self._current_action_key != key and value > 0:
             self._handle_subaction(self._current_action_key, key)
+            self._cancel_action_timeout()
 
         if value == 0:
             self._pressed_keys.remove(key)
             if len(self._pressed_keys) == 0:
                 if self._current_action_key == key and not self._current_action_skips_ending:
                     self._end_action(key)
+                self._cancel_action_timeout()
                 self._current_action_key = None  # Reset after all keys are released
 
     def _begin_action(self, action_key):
@@ -162,8 +168,22 @@ class TransportController:
             # song.can_jump_to_next_cue
             # song.can_jump_to_prev_cue
 
+    def _start_action_timeout(self):
+        self._cancel_action_timeout()
+        self._action_timer = threading.Timer(3.0, self._on_action_timeout)
+        self._action_timer.start()
+
+    def _cancel_action_timeout(self):
+        if self._action_timer is not None:
+            self._action_timer.cancel()
+            self._action_timer = None
+
+    def _on_action_timeout(self):
+        self._logger.log("action timeout")
+        self._current_action_key = None # Consume action (force to press again first note to redo action)
             
     def disconnect(self):
+        self._cancel_action_timeout()
         self.set_enabled(False)
         self._logger = None
         self._song = None

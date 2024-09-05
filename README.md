@@ -46,7 +46,9 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 
 ### Delay switch:
 
-* **A.Delay On**: Enables the transport mode. In this mode the keyboard note keys have special functions and can be recalled from any octave in the keyboard for easiness of use.
+* **A.Delay On**: Enables the transport mode. In this mode the keyboard note keys have special functions and can be recalled from any octave in the keyboard for easiness of use. In most cases, a secondary note can also be pressed to perform subactions. 
+
+When pressing down the first key, a hint message is displayed in Live's bottom status bar. If the first note key is pressed and held for more than 3 seconds without pressing any other key the ongoing action is automatically cancelled to prevent triggering unwanted actions. This timeout corresponds to the duration that Live allows displaying messages from the script in the status bar. 
 
 #### C note
 
