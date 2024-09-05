@@ -56,10 +56,11 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 
 #### C# note
 
-* Press and release the key to toggle the arrangement record.
-* Press and hold + D to go back to arrangement.
-* Press and hold + D# to toggle MIDI arrangement overdub.
+* Press and release the key to toggle the Arrangement record.
+* Press and hold + D to go back to Arrangement.
+* Press and hold + D# to toggle MIDI Arrangement overdub.
 * Press and hold + E to toggle automation arm.
+* Press and hold + F to re-enable automation for any parameters that are currently overriden in the Arrangement or Session clips.
 
 #### D note
 
