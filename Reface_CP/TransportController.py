@@ -78,7 +78,7 @@ class TransportController:
         if action == Note.c:
             self._logger.show_message("◼︎ Release to stop playing. │◼︎│ Hold+D: Stop track clips. │◼︎◼︎◼︎│ Hold+E: Stop all clips.")
         elif action == Note.c_sharp:
-            self._logger.show_message("● Release to toggle arrangement record. ▶= Hold+D: Back to arranger. ✚ Hold+D#: MIDI arrangement overdub.")
+            self._logger.show_message("● Release to toggle arrangement record. ▶= Hold+D: Back to arranger. ✚ Hold+D#: Arrangement overdub. •-• Hold+E: Automation arm")
         elif action == Note.d:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. │▶ Hold+D#: Continue playback.")
 
@@ -122,6 +122,12 @@ class TransportController:
             elif subaction == Note.d_sharp:
                 self._logger.show_message("Toggle MIDI arrangement overdub.")
                 self._song.arrangement_overdub = not self._song.arrangement_overdub
+            elif subaction == Note.e:
+                self._logger.show_message("Toggle automation arm.")
+                self._song.session_automation_record = not self._song.session_automation_record
+                # self._song.re_enable_automation() 
+            else:
+                self._logger.show_message("")
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
 
 
