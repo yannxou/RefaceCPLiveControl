@@ -38,25 +38,25 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 	<img src="Images/locked_device_mode.jpg" alt="Locked Device Mode" width="50%" />
 </p>
 
-* **Wah On**: Enables the track mode. This allows changing the selected track's volume, panning, sends A and B as well as the Mute, Solo and Arm buttons. In this mode the `Drive` knob is connected to the currently selected parameter in Live which can be very handy for quick automations.
+* **Wah On**: Enables the **Track mode**. This allows changing the selected track's volume, panning, sends A and B as well as the Mute, Solo and Arm buttons. In this mode the `Drive` knob is connected to the currently selected parameter in Live which can be very handy for quick automations.
 
 <p align="center">
 	<img src="Images/track_mode.jpg" alt="Track Mode" width="50%" />
 </p>
 
-### Delay switch:
+### A.Delay switch:
 
-* **A.Delay On**: Enables the transport mode. In this mode the keyboard note keys have special functions and can be recalled from any octave in the keyboard for easiness of use. In most cases, a secondary note can also be pressed to perform subactions. 
+Enables the **Transport mode**. In this mode the keyboard note keys have special functions and can be recalled from any octave in the keyboard for easiness of use. In most cases, a secondary note can also be pressed to perform subactions. 
 
 When pressing down the first key, a hint message is displayed in Live's bottom status bar. If the first note key is pressed and held for more than 3 seconds without pressing any other key the ongoing action is automatically cancelled to prevent triggering unwanted actions. This timeout corresponds to the duration that Live allows displaying messages from the script in the status bar. 
 
-#### C note
+#### C note ⏐ *Stop actions*
 
 * Press and release the key to stop playing.
 * Press and hold + D to stop the current track clip (if any). 
 * Press and hold + E to stop all clips from all tracks. 
 
-#### C# note
+#### C# note ⏐ *Arrangement actions*
 
 * Press and release the key to toggle the Arrangement record.
 * Press and hold + D to go back to Arrangement.
@@ -64,13 +64,13 @@ When pressing down the first key, a hint message is displayed in Live's bottom s
 * Press and hold + E to toggle automation arm.
 * Press and hold + F to re-enable automation for any parameters that are currently overriden in the Arrangement or Session clips.
 
-#### D note
+#### D note ⏐ *Play actions*
 
 * Press and release the key to start playing.
 * Press and hold + use the white keys to change the song position (jump) according to the distance between the first key (D) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 * Press and hold + D# to continue playback from the current position.
 
-#### D# note
+#### D# note ⏐ *Session actions*
 
 * Press and release the key to toggle the Session record.
 
