@@ -84,6 +84,11 @@ When pressing down the first key, a hint message is displayed in Live's bottom s
 * Press and hold + G# to increase the loop length.
 * Press and hold + use the white keys to change the loop start position according to the distance between the first key (G) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 
+#### B ⏐ *Edit actions*
+
+* Press and hold + A to undo last action.
+* Press and hold + C to redo last action.
+
 ## Constraints
 
 Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders. It's also a pity that the Type knob is not an endless encoder. This limits the possibilities of what could be achieved when used as a controller but I hope this still brings a new dimension to your great Reface CP. 

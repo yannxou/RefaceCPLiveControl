@@ -91,6 +91,8 @@ class TransportController:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D")
         elif action == Note.g:
             self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start.")
+        elif action == Note.b:
+            self._logger.show_message("|← Hold+A: Undo. →| Hold+C: Redo.")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -115,6 +117,7 @@ class TransportController:
         elif action == Note.g:
             self._logger.show_message("Toggle loop.")
             self._song.loop = not self._song.loop
+
 
     def _handle_subaction(self, action_key, subaction_key):
         action = action_key % 12
@@ -209,6 +212,15 @@ class TransportController:
                         self._logger.log("Cannot set loop length longer that song length.")
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
+
+        elif action == Note.b:
+            if subaction == Note.a:
+                self._song.undo()
+                self._logger.show_message("Undo.")
+            elif subaction == Note.c:
+                self._song.redo()
+                self._logger.show_message("Redo.")
+            self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
             # song.jump_to_next_cue()   # Jump to the next cue (marker) if possible.
             # song.jump_to_prev_cue()   # Jump to the prior cue (marker) if possible.
