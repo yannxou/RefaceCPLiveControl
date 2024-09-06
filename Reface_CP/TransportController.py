@@ -90,7 +90,7 @@ class TransportController:
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D")
         elif action == Note.g:
-            self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start.")
+            self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start.")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -190,7 +190,15 @@ class TransportController:
                 except:
                     self._logger.log("Cannot set loop start behind song length.")
             else:
-                if subaction == Note.f_sharp:
+                if subaction == Note.d_sharp:
+                    try:
+                        if self._song.is_playing:
+                            self._song.jump_by(round(self._song.loop_start - self._song.current_song_time))
+                        else:
+                            self._song.current_song_time = self._song.loop_start
+                    except:
+                        self._logger.log("Cannot set time behind song length")
+                elif subaction == Note.f_sharp:
                     loop_length = self._song.loop_length  # Loop length in beats
                     self._song.loop_length = max(1, loop_length / 2)
                 elif subaction == Note.g_sharp:
