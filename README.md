@@ -50,29 +50,26 @@ Enables the **Transport mode**. In this mode the keyboard note keys have special
 
 When pressing down the first key, a hint message is displayed in Live's bottom status bar. If the first note key is pressed and held for more than 3 seconds without pressing any other key the ongoing action is automatically cancelled to prevent triggering unwanted actions. This timeout corresponds to the duration that Live allows displaying messages from the script in the status bar. 
 
-#### C note ⏐ *Stop actions*
+#### C ⏐ *Stop actions*
 
 * Press and release the key to stop playing.
 * Press and hold + D to stop the current track clip (if any). 
 * Press and hold + E to stop all clips from all tracks. 
 
-#### C# note ⏐ *Arrangement actions*
+#### C# ⏐ *Recording actions*
 
 * Press and release the key to toggle the Arrangement record.
-* Press and hold + D to go back to Arrangement.
-* Press and hold + D# to toggle MIDI Arrangement overdub.
+* Press and hold + C to go back to Arrangement.
+* Press and hold + D# to toggle the Session record.
+* Press and hold + D to toggle MIDI Arrangement overdub.
 * Press and hold + E to toggle automation arm.
 * Press and hold + F to re-enable automation for any parameters that are currently overriden in the Arrangement or Session clips.
 
-#### D note ⏐ *Play actions*
+#### D ⏐ *Play actions*
 
 * Press and release the key to start playing.
 * Press and hold + use the white keys to change the song position (jump) according to the distance between the first key (D) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 * Press and hold + D# to continue playback from the current position.
-
-#### D# note ⏐ *Session actions*
-
-* Press and release the key to toggle the Session record.
 
 ## Constraints
 
