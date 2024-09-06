@@ -88,7 +88,7 @@ class TransportController:
         elif action == Note.d:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. │▶ Hold+D#: Continue playback.")
         elif action == Note.e:
-            self._logger.show_message("[○ ●] Release to toggle metronome.")
+            self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -164,8 +164,15 @@ class TransportController:
                     self._current_action_key = None # Consume action (force to press again first note to redo action)
                 
         
-        elif action == Note.d_sharp:
-            self._current_action_key = None # Consume action (force to press again first note to redo action)
+        elif action == Note.e:
+            if subaction == Note.d:
+                if not self._current_action_skips_ending:
+                    self._logger.show_message("Tap Tempo.")
+                self._song.tap_tempo()
+                self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+            else:
+                self._current_action_key = None # Consume action (force to press again first note to redo action)
+
             # song.jump_to_next_cue()   # Jump to the next cue (marker) if possible.
             # song.jump_to_prev_cue()   # Jump to the prior cue (marker) if possible.
             # song.can_jump_to_next_cue

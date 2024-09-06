@@ -73,7 +73,8 @@ When pressing down the first key, a hint message is displayed in Live's bottom s
 
 #### E ⏐ *Tempo actions*
 
-* Press and release the key to toggle the metronome.
+* Press and release the key to toggle the Metronome.
+* Press and hold + E to Tap Tempo.
 
 ## Constraints
 
