@@ -86,7 +86,7 @@ class TransportController:
         elif action == Note.c_sharp:
             self._logger.show_message("● Release to toggle record. ▶= Hold+C: Back to Arranger. ✚ Hold+D: Arrangement overdub. ○ Hold+D#: Session record •-• Hold+E: Automation arm. ◀︎- Hold+F: Reenable automation.")
         elif action == Note.d:
-            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. │▶ Hold+D#: Continue playback.")
+            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. │▶ Hold+F#: Continue playback.")
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D")
         elif action == Note.g:
@@ -164,7 +164,7 @@ class TransportController:
                 self._song.jump_by(jump_value) # compred to scrub_by, this one keeps playback in sync
                 self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
             else:
-                if subaction == Note.d_sharp:
+                if subaction == Note.f_sharp:
                     self._logger.show_message("Play from selection.")
                     self._song.continue_playing()   # Continue playing the song from the current position
                     self._current_action_key = None # Consume action (force to press again first note to redo action)
