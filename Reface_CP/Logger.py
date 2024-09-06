@@ -1,3 +1,14 @@
+# Logger
+# - Simple logger to pass around other classes
+#
+# Part of RefaceCPLiveControl
+#
+# Ableton Live MIDI Remote Script for the Yamaha Reface CP
+#
+# Author: Joan Duat
+#
+# Distributed under the MIT License, see LICENSE
+
 from .Settings import *
 
 class Logger:

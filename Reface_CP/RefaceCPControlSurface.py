@@ -1,3 +1,14 @@
+# RefaceCPControlSurface
+# - Main class adding behaviour for the Reface CP Live control surface
+#
+# Part of RefaceCPLiveControl
+#
+# Ableton Live MIDI Remote Script for the Yamaha Reface CP
+#
+# Author: Joan Duat
+#
+# Distributed under the MIT License, see LICENSE
+
 from __future__ import absolute_import, print_function, unicode_literals
 import Live
 from .RefaceCP import *

@@ -1,3 +1,14 @@
+# Note
+# - Includes Note constants and helper functions for MIDI notes
+#
+# Part of RefaceCPLiveControl
+#
+# Ableton Live MIDI Remote Script for the Yamaha Reface CP
+#
+# Author: Joan Duat
+#
+# Distributed under the MIT License, see LICENSE
+
 class Note:
     c = 0
     c_sharp = 1

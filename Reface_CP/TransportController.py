@@ -1,3 +1,14 @@
+# TransportController
+# - Allows using MIDI note keys for transport controls and other Live actions.
+#
+# Part of RefaceCPLiveControl
+#
+# Ableton Live MIDI Remote Script for the Yamaha Reface CP
+#
+# Author: Joan Duat
+#
+# Distributed under the MIT License, see LICENSE
+
 import math
 import threading
 import time

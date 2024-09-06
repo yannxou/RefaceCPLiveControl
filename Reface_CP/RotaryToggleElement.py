@@ -1,3 +1,13 @@
+# RotaryToggleElement
+#
+# Part of RefaceCPLiveControl
+#
+# Ableton Live MIDI Remote Script for the Yamaha Reface CP
+#
+# Author: Joan Duat
+#
+# Distributed under the MIT License, see LICENSE
+
 import Live
 from _Framework.ButtonElement import *
 
