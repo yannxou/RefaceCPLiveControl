@@ -55,7 +55,7 @@ reface_toggle_map = {
 }
 
 class RefaceCP:
-    def __init__(self, logger, send_midi, 
+    def __init__(self, logger: Logger, send_midi, 
                  receive_type_value = None,
                  receive_tremolo_toggle_value = None,
                  receive_chorus_toggle_value = None,

@@ -2,6 +2,7 @@ import math
 import threading
 import time
 import Live
+import Live.Song
 from .Logger import Logger
 from .Note import Note
 from _Framework.ButtonElement import ButtonElement
@@ -9,7 +10,7 @@ from _Framework.InputControlElement import MIDI_NOTE_TYPE
 
 class TransportController:
     
-    def __init__(self, logger, song, channel = 0):
+    def __init__(self, logger: Logger, song: Live.Song.Song, channel = 0):
         self._logger = logger
         self._song = song
         self._enabled = False

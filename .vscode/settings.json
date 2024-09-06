@@ -1,9 +1,11 @@
 {
     "python.autoComplete.extraPaths": [
-        "../AbletonLive12_MIDIRemoteScripts-main"
+        /* "../AbletonLive12_MIDIRemoteScripts-main" */
+        "../ableton-control-surface-toolkit-main/ableton-control-surface-core/src"
     ],
     "python.analysis.extraPaths": [
-        "../AbletonLive12_MIDIRemoteScripts-main"
+        /* "../AbletonLive12_MIDIRemoteScripts-main" */
+        "../ableton-control-surface-toolkit-main/ableton-control-surface-core/src"
     ]
   }
   
