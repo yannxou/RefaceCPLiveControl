@@ -90,7 +90,7 @@ class TransportController:
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D")
         elif action == Note.g:
-            self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length.")
+            self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start.")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -181,15 +181,24 @@ class TransportController:
 
 
         elif action == Note.g:
-            if subaction == Note.f_sharp:
-                loop_length = self._song.loop_length  # Loop length in beats
-                self._song.loop_length = max(1, loop_length / 2)
-            elif subaction == Note.g_sharp:
-                loop_length = self._song.loop_length  # Loop length in beats
+            if Note.is_white_key(subaction):
+                # Move loop start using white keys and distance to root.
+                distance = Note.white_key_distance(action_key, subaction_key)
+                jump_value = (2 ** abs(distance) / 4) * math.copysign(1, distance)
                 try:
-                    self._song.loop_length = loop_length * 2
+                    self._song.loop_start = max(0, self._song.loop_start + jump_value)
                 except:
-                    self._logger.log("Cannot set loop length longer that song length.")
+                    self._logger.log("Cannot set loop start behind song length.")
+            else:
+                if subaction == Note.f_sharp:
+                    loop_length = self._song.loop_length  # Loop length in beats
+                    self._song.loop_length = max(1, loop_length / 2)
+                elif subaction == Note.g_sharp:
+                    loop_length = self._song.loop_length  # Loop length in beats
+                    try:
+                        self._song.loop_length = loop_length * 2
+                    except:
+                        self._logger.log("Cannot set loop length longer that song length.")
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
 

@@ -81,6 +81,7 @@ When pressing down the first key, a hint message is displayed in Live's bottom s
 * Press and release the key to toggle loop.
 * Press and hold + F# to decrease the loop length.
 * Press and hold + G# to increase the loop length.
+* Press and hold + use the white keys to change the loop start position according to the distance between the first key (G) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 
 ## Constraints
 
