@@ -89,6 +89,8 @@ class TransportController:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. │▶ Hold+D#: Continue playback.")
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D")
+        elif action == Note.g:
+            self._logger.show_message("│←│ Release to toggle loop.")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -109,6 +111,10 @@ class TransportController:
         elif action == Note.e:
             self._logger.show_message("Toggle metronome.")
             self._song.metronome = not self._song.metronome
+
+        elif action == Note.g:
+            self._logger.show_message("Toggle loop.")
+            self._song.loop = not self._song.loop
 
     def _handle_subaction(self, action_key, subaction_key):
         action = action_key % 12

@@ -76,6 +76,10 @@ When pressing down the first key, a hint message is displayed in Live's bottom s
 * Press and release the key to toggle the Metronome.
 * Press and hold + E to Tap Tempo.
 
+#### G ⏐ *Loop actions*
+
+* Press and release the key to toggle loop.
+
 ## Constraints
 
 Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders. It's also a pity that the Type knob is not an endless encoder. This limits the possibilities of what could be achieved when used as a controller but I hope this still brings a new dimension to your great Reface CP. 
