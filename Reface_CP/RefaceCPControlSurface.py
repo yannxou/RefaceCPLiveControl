@@ -59,8 +59,8 @@ class RefaceCPControlSurface(ControlSurface):
             self._chorus_toggle_value = REFACE_TOGGLE_OFF
             self._delay_toggle_value = REFACE_TOGGLE_OFF
 
-            self._suggested_input_port = "reface CP"
-            self._suggested_output_port = "reface CP"
+            self._suggested_input_port = MODEL_NAME
+            self._suggested_output_port = MODEL_NAME
 
             self._setup_initial_values()
             self._setup_buttons()
@@ -173,7 +173,7 @@ class RefaceCPControlSurface(ControlSurface):
             input_routing_channel = track.input_routing_channel # same as 'current_input_sub_routing' which is now deprecated
             if (input_routing_channel.layout == Live.Track.RoutingChannelLayout.midi 
                 and input_routing_type.category == ROUTING_CATEGORY_MIDI
-                and "reface CP" in input_routing_type.display_name):
+                and MODEL_NAME in input_routing_type.display_name):
                 if input_routing_channel.display_name == f"{channel_prefix}{channel+1}":
                     channel_tracks.append(track)
                 else:

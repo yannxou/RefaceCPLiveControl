@@ -14,6 +14,10 @@ from .Logger import Logger
 # Reface constants
 # https://usa.yamaha.com/files/download/other_assets/7/794817/reface_en_dl_b0.pdf
 
+VENDOR_ID = 5667
+PRODUCT_ID = 1177
+MODEL_NAME = "reface CP"
+
 # Reface Sysex
 SYSEX_START = 0xF0
 SYSEX_END = 0xF7
