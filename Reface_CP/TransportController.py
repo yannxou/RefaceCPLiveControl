@@ -87,6 +87,8 @@ class TransportController:
             self._logger.show_message("● Release to toggle record. ▶= Hold+C: Back to Arranger. ✚ Hold+D: Arrangement overdub. ○ Hold+D#: Session record •-• Hold+E: Automation arm. ◀︎- Hold+F: Reenable automation.")
         elif action == Note.d:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. │▶ Hold+D#: Continue playback.")
+        elif action == Note.e:
+            self._logger.show_message("[○ ●] Release to toggle metronome.")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -103,6 +105,10 @@ class TransportController:
         elif action == Note.d:
             self._logger.show_message("Play.")
             self._song.start_playing()
+
+        elif action == Note.e:
+            self._logger.show_message("Toggle metronome.")
+            self._song.metronome = not self._song.metronome
 
     def _handle_subaction(self, action_key, subaction_key):
         action = action_key % 12
