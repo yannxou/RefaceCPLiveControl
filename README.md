@@ -79,6 +79,8 @@ When pressing down the first key, a hint message is displayed in Live's bottom s
 #### G ⏐ *Loop actions*
 
 * Press and release the key to toggle loop.
+* Press and hold + F# to decrease the loop length.
+* Press and hold + G# to increase the loop length.
 
 ## Constraints
 
