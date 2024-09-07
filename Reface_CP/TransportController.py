@@ -16,6 +16,7 @@ import Live
 import Live.Song
 from .Logger import Logger
 from .Note import Note
+from .SongUtil import *
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 
@@ -102,7 +103,7 @@ class TransportController:
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D")
         elif action == Note.g:
-            self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start.")
+            self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start. |←→| Hold+A#: Loop nearest cue points.")
         elif action == Note.b:
             self._logger.show_message("|← Hold+A: Undo. →| Hold+C: Redo.")
 
@@ -202,7 +203,7 @@ class TransportController:
             else:
                 self._current_action_key = None # Consume action (force to press again first note to redo action)
 
-
+        # Loop actions
         elif action == Note.g:
             if Note.is_white_key(subaction):
                 # Move loop start using white keys and distance to root.
@@ -230,6 +231,12 @@ class TransportController:
                         self._song.loop_length = loop_length * 2
                     except:
                         self._logger.log("Cannot set loop length longer that song length.")
+                elif subaction == Note.a_sharp:
+                    # set loop between prev/next cue. Uses song start/end positions in place of missing cue points.
+                    start_pos, end_pos = SongUtil.get_nearest_cue_times(self._song)
+                    self._song.loop_length = end_pos - start_pos
+                    self._song.loop_start = start_pos
+
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
 
@@ -255,8 +262,8 @@ class TransportController:
 
     def _on_action_timeout(self):
         self._logger.log("action timeout")
-        self._current_action_key = None # Consume action (force to press again first note to redo action)
-            
+        self._current_action_key = None # Consume action (force to press again first note to redo action)    
+
     def disconnect(self):
         self._cancel_action_timeout()
         self.set_enabled(False)
