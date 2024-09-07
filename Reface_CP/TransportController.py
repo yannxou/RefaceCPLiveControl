@@ -98,7 +98,7 @@ class TransportController:
         elif action == Note.c_sharp:
             self._logger.show_message("● Release to toggle record. ▶= Hold+C: Back to Arranger. ✚ Hold+D: Arrangement overdub. ○ Hold+D#: Session record •-• Hold+E: Automation arm. ◀︎- Hold+F: Reenable automation.")
         elif action == Note.d:
-            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. │▶ Hold+F#: Continue playback.")
+            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. ▶│◀︎ Hold+C#/D#: Jump to prev/next cue. │▶ Hold+F#: Continue playback.")
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D")
         elif action == Note.g:
@@ -179,7 +179,15 @@ class TransportController:
                 self._song.jump_by(jump_value) # compred to scrub_by, this one keeps playback in sync
                 self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
             else:
-                if subaction == Note.f_sharp:
+                if subaction == Note.c_sharp:
+                    self._song.jump_to_prev_cue()
+                    self._logger.show_message("Jump to previous cue.")
+                    self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+                elif subaction == Note.d_sharp:
+                    self._song.jump_to_next_cue()
+                    self._logger.show_message("Jump to next cue.")
+                    self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+                elif subaction == Note.f_sharp:
                     self._logger.show_message("Play from selection.")
                     self._song.continue_playing()   # Continue playing the song from the current position
                     self._current_action_key = None # Consume action (force to press again first note to redo action)
@@ -234,10 +242,6 @@ class TransportController:
                 self._logger.show_message("Redo.")
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
-            # song.jump_to_next_cue()   # Jump to the next cue (marker) if possible.
-            # song.jump_to_prev_cue()   # Jump to the prior cue (marker) if possible.
-            # song.can_jump_to_next_cue
-            # song.can_jump_to_prev_cue
 
     def _start_action_timeout(self):
         self._cancel_action_timeout()
