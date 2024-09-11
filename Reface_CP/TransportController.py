@@ -101,7 +101,7 @@ class TransportController:
         elif action == Note.d:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. ▶│◀︎ Hold+C#/D#: Jump to prev/next cue. │▶ Hold+F#: Continue playback.")
         elif action == Note.e:
-            self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization.")
+            self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization.")
         elif action == Note.g:
             self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start. |←→| Hold+A#: Loop nearest cue points.")
         elif action == Note.b:
@@ -201,6 +201,9 @@ class TransportController:
                 self._song.tap_tempo()
             elif subaction == Note.f:
                 SongUtil.set_previous_clip_trigger_quantization(self._song)
+            elif subaction == Note.f_sharp:
+                self._song.clip_trigger_quantization = Live.Song.Quantization.q_bar
+                self._logger.show_message("Reset clip trigger quantization to 1 bar.")
             elif subaction == Note.g:
                 SongUtil.set_next_clip_trigger_quantization(self._song)
             else:
