@@ -151,7 +151,7 @@ class RefaceCPControlSurface(ControlSurface):
             channel=self._channel,
             track_navigation_button=self._drive_knob,
             clip_navigation_button=self._tremolo_depth_knob,
-            # TODO: setup other buttons
+            device_navigation_button=self._tremolo_rate_knob
         )
         self._navigation_controller = navigation_controller
 

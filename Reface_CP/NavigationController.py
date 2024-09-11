@@ -1,5 +1,5 @@
 # NavigationController
-# - Handles navigation for tracks, clips, etc
+# - Handles navigation for tracks, clips, devices
 #
 # Part of RefaceCPLiveControl
 #
@@ -23,13 +23,15 @@ class NavigationController:
     def __init__(self, logger: Logger, 
                  song: Live.Song.Song, channel = 0,
                  track_navigation_button = None,
-                 clip_navigation_button = None
+                 clip_navigation_button = None,
+                 device_navigation_button = None
                  ):
         self._logger = logger
         self._song = song
         self._enabled = False
         self._track_navigation_button = track_navigation_button
         self._clip_navigation_button = clip_navigation_button
+        self._device_navigation_button = device_navigation_button
 
     def set_enabled(self, enabled):
         if self._enabled == enabled:
@@ -42,17 +44,21 @@ class NavigationController:
 
     def _setup_button_listeners(self):
         if self._track_navigation_button:
-            self._track_navigation_button.add_value_listener(self._on_track_navigation_button_change)
+            self._track_navigation_button.add_value_listener(self._on_track_navigation_button_changed)
         if self._clip_navigation_button:
-            self._clip_navigation_button.add_value_listener(self._on_clip_navigation_button_change)
+            self._clip_navigation_button.add_value_listener(self._on_clip_navigation_button_changed)
+        if self._device_navigation_button:
+            self._device_navigation_button.add_value_listener(self._on_device_navigation_button_changed)
 
     def _disable_button_listeners(self):
         if self._track_navigation_button:
-            self._track_navigation_button.remove_value_listener(self._on_track_navigation_button_change)
+            self._track_navigation_button.remove_value_listener(self._on_track_navigation_button_changed)
         if self._clip_navigation_button:
-            self._clip_navigation_button.remove_value_listener(self._on_clip_navigation_button_change)
+            self._clip_navigation_button.remove_value_listener(self._on_clip_navigation_button_changed)
+        if self._device_navigation_button:
+            self._device_navigation_button.remove_value_listener(self._on_device_navigation_button_changed)
 
-    def _on_track_navigation_button_change(self, value):
+    def _on_track_navigation_button_changed(self, value):
         # self._logger.log(f"_on_track_navigation_button_change: {value}")
         all_tracks = list(self._song.tracks) + list(self._song.return_tracks) + [self._song.master_track]
         total_tracks = len(all_tracks)
@@ -62,13 +68,22 @@ class NavigationController:
             self._song.view.selected_track = selected_track
             self._logger.log(f"Select track: {selected_track.name}")
 
-    def _on_clip_navigation_button_change(self, value):
+    def _on_clip_navigation_button_changed(self, value):
         selected_track = self._song.view.selected_track
         total_clip_slots = len(selected_track.clip_slots)
         if total_clip_slots > 0:
             clip_index = int((value / 127.0) * (total_clip_slots - 1))
             selected_clip_slot = selected_track.clip_slots[clip_index]
             self._song.view.highlighted_clip_slot = selected_clip_slot
+
+    def _on_device_navigation_button_changed(self, value):
+        selected_track = self._song.view.selected_track
+        devices = selected_track.devices
+        total_devices = len(devices)
+        if total_devices > 0:
+            device_index = int((value / 127.0) * (total_devices - 1))
+            selected_device = devices[device_index]
+            self._song.view.select_device(selected_device, True)
 
     def disconnect(self):
         self._disable_button_listeners()
