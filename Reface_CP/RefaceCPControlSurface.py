@@ -26,6 +26,7 @@ from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 from _Framework.ChannelStripComponent import ChannelStripComponent
 from .RotaryToggleElement import RotaryToggleElement
 from .TransportController import TransportController
+from .NavigationController import NavigationController
 
 # Live Routing Category values
 ROUTING_CATEGORY_NONE = 6
@@ -72,6 +73,7 @@ class RefaceCPControlSurface(ControlSurface):
                 self.song(),
                 channel=self._channel
             )
+            self._setup_navigation_controller()
 
             self._logger.log("RefaceCP Init Succeeded.")
 
@@ -142,6 +144,16 @@ class RefaceCPControlSurface(ControlSurface):
         self._channel_strip.set_arm_button(arm_button)
         self._all_controls.append(arm_button)
 
+    def _setup_navigation_controller(self):
+        navigation_controller = NavigationController(
+            self._logger,
+            self.song(),
+            channel=self._channel,
+            track_navigation_button=self._drive_knob
+            # TODO: setup other buttons
+        )
+        self._navigation_controller = navigation_controller
+
     def _update_device_control_channel(self, channel):
         device_controls = []
         for index in range(8):
@@ -193,11 +205,7 @@ class RefaceCPControlSurface(ControlSurface):
         for control in self._all_controls:
             control.set_channel(channel)
         self._transport_controller.set_channel(channel)
-
-        if self.is_track_mode_selected():
-            self.setup_track_mode()
-        else:
-            self._update_device_control_channel(channel)
+        self._reenable_selected_mode()
 
     def _set_chorus_toggle(self, value):
         self._logger.log(f"_set_chorus_toggle: {value}")
@@ -286,45 +294,59 @@ class RefaceCPControlSurface(ControlSurface):
 
         self._locked_device = None
 
+# -- Modes
+
+    def _reenable_selected_mode(self):
+        if self._delay_toggle_value == REFACE_TOGGLE_DOWN:
+            self.disable_track_mode()
+            self._device.set_parameter_controls(None)
+            self._transport_controller.set_enabled(True)
+            self._navigation_controller.set_enabled(True)
+            self._logger.show_message("Transport/Navigation mode enabled.")
+        else:
+            self._transport_controller.set_enabled(False)
+            self._navigation_controller.set_enabled(False)
+
+            if self._tremolo_toggle_value == REFACE_TOGGLE_UP:
+                self.disable_track_mode()
+                selected_device = self.get_selected_device()
+                self._logger.log(f"Device locked: {selected_device.name}")
+                self._update_device_control_channel(self._channel)
+                self.set_device_component(self._device)
+                self._lock_to_device(selected_device)
+            elif self._tremolo_toggle_value == REFACE_TOGGLE_DOWN:
+                self._unlock_from_device()
+                self._device.set_parameter_controls(None)
+                self.set_device_component(None)
+                self.enable_track_mode()
+                self._logger.show_message("Track mode enabled.")
+            else:
+                self.disable_track_mode()
+                self._update_device_control_channel(self._channel)
+                self._unlock_from_device()
+                self.set_device_component(self._device)
+                self.set_device_to_selected()
+                self._logger.show_message("Following device selection.")
+
+        self.request_rebuild_midi_map()
+
+
 # -- Track mode
 
     def _set_tremolo_toggle(self, value):
-        self._logger.log(f"_set_tremolo_toggle: {value}")
+        # self._logger.log(f"_set_tremolo_toggle: {value}")
         self._tremolo_toggle_value = value
-
-        if value == REFACE_TOGGLE_UP:
-            self.disable_track_mode()
-            selected_device = self.get_selected_device()
-            self._logger.log(f"Device locked: {selected_device.name}")
-            self._update_device_control_channel(self._channel)
-            self.set_device_component(self._device)
-            self._lock_to_device(selected_device)
-        elif value == REFACE_TOGGLE_DOWN:
-            self._unlock_from_device()
-            self._device.set_parameter_controls(None)
-            self.set_device_component(None)
-            self.setup_track_mode()
-        else:
-            self.disable_track_mode()
-            self._update_device_control_channel(self._channel)
-            self._unlock_from_device()
-            self.set_device_component(self._device)
-            self.set_device_to_selected()
-            self._logger.show_message("Device lock off. Following device selection.")
-        self.request_rebuild_midi_map()
+        self._reenable_selected_mode()
 
     def is_track_mode_selected(self):
-        return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN
+        return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN and self._delay_toggle_value != REFACE_TOGGLE_DOWN
 
-    def setup_track_mode(self):
-        self._logger.show_message("Track mode enabled.")
-        self.disable_track_mode(debug=False)
+    def enable_track_mode(self):
+        self.disable_track_mode()
         self._drive_knob.connect_to(self._selected_parameter)
         self._channel_strip.set_track(self._selected_track)
 
-    def disable_track_mode(self, debug=True):
-        if debug:
-            self._logger.log("Track mode disabled.")
+    def disable_track_mode(self):
         for element in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
             element.connect_to(None)
         self._channel_strip.set_track(None)
@@ -334,12 +356,7 @@ class RefaceCPControlSurface(ControlSurface):
     def _set_delay_toggle(self, value):
         self._logger.log(f"_set_delay_toggle: {value}")
         self._delay_toggle_value = value
-
-        if value == REFACE_TOGGLE_DOWN:
-            self._transport_controller.set_enabled(True)
-            self._logger.show_message("Transport mode enabled.")
-        else:
-            self._transport_controller.set_enabled(False)
+        self._reenable_selected_mode()
 
 # --- Live (ControlSurface Inherited)
 
@@ -348,7 +365,7 @@ class RefaceCPControlSurface(ControlSurface):
         super()._on_selected_track_changed()
         self._selected_track = self.song().view.selected_track
         if self.is_track_mode_selected():
-            self.setup_track_mode()
+            self.enable_track_mode()
 
     def handle_sysex(self, midi_bytes):
         self._refaceCP.handle_sysex(midi_bytes)
@@ -360,6 +377,7 @@ class RefaceCPControlSurface(ControlSurface):
 
         self.disable_track_mode()
         self._transport_controller.disconnect()
+        self._navigation_controller.disconnect()
 
         self._type_select_button.remove_value_listener(self._reface_type_select_changed)
         self._tremolo_toggle_button.remove_value_listener(self._reface_tremolo_toggle_changed)
