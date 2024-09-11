@@ -149,7 +149,8 @@ class RefaceCPControlSurface(ControlSurface):
             self._logger,
             self.song(),
             channel=self._channel,
-            track_navigation_button=self._drive_knob
+            track_navigation_button=self._drive_knob,
+            clip_navigation_button=self._tremolo_depth_knob,
             # TODO: setup other buttons
         )
         self._navigation_controller = navigation_controller

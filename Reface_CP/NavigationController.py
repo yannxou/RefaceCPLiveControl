@@ -22,12 +22,14 @@ class NavigationController:
     
     def __init__(self, logger: Logger, 
                  song: Live.Song.Song, channel = 0,
-                 track_navigation_button = None
+                 track_navigation_button = None,
+                 clip_navigation_button = None
                  ):
         self._logger = logger
         self._song = song
         self._enabled = False
         self._track_navigation_button = track_navigation_button
+        self._clip_navigation_button = clip_navigation_button
 
     def set_enabled(self, enabled):
         if self._enabled == enabled:
@@ -41,10 +43,14 @@ class NavigationController:
     def _setup_button_listeners(self):
         if self._track_navigation_button:
             self._track_navigation_button.add_value_listener(self._on_track_navigation_button_change)
+        if self._clip_navigation_button:
+            self._clip_navigation_button.add_value_listener(self._on_clip_navigation_button_change)
 
     def _disable_button_listeners(self):
         if self._track_navigation_button:
             self._track_navigation_button.remove_value_listener(self._on_track_navigation_button_change)
+        if self._clip_navigation_button:
+            self._clip_navigation_button.remove_value_listener(self._on_clip_navigation_button_change)
 
     def _on_track_navigation_button_change(self, value):
         # self._logger.log(f"_on_track_navigation_button_change: {value}")
@@ -55,6 +61,14 @@ class NavigationController:
         if self._song.view.selected_track != selected_track:
             self._song.view.selected_track = selected_track
             self._logger.log(f"Select track: {selected_track.name}")
+
+    def _on_clip_navigation_button_change(self, value):
+        selected_track = self._song.view.selected_track
+        total_clip_slots = len(selected_track.clip_slots)
+        if total_clip_slots > 0:
+            clip_index = int((value / 127.0) * (total_clip_slots - 1))
+            selected_clip_slot = selected_track.clip_slots[clip_index]
+            self._song.view.highlighted_clip_slot = selected_clip_slot
 
     def disconnect(self):
         self._disable_button_listeners()
