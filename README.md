@@ -46,9 +46,19 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 
 ### A.Delay switch:
 
-Enables the **Transport mode**. In this mode the keyboard note keys have special functions and can be recalled from any octave in the keyboard for easiness of use. In most cases, a secondary note can also be pressed to perform subactions. 
+Enables the **Navigation/Transport mode**. In this mode the knobs are used for navigation and the note keys for transport actions and more.
 
-When pressing down the first key, a hint message is displayed in Live's bottom status bar. If the first note key is pressed and held for more than 3 seconds without pressing any other key the ongoing action is automatically cancelled to prevent triggering unwanted actions. This timeout corresponds to the duration that Live allows displaying messages from the script in the status bar. 
+* **Drive**: Track navigation. Move the knob to change the track selection including sends and the master track. Since the knobs in the Reface CP are not endless the navigation will only work well for up to 127 tracks. If you have more than 127 tracks in your Live Set then some of the tracks won't be accessible using this knob but usually this doesn't happen unless you're Jacob Collier. In any case, the track can still be selected manually or using some of the actions from the list below.
+
+* **Tremolo Depth**: Clip navigation. Move the knob to change the clip selection in the current track. Again, since the knobs in the Reface CP are not endless the clip selection works fine for up to 127 scenes. Still, some simple navigation can be performed using some of the actions from the list below.
+
+* **Tremolo Rate**: Device navigation. Move the knob to change the device selection in the current track. This also has the 127 device limit.
+
+Each note key has a special function and can be recalled from any octave in the keyboard for easiness of use. In most cases, a secondary note can also be pressed to perform subactions. 
+
+When pressing down the first key, a hint message is displayed in Live's bottom status bar. If the first note key is pressed and held for more than 3 seconds without pressing any other key the ongoing action is automatically cancelled to prevent triggering unwanted actions. This timeout corresponds to the duration that Live displays messages from the script in the status bar. 
+
+Here are all the actions that can be triggered from the MIDI keyboard:
 
 #### C ⏐ *Stop actions*
 
