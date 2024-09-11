@@ -77,6 +77,9 @@ When pressing down the first key, a hint message is displayed in Live's bottom s
 
 * Press and release the key to toggle the Metronome.
 * Press and hold + D to Tap Tempo.
+* Press and hold + F to decrease the clip trigger quantization.
+* Press and hold + F# to reset the clip trigger quantization to 1 bar.
+* Press and hold + G to increase the clip trigger quantization.
 
 #### G ⏐ *Loop actions*
 
