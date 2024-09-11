@@ -101,7 +101,7 @@ class TransportController:
         elif action == Note.d:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. ▶│◀︎ Hold+C#/D#: Jump to prev/next cue. │▶ Hold+F#: Continue playback.")
         elif action == Note.e:
-            self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D")
+            self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization.")
         elif action == Note.g:
             self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start. |←→| Hold+A#: Loop nearest cue points.")
         elif action == Note.b:
@@ -199,9 +199,13 @@ class TransportController:
                 if not self._current_action_skips_ending:
                     self._logger.show_message("Tap Tempo.")
                 self._song.tap_tempo()
-                self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+            elif subaction == Note.f:
+                SongUtil.set_previous_clip_trigger_quantization(self._song)
+            elif subaction == Note.g:
+                SongUtil.set_next_clip_trigger_quantization(self._song)
             else:
                 self._current_action_key = None # Consume action (force to press again first note to redo action)
+            self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
         # Loop actions
         elif action == Note.g:
