@@ -104,8 +104,8 @@ class TransportController:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization.")
         elif action == Note.g:
             self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start. |←→| Hold+A#: Loop nearest cue points.")
-        elif action == Note.b:
-            self._logger.show_message("|← Hold+A: Undo. →| Hold+C: Redo.")
+        elif action == Note.a_sharp:
+            self._logger.show_message("|← Hold+A: Undo. →| Hold+B: Redo.")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -137,6 +137,7 @@ class TransportController:
         subaction = subaction_key % 12
         # self._logger.log(f"handle_subaction: {action}, {subaction}")
 
+        # Stop actions
         if action == Note.c:
             if subaction == Note.d:
                 self._logger.show_message("Stop current track clip.")
@@ -148,7 +149,7 @@ class TransportController:
                 self._logger.show_message("")
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
 
-
+        # Recording actions
         elif action == Note.c_sharp:
             if subaction == Note.c:
                 self._logger.show_message("Back to arrangement.")
@@ -169,7 +170,7 @@ class TransportController:
                 self._logger.show_message("")
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
 
-
+        # Play actions
         elif action == Note.d:
             if Note.is_white_key(subaction):
                 # Jump playhead using white keys and distance to root.
@@ -193,7 +194,7 @@ class TransportController:
                     self._song.continue_playing()   # Continue playing the song from the current position
                     self._current_action_key = None # Consume action (force to press again first note to redo action)
                 
-        
+        # Tempo actions
         elif action == Note.e:
             if subaction == Note.d:
                 if not self._current_action_skips_ending:
@@ -246,12 +247,12 @@ class TransportController:
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
-
-        elif action == Note.b:
+        # Edit actions
+        elif action == Note.a_sharp:
             if subaction == Note.a:
                 self._song.undo()
                 self._logger.show_message("Undo.")
-            elif subaction == Note.c:
+            elif subaction == Note.b:
                 self._song.redo()
                 self._logger.show_message("Redo.")
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
