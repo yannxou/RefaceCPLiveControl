@@ -98,6 +98,8 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 #### F | *Track actions*
 
 * Press and release the key to toggle the Clip/Device view.
+* Press and hold + D# to select to the previous track.
+* Press and hold + E to select to the next track.
 
 #### G ⏐ *Loop actions*
 

@@ -104,7 +104,7 @@ class TransportController:
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization.")
         elif action == Note.f:
-            self._logger.show_message("⚙︎ Release to toggle device/clip view.")
+            self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+D#/E: Prev/Next track.")
         elif action == Note.g:
             self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start. |←→| Hold+A#: Loop nearest cue points.")
         elif action == Note.a_sharp:
@@ -222,6 +222,18 @@ class TransportController:
             else:
                 self._current_action_key = None # Consume action (force to press again first note to redo action)
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+
+        # Track actions
+        elif action == Note.f:
+            if subaction == Note.d_sharp or subaction == Note.e:
+                all_tracks = self._song.tracks + self._song.return_tracks + (self._song.master_track,)
+                current_index = list(all_tracks).index(self._song.view.selected_track)
+                if subaction == Note.d_sharp and current_index > 0:
+                    self._song.view.selected_track = all_tracks[current_index - 1]
+                elif subaction == Note.e and current_index < (len(all_tracks) - 1):
+                    self._song.view.selected_track = all_tracks[current_index + 1]    
+            self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+
 
         # Loop actions
         elif action == Note.g:
