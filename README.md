@@ -95,6 +95,10 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + F# to reset the clip trigger quantization to 1 bar.
 * Press and hold + G to increase the clip trigger quantization.
 
+#### F | *Track actions*
+
+* Press and release the key to toggle the Clip/Device view.
+
 #### G ⏐ *Loop actions*
 
 * Press and release the key to toggle loop.

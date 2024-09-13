@@ -13,6 +13,7 @@ import math
 import threading
 import time
 import Live
+import Live.Application
 import Live.Song
 from .Logger import Logger
 from .Note import Note
@@ -102,6 +103,8 @@ class TransportController:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. ▶│◀︎ Hold+C#/D#: Jump to prev/next cue. │▶ Hold+F#: Continue playback.")
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization.")
+        elif action == Note.f:
+            self._logger.show_message("⚙︎ Release to toggle device/clip view.")
         elif action == Note.g:
             self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start. |←→| Hold+A#: Loop nearest cue points.")
         elif action == Note.a_sharp:
@@ -126,6 +129,15 @@ class TransportController:
         elif action == Note.e:
             self._logger.show_message("Toggle metronome.")
             self._song.metronome = not self._song.metronome
+
+        elif action == Note.f:
+            view = Live.Application.get_application().view
+            if view.is_view_visible("Detail/Clip"):
+                view.show_view("Detail/DeviceChain")
+                self._logger.show_message("Toggle Device View")
+            else:
+                view.show_view("Detail/Clip")
+                self._logger.show_message("Toggle Clip View")
 
         elif action == Note.g:
             self._logger.show_message("Toggle loop.")
