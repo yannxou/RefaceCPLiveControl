@@ -99,6 +99,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 
 * Press and release the key to toggle the Clip/Device view.
 * Press and hold + C to mute track.
+* Press and hold + C# to arm track.
 * Press and hold + D# to select to the previous track.
 * Press and hold + E to select to the next track.
 
