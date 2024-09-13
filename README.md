@@ -54,7 +54,11 @@ Enables the **Navigation/Transport mode**. In this mode the knobs are used for n
 
 * **Tremolo Rate**: Device navigation. Move the knob to change the device selection in the current track. This also has the 127 device limit.
 
-Each note key has a special function and can be recalled from any octave in the keyboard for easiness of use. In most cases, a secondary note can also be pressed to perform subactions. 
+<p align="center">
+	<img src="Images/navigation_transport_mode.jpg" alt="Navigation/Transport Mode" width="50%" />
+</p>
+
+In this mode each note key has a special function and can be recalled from any octave in the keyboard for easiness of use. In most cases, a secondary note can also be pressed to perform subactions. 
 
 When pressing down the first key, a hint message is displayed in Live's bottom status bar. If the first note key is pressed and held for more than 3 seconds without pressing any other key the ongoing action is automatically cancelled to prevent triggering unwanted actions. This timeout corresponds to the duration that Live displays messages from the script in the status bar. 
 
