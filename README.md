@@ -103,6 +103,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + D to solo the selected track.
 * Press and hold + D# to select to the previous track.
 * Press and hold + E to select to the next track.
+* Press and hold + A to select the current track's instrument.
 
 #### G ⏐ *Loop actions*
 

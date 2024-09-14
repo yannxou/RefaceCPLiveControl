@@ -104,7 +104,10 @@ class TransportController:
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization.")
         elif action == Note.f:
-            self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+D#/E: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S]: Hold+D: Solo.")
+            if self._song.view.selected_track.has_midi_input:
+                self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+D#/E: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. 🎹 Hold+A: Select instrument.")
+            else:
+                self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+D#/E: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo.")
         elif action == Note.g:
             self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start. |←→| Hold+A#: Loop nearest cue points.")
         elif action == Note.a_sharp:
@@ -225,23 +228,28 @@ class TransportController:
 
         # Track actions
         elif action == Note.f:
+            selected_track = self._song.view.selected_track
+
             if subaction == Note.c:
-                if self._song.view.selected_track != self._song.master_track:
-                    self._song.view.selected_track.mute = not self._song.view.selected_track.mute
+                if selected_track != self._song.master_track:
+                    selected_track.mute = not selected_track.mute
             elif subaction == Note.c_sharp:
-                if self._song.view.selected_track.can_be_armed:
-                    self._song.view.selected_track.arm = not self._song.view.selected_track.arm
+                if selected_track.can_be_armed:
+                    selected_track.arm = not selected_track.arm
             elif subaction == Note.d:
-                if self._song.view.selected_track != self._song.master_track:
-                    self._song.view.selected_track.solo = not self._song.view.selected_track.solo
+                if selected_track != self._song.master_track:
+                    selected_track.solo = not selected_track.solo
 
             elif subaction == Note.d_sharp or subaction == Note.e:
                 all_tracks = self._song.tracks + self._song.return_tracks + (self._song.master_track,)
-                current_index = list(all_tracks).index(self._song.view.selected_track)
+                current_index = list(all_tracks).index(selected_track)
                 if subaction == Note.d_sharp and current_index > 0:
                     self._song.view.selected_track = all_tracks[current_index - 1]
                 elif subaction == Note.e and current_index < (len(all_tracks) - 1):
-                    self._song.view.selected_track = all_tracks[current_index + 1]    
+                    self._song.view.selected_track = all_tracks[current_index + 1]
+
+            elif subaction == Note.a and selected_track.has_midi_input:
+                selected_track.view.select_instrument()
             
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
