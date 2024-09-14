@@ -105,9 +105,9 @@ class TransportController:
             self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization.")
         elif action == Note.f:
             if self._song.view.selected_track.has_midi_input:
-                self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+D#/E: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. 🎹 Hold+A: Select instrument.")
+                self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. 🎹 Hold+A: Select instrument.")
             else:
-                self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+D#/E: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo.")
+                self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo.")
         elif action == Note.a_sharp:
             self._logger.show_message("|← Hold+A: Undo. →| Hold+B: Redo.")
         elif action == Note.b:
@@ -240,12 +240,12 @@ class TransportController:
                 if selected_track != self._song.master_track:
                     selected_track.solo = not selected_track.solo
 
-            elif subaction == Note.d_sharp or subaction == Note.e:
+            elif subaction == Note.e or subaction == Note.g:
                 all_tracks = self._song.tracks + self._song.return_tracks + (self._song.master_track,)
                 current_index = list(all_tracks).index(selected_track)
-                if subaction == Note.d_sharp and current_index > 0:
+                if subaction == Note.e and current_index > 0:
                     self._song.view.selected_track = all_tracks[current_index - 1]
-                elif subaction == Note.e and current_index < (len(all_tracks) - 1):
+                elif subaction == Note.g and current_index < (len(all_tracks) - 1):
                     self._song.view.selected_track = all_tracks[current_index + 1]
 
             elif subaction == Note.a and selected_track.has_midi_input:
