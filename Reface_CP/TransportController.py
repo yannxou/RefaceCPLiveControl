@@ -108,10 +108,10 @@ class TransportController:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+D#/E: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. 🎹 Hold+A: Select instrument.")
             else:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+D#/E: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo.")
-        elif action == Note.g:
-            self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+C#: Jump to loop start. |←→| Hold+A#: Loop nearest cue points.")
         elif action == Note.a_sharp:
             self._logger.show_message("|← Hold+A: Undo. →| Hold+B: Redo.")
+        elif action == Note.b:
+            self._logger.show_message("[←] Release to toggle loop. [←→] Hold+F#/G#: Dec/Inc loop length. ←[ ] Hold+white keys to move loop start. [◀︎] Hold+D#: Jump to loop start. |←→| Hold+A#: Loop nearest cue points.")
 
     def _end_action(self, action_key):
         action = action_key % 12
@@ -142,7 +142,7 @@ class TransportController:
                 view.show_view("Detail/Clip")
                 self._logger.show_message("Toggle Clip View")
 
-        elif action == Note.g:
+        elif action == Note.b:
             self._logger.show_message("Toggle loop.")
             self._song.loop = not self._song.loop
 
@@ -253,9 +253,18 @@ class TransportController:
             
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
+        # Edit actions
+        elif action == Note.a_sharp:
+            if subaction == Note.a:
+                self._song.undo()
+                self._logger.show_message("Undo.")
+            elif subaction == Note.b:
+                self._song.redo()
+                self._logger.show_message("Redo.")
+            self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
         # Loop actions
-        elif action == Note.g:
+        elif action == Note.b:
             if Note.is_white_key(subaction):
                 # Move loop start using white keys and distance to root.
                 distance = Note.white_key_distance(action_key, subaction_key)
@@ -288,16 +297,6 @@ class TransportController:
                     self._song.loop_length = end_pos - start_pos
                     self._song.loop_start = start_pos
 
-            self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
-
-        # Edit actions
-        elif action == Note.a_sharp:
-            if subaction == Note.a:
-                self._song.undo()
-                self._logger.show_message("Undo.")
-            elif subaction == Note.b:
-                self._song.redo()
-                self._logger.show_message("Redo.")
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
 

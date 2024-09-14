@@ -105,7 +105,12 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + E to select to the next track.
 * Press and hold + A to select the current track's instrument.
 
-#### G ⏐ *Loop actions*
+#### A# ⏐ *Edit actions*
+
+* Press and hold + A to undo last action.
+* Press and hold + B to redo last action.
+
+#### B ⏐ *Loop actions*
 
 * Press and release the key to toggle loop.
 * Press and hold + D# to jump song position to the loop start position.
@@ -114,10 +119,6 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + A# to set the loop between the nearest cue points.
 * Press and hold + use the white keys to change the loop start position according to the distance between the first key (G) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 
-#### A# ⏐ *Edit actions*
-
-* Press and hold + A to undo last action.
-* Press and hold + B to redo last action.
 
 ## Constraints
 
