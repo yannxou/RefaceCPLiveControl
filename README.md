@@ -109,6 +109,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 
 * Press and release the key to show the Clip view.
 * Press and hold + C to stop the selected clip.
+* Press and hold + C# to delete the selected clip.
 
 #### A# ⏐ *Edit actions*
 
