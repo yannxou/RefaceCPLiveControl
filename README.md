@@ -105,6 +105,11 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + G to select to the next track.
 * Press and hold + A to select the current track's instrument.
 
+#### G | *Clip actions*
+
+* Press and release the key to show the Clip view.
+* Press and hold + C to stop the selected clip.
+
 #### A# ⏐ *Edit actions*
 
 * Press and hold + A to undo last action.

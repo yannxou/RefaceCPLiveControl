@@ -108,6 +108,8 @@ class TransportController:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. 🎹 Hold+A: Select instrument.")
             else:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo.")
+        elif action == Note.g:
+            self._logger.show_message("[◼︎] Hold+C: Stop clip.")
         elif action == Note.a_sharp:
             self._logger.show_message("|← Hold+A: Undo. →| Hold+B: Redo.")
         elif action == Note.b:
@@ -141,6 +143,9 @@ class TransportController:
             else:
                 view.show_view("Detail/Clip")
                 self._logger.show_message("Toggle Clip View")
+
+        elif action == Note.g:
+            Live.Application.get_application().view.show_view("Detail/Clip")
 
         elif action == Note.b:
             self._logger.show_message("Toggle loop.")
@@ -251,6 +256,13 @@ class TransportController:
             elif subaction == Note.a and selected_track.has_midi_input:
                 selected_track.view.select_instrument()
             
+            self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+
+        # Clip actions
+        elif action == Note.g:
+            if subaction == Note.c:
+                self._song.view.highlighted_clip_slot.stop()
+
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
         # Edit actions
