@@ -63,16 +63,16 @@ class RefaceCPControlSurface(ControlSurface):
             self._suggested_input_port = MODEL_NAME
             self._suggested_output_port = MODEL_NAME
 
-            self._setup_initial_values()
-            self._setup_buttons()
-            self._setup_device_control()
-            self._setup_song_listeners()
-            self._setup_channel_strip()
             self._transport_controller = TransportController(
                 self._logger,
                 self.song(),
                 channel=self._channel
             )
+            self._setup_initial_values()
+            self._setup_buttons()
+            self._setup_device_control()
+            self._setup_song_listeners()
+            self._setup_channel_strip()
             self._setup_navigation_controller()
 
             self._logger.log("RefaceCP Init Succeeded.")
@@ -265,6 +265,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._device.set_device(device_to_select)
             self.song().appointed_device = device_to_select
             self._device.update()
+            self._transport_controller.set_locked_device(device_to_select)
         else:
             self._logger.log("No device to select.")
 
@@ -276,6 +277,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._device_lock_button.receive_value(127)
             self._device.set_lock_to_device(True, device)
             self._device.update()
+            self._transport_controller.set_locked_device(device)
 
     def _unlock_from_device(self):
         device = self._locked_device

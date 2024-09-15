@@ -14,12 +14,15 @@ import threading
 import time
 import Live
 import Live.Application
+import Live.Device
 import Live.Song
 from .Logger import Logger
 from .Note import Note
 from .SongUtil import *
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
+
+NavDirection = Live.Application.Application.View.NavDirection
 
 class TransportController:
     
@@ -33,6 +36,7 @@ class TransportController:
         self._current_action_key = None
         self._current_action_skips_ending = False
         self._action_timer = None
+        self._locked_device = None
 
     def set_enabled(self, enabled):
         if self._enabled == enabled:
@@ -47,6 +51,9 @@ class TransportController:
         self._channel = channel
         for note_key in self._note_key_buttons:
             note_key.set_channel(channel)
+
+    def set_locked_device(self, device):
+        self._locked_device = device
 
 # - Private
 
@@ -146,6 +153,16 @@ class TransportController:
 
         elif action == Note.g:
             Live.Application.get_application().view.show_view("Detail/Clip")
+
+        elif action == Note.a:
+            Live.Application.get_application().view.show_view("Detail/DeviceChain")
+            # device = self._song.appointed_device  # This does not seem to reflect the currently assigned device to a control surface
+            device: Live.Device.Device = self._locked_device
+            track = SongUtil.get_track_from_device(device) 
+            if device is None or track is None:
+                return
+            self._song.view.selected_track = track
+            self._song.view.select_device(device, ShouldAppointDevice=False)
 
         elif action == Note.b:
             self._logger.show_message("Toggle loop.")
@@ -272,6 +289,16 @@ class TransportController:
                 SongUtil.select_previous_clip_slot(self._song)
             elif subaction == Note.a:
                 SongUtil.select_next_clip_slot(self._song)
+
+            self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+
+        # Device actions
+        elif action == Note.a:
+            view = Live.Application.get_application().view
+            if subaction == Note.g:
+                view.scroll_view(NavDirection.left, 'Detail/DeviceChain', False)
+            elif subaction == Note.b:
+                view.scroll_view(NavDirection.right, 'Detail/DeviceChain', False)
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 

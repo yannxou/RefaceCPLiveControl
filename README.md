@@ -95,7 +95,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + F# to reset the clip trigger quantization to 1 bar.
 * Press and hold + G to increase the clip trigger quantization.
 
-#### F | *Track actions*
+#### F ⏐ *Track actions*
 
 * Press and release the key to toggle the Clip/Device view.
 * Press and hold + C to mute the selected track.
@@ -105,7 +105,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + G to select to the next track.
 * Press and hold + A to select the current track's instrument.
 
-#### G | *Clip actions*
+#### G ⏐ *Clip actions*
 
 * Press and release the key to show the Clip view.
 * Press and hold + C to stop the selected clip.
@@ -114,6 +114,12 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + E to fire the selected scene.
 * Press and hold + F to select the previous clip slot.
 * Press and hold + A to select the next clip slot.
+
+#### A ⏐ *Device actions*
+
+* Press and release to select the currently assigned (or locked) device.
+* Press and hold + G to select the previous device.
+* Press and hold + B to select the next device.
 
 #### A# ⏐ *Edit actions*
 

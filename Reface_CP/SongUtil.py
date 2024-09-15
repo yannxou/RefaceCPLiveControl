@@ -9,6 +9,8 @@
 #
 # Distributed under the MIT License, see LICENSE
 
+from Live.Device import Device
+from Live.Track import Track
 from Live.Song import Song, Quantization
 
 class SongUtil:
@@ -73,6 +75,22 @@ class SongUtil:
                 song.view.highlighted_clip_slot = next_clip_slot
                 return
 
+
+    # - Device navigation
+
+    @staticmethod
+    def get_track_from_device(device: Device):
+        """Recursively find the track associated with a given device."""
+        parent = device.canonical_parent
+
+        # Traverse up the parent chain until we find a Track object
+        while parent is not None:
+            if isinstance(parent, Track):
+                return parent  # We found the track
+            parent = parent.canonical_parent
+        
+        # If no track is found, return None
+        return None
 
     # - Cue helpers
 
