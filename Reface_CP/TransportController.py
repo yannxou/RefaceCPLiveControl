@@ -109,7 +109,7 @@ class TransportController:
             else:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo.")
         elif action == Note.g:
-            self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip.")
+            self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip.")
         elif action == Note.a_sharp:
             self._logger.show_message("|← Hold+A: Undo. →| Hold+B: Redo.")
         elif action == Note.b:
@@ -266,6 +266,8 @@ class TransportController:
             elif subaction == Note.c_sharp:
                 if selected_clip.has_clip:
                     selected_clip.delete_clip()
+            elif subaction == Note.d:
+                selected_clip.fire()
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
