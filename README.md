@@ -112,6 +112,8 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + C# to delete the selected clip.
 * Press and hold + D to fire the selected clip.
 * Press and hold + E to fire the selected scene.
+* Press and hold + F to select the previous clip slot.
+* Press and hold + A to select the next clip slot.
 
 #### A# ⏐ *Edit actions*
 

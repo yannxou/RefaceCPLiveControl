@@ -109,7 +109,7 @@ class TransportController:
             else:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo.")
         elif action == Note.g:
-            self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip. [▶..] Hold+E: Fire scene.")
+            self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip. [▶..] Hold+E: Fire scene. [←|→] Hold+F/A: Prev/Next clip slot.")
         elif action == Note.a_sharp:
             self._logger.show_message("|← Hold+A: Undo. →| Hold+B: Redo.")
         elif action == Note.b:
@@ -270,6 +270,10 @@ class TransportController:
                 selected_clip.fire()
             elif subaction == Note.e:
                 self._song.view.selected_scene.fire()
+            elif subaction == Note.f:
+                self.select_previous_clip_slot()
+            elif subaction == Note.a:
+                self.select_next_clip_slot()
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
@@ -319,6 +323,7 @@ class TransportController:
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
+    # - Action timeout
 
     def _start_action_timeout(self):
         self._cancel_action_timeout()
@@ -333,6 +338,34 @@ class TransportController:
     def _on_action_timeout(self):
         self._logger.log("action timeout")
         self._current_action_key = None # Consume action (force to press again first note to redo action)    
+
+    # - Helpers
+
+    def select_previous_clip_slot(self):
+        # Set the highlighted clip to the previous clip slot in the current track
+        current_track = self._song.view.selected_track
+        all_clip_slots = current_track.clip_slots
+        if len(all_clip_slots) > 0:  # master and return tracks do not have clip slots
+            highlighted_clip_slot = self._song.view.highlighted_clip_slot
+            if highlighted_clip_slot is None:
+                self._song.view.highlighted_clip_slot = current_track.clip_slots[0]
+            else:
+                current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
+                if current_clip_slot_index > 0:
+                    self._song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index - 1]
+
+    def select_next_clip_slot(self):
+        # Set the highlighted clip to the next clip slot in the current track
+        current_track = self._song.view.selected_track
+        all_clip_slots = current_track.clip_slots
+        if len(all_clip_slots) > 0:  # master and return tracks do not have clip slots
+            highlighted_clip_slot = self._song.view.highlighted_clip_slot
+            if highlighted_clip_slot is None:
+                self._song.view.highlighted_clip_slot = current_track.clip_slots[(len(all_clip_slots) - 1)]
+            else:
+                current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
+                if current_clip_slot_index < (len(all_clip_slots) - 1):
+                    self._song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index + 1]
 
     def disconnect(self):
         self._cancel_action_timeout()
