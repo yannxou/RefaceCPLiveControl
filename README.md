@@ -111,6 +111,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + C to stop the selected clip.
 * Press and hold + C# to delete the selected clip.
 * Press and hold + D to fire the selected clip.
+* Press and hold + E to fire the selected scene.
 
 #### A# ⏐ *Edit actions*
 
