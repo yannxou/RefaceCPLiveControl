@@ -342,30 +342,58 @@ class TransportController:
     # - Helpers
 
     def select_previous_clip_slot(self):
-        # Set the highlighted clip to the previous clip slot in the current track
+        """Set the highlighted clip to the previous clip slot in the current track"""
         current_track = self._song.view.selected_track
         all_clip_slots = current_track.clip_slots
-        if len(all_clip_slots) > 0:  # master and return tracks do not have clip slots
-            highlighted_clip_slot = self._song.view.highlighted_clip_slot
-            if highlighted_clip_slot is None:
-                self._song.view.highlighted_clip_slot = current_track.clip_slots[0]
-            else:
-                current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
-                if current_clip_slot_index > 0:
-                    self._song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index - 1]
+        highlighted_clip_slot = self._song.view.highlighted_clip_slot
+        if highlighted_clip_slot is None:
+            return
+        
+        current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
+        if current_clip_slot_index > 0:
+            self._song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index - 1]
 
     def select_next_clip_slot(self):
-        # Set the highlighted clip to the next clip slot in the current track
+        """Set the highlighted clip to the next clip slot in the current track"""
         current_track = self._song.view.selected_track
         all_clip_slots = current_track.clip_slots
-        if len(all_clip_slots) > 0:  # master and return tracks do not have clip slots
-            highlighted_clip_slot = self._song.view.highlighted_clip_slot
-            if highlighted_clip_slot is None:
-                self._song.view.highlighted_clip_slot = current_track.clip_slots[(len(all_clip_slots) - 1)]
-            else:
-                current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
-                if current_clip_slot_index < (len(all_clip_slots) - 1):
-                    self._song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index + 1]
+        highlighted_clip_slot = self._song.view.highlighted_clip_slot
+        if highlighted_clip_slot is None:
+            return
+        
+        current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
+        if current_clip_slot_index < (len(all_clip_slots) - 1):
+            self._song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index + 1]
+
+    def select_previous_clip(self):
+        """Set the highlighted clip to the previous clip slot that has a clip in the current track"""
+        # Get the currently selected track and highlighted clip slot
+        current_track = self._song.view.selected_track
+        highlighted_clip_slot = self._song.view.highlighted_clip_slot
+        if highlighted_clip_slot is None:
+            return
+
+        current_clip_slot_index = list(current_track.clip_slots).index(highlighted_clip_slot)
+        for clip_slot_index in range(current_clip_slot_index - 1, -1, -1):
+            previous_clip_slot = current_track.clip_slots[clip_slot_index]
+            if previous_clip_slot.has_clip:
+                self._song.view.highlighted_clip_slot = previous_clip_slot
+                return
+
+    def select_next_clip(self):
+        """Set the highlighted clip to the next clip slot that has a clip in the current track"""
+        # Get the currently selected track and highlighted clip slot
+        current_track = self._song.view.selected_track
+        highlighted_clip_slot = self._song.view.highlighted_clip_slot
+        if highlighted_clip_slot is None:
+            return
+
+        current_clip_slot_index = list(current_track.clip_slots).index(highlighted_clip_slot)
+        for clip_slot_index in range(current_clip_slot_index + 1, len(current_track.clip_slots)):
+            next_clip_slot = current_track.clip_slots[clip_slot_index]
+            if next_clip_slot.has_clip:
+                self._song.view.highlighted_clip_slot = next_clip_slot
+                return
 
     def disconnect(self):
         self._cancel_action_timeout()
