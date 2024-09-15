@@ -13,11 +13,72 @@ from Live.Song import Song, Quantization
 
 class SongUtil:
 
+    # - Clip navigation
+
+    @staticmethod
+    def select_previous_clip_slot(song: Song):
+        """Set the highlighted clip to the previous clip slot in the current track"""
+        current_track = song.view.selected_track
+        all_clip_slots = current_track.clip_slots
+        highlighted_clip_slot = song.view.highlighted_clip_slot
+        if highlighted_clip_slot is None:
+            return
+        
+        current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
+        if current_clip_slot_index > 0:
+            song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index - 1]
+
+    @staticmethod
+    def select_next_clip_slot(song: Song):
+        """Set the highlighted clip to the next clip slot in the current track"""
+        current_track = song.view.selected_track
+        all_clip_slots = current_track.clip_slots
+        highlighted_clip_slot = song.view.highlighted_clip_slot
+        if highlighted_clip_slot is None:
+            return
+        
+        current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
+        if current_clip_slot_index < (len(all_clip_slots) - 1):
+            song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index + 1]
+
+    @staticmethod
+    def select_previous_clip(song: Song):
+        """Set the highlighted clip to the previous clip slot that has a clip in the current track"""
+        # Get the currently selected track and highlighted clip slot
+        current_track = song.view.selected_track
+        highlighted_clip_slot = song.view.highlighted_clip_slot
+        if highlighted_clip_slot is None:
+            return
+
+        current_clip_slot_index = list(current_track.clip_slots).index(highlighted_clip_slot)
+        for clip_slot_index in range(current_clip_slot_index - 1, -1, -1):
+            previous_clip_slot = current_track.clip_slots[clip_slot_index]
+            if previous_clip_slot.has_clip:
+                song.view.highlighted_clip_slot = previous_clip_slot
+                return
+
+    @staticmethod
+    def select_next_clip(song: Song):
+        """Set the highlighted clip to the next clip slot that has a clip in the current track"""
+        # Get the currently selected track and highlighted clip slot
+        current_track = song.view.selected_track
+        highlighted_clip_slot = song.view.highlighted_clip_slot
+        if highlighted_clip_slot is None:
+            return
+
+        current_clip_slot_index = list(current_track.clip_slots).index(highlighted_clip_slot)
+        for clip_slot_index in range(current_clip_slot_index + 1, len(current_track.clip_slots)):
+            next_clip_slot = current_track.clip_slots[clip_slot_index]
+            if next_clip_slot.has_clip:
+                song.view.highlighted_clip_slot = next_clip_slot
+                return
+
+
     # - Cue helpers
 
     @staticmethod
     def get_nearest_cue_times(song: Song):
-        # Returns the positions in beats for the previous cue and next cue to the current song position.
+        """Returns the positions in beats for the previous cue and next cue to the current song position."""
         prev_cue, next_cue = SongUtil.find_nearest_cue_points(song)
         left_time = prev_cue.time if prev_cue is not None else 0
         right_time = next_cue.time if next_cue is not None else song.last_event_time

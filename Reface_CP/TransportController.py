@@ -199,20 +199,18 @@ class TransportController:
                 # self._logger.log(f"distance: {distance}. jump: {jump_value}")
                 # self._song.scrub_by(distance) 
                 self._song.jump_by(jump_value) # compred to scrub_by, this one keeps playback in sync
-                self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
             else:
                 if subaction == Note.c_sharp:
                     self._song.jump_to_prev_cue()
                     self._logger.show_message("Jump to previous cue.")
-                    self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
                 elif subaction == Note.d_sharp:
                     self._song.jump_to_next_cue()
                     self._logger.show_message("Jump to next cue.")
-                    self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
                 elif subaction == Note.f_sharp:
                     self._logger.show_message("Play from selection.")
                     self._song.continue_playing()   # Continue playing the song from the current position
                     self._current_action_key = None # Consume action (force to press again first note to redo action)
+            self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
                 
         # Tempo actions
         elif action == Note.e:
@@ -271,9 +269,9 @@ class TransportController:
             elif subaction == Note.e:
                 self._song.view.selected_scene.fire()
             elif subaction == Note.f:
-                self.select_previous_clip_slot()
+                SongUtil.select_previous_clip_slot(self._song)
             elif subaction == Note.a:
-                self.select_next_clip_slot()
+                SongUtil.select_next_clip_slot(self._song)
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
@@ -338,62 +336,6 @@ class TransportController:
     def _on_action_timeout(self):
         self._logger.log("action timeout")
         self._current_action_key = None # Consume action (force to press again first note to redo action)    
-
-    # - Helpers
-
-    def select_previous_clip_slot(self):
-        """Set the highlighted clip to the previous clip slot in the current track"""
-        current_track = self._song.view.selected_track
-        all_clip_slots = current_track.clip_slots
-        highlighted_clip_slot = self._song.view.highlighted_clip_slot
-        if highlighted_clip_slot is None:
-            return
-        
-        current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
-        if current_clip_slot_index > 0:
-            self._song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index - 1]
-
-    def select_next_clip_slot(self):
-        """Set the highlighted clip to the next clip slot in the current track"""
-        current_track = self._song.view.selected_track
-        all_clip_slots = current_track.clip_slots
-        highlighted_clip_slot = self._song.view.highlighted_clip_slot
-        if highlighted_clip_slot is None:
-            return
-        
-        current_clip_slot_index = list(all_clip_slots).index(highlighted_clip_slot)
-        if current_clip_slot_index < (len(all_clip_slots) - 1):
-            self._song.view.highlighted_clip_slot = current_track.clip_slots[current_clip_slot_index + 1]
-
-    def select_previous_clip(self):
-        """Set the highlighted clip to the previous clip slot that has a clip in the current track"""
-        # Get the currently selected track and highlighted clip slot
-        current_track = self._song.view.selected_track
-        highlighted_clip_slot = self._song.view.highlighted_clip_slot
-        if highlighted_clip_slot is None:
-            return
-
-        current_clip_slot_index = list(current_track.clip_slots).index(highlighted_clip_slot)
-        for clip_slot_index in range(current_clip_slot_index - 1, -1, -1):
-            previous_clip_slot = current_track.clip_slots[clip_slot_index]
-            if previous_clip_slot.has_clip:
-                self._song.view.highlighted_clip_slot = previous_clip_slot
-                return
-
-    def select_next_clip(self):
-        """Set the highlighted clip to the next clip slot that has a clip in the current track"""
-        # Get the currently selected track and highlighted clip slot
-        current_track = self._song.view.selected_track
-        highlighted_clip_slot = self._song.view.highlighted_clip_slot
-        if highlighted_clip_slot is None:
-            return
-
-        current_clip_slot_index = list(current_track.clip_slots).index(highlighted_clip_slot)
-        for clip_slot_index in range(current_clip_slot_index + 1, len(current_track.clip_slots)):
-            next_clip_slot = current_track.clip_slots[clip_slot_index]
-            if next_clip_slot.has_clip:
-                self._song.view.highlighted_clip_slot = next_clip_slot
-                return
 
     def disconnect(self):
         self._cancel_action_timeout()
