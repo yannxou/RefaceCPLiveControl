@@ -67,8 +67,8 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 #### C ⏐ *Stop actions*
 
 * Press and release the key to stop playing.
-* Press and hold + D to stop the current track clip (if any). 
 * Press and hold + E to stop all clips from all tracks. 
+* Press and hold + F to stop the current track clip (if any).
 
 #### C# ⏐ *Recording actions*
 

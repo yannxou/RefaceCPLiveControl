@@ -176,12 +176,12 @@ class TransportController:
 
         # Stop actions
         if action == Note.c:
-            if subaction == Note.d:
-                self._logger.show_message("Stop current track clip.")
-                self._song.view.selected_track.stop_all_clips()
-            elif subaction == Note.e:
+            if subaction == Note.e:
                 self._logger.show_message("Stop all clips.")
                 self._song.stop_all_clips()
+            elif subaction == Note.f:
+                self._logger.show_message("Stop current track clip.")
+                self._song.view.selected_track.stop_all_clips()
             else:
                 self._logger.show_message("")
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
