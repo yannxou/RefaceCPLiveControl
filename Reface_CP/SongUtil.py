@@ -12,6 +12,7 @@
 from Live.Device import Device
 from Live.Track import Track
 from Live.Song import Song, Quantization
+from Live.DeviceParameter import ParameterState
 
 class SongUtil:
 
@@ -76,7 +77,7 @@ class SongUtil:
                 return
 
 
-    # - Device navigation
+    # - Device helpers
 
     @staticmethod
     def get_track_from_device(device: Device):
@@ -91,6 +92,14 @@ class SongUtil:
         
         # If no track is found, return None
         return None
+    
+    @staticmethod
+    def toggle_device_on_off(device: Device):
+        """Toggle the on/off state of the currently appointed device."""
+        on_off_param = next((param for param in device.parameters if param.name == "Device On"), None)
+        if on_off_param is not None:
+            if on_off_param.state != ParameterState.disabled:
+                on_off_param.value = 0.0 if on_off_param.value == 1.0 else 1.0
 
     # - Cue helpers
 

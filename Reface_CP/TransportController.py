@@ -117,6 +117,8 @@ class TransportController:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo.")
         elif action == Note.g:
             self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip. [▶..] Hold+E: Fire scene. [←|→] Hold+F/A: Prev/Next clip slot.")
+        elif action == Note.a:
+            self._logger.show_message("⚙︎ Release to show appointed device. [⏀] Hold+C: Toggle device on/off. [←|→] Hold+G/B: Prev/Next device. ")
         elif action == Note.a_sharp:
             self._logger.show_message("|← Hold+A: Undo. →| Hold+B: Redo.")
         elif action == Note.b:
@@ -294,11 +296,14 @@ class TransportController:
 
         # Device actions
         elif action == Note.a:
-            view = Live.Application.get_application().view
-            if subaction == Note.g:
-                view.scroll_view(NavDirection.left, 'Detail/DeviceChain', False)
+            if subaction == Note.c:
+                appointed_device = self._song.appointed_device
+                if appointed_device is not None:
+                    SongUtil.toggle_device_on_off(appointed_device)
+            elif subaction == Note.g:
+                Live.Application.get_application().view.scroll_view(NavDirection.left, 'Detail/DeviceChain', False)
             elif subaction == Note.b:
-                view.scroll_view(NavDirection.right, 'Detail/DeviceChain', False)
+                Live.Application.get_application().view.scroll_view(NavDirection.right, 'Detail/DeviceChain', False)
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 

@@ -118,6 +118,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 #### A ⏐ *Device actions*
 
 * Press and release to select the currently assigned (or locked) device.
+* Press and hold + C to toggle the device on/off.
 * Press and hold + G to select the previous device.
 * Press and hold + B to select the next device.
 
