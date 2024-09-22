@@ -64,6 +64,8 @@ When pressing down the first key, a hint message is displayed in Live's bottom s
 
 Here are all the actions that can be triggered from the MIDI keyboard:
 
+*Note*: Unless specified, all secondary action notes from the list correspond to the note within the same octave as the main action note. Higher or lower octaves are represented with a <sup>+n</sup> or <sup>-n</sup> text next to it.
+
 #### C ⏐ *Stop actions*
 
 * Press and release the key to stop playing.

@@ -174,14 +174,17 @@ class TransportController:
     def _handle_subaction(self, action_key, subaction_key):
         action = action_key % 12
         subaction = subaction_key % 12
+        action_octave = action_key // 12
+        subaction_octave = subaction_key // 12
+        is_same_octave = action_octave == subaction_octave
         # self._logger.log(f"handle_subaction: {action}, {subaction}")
 
         # Stop actions
         if action == Note.c:
-            if subaction == Note.e:
+            if subaction == Note.e and is_same_octave:
                 self._logger.show_message("Stop all clips.")
                 self._song.stop_all_clips()
-            elif subaction == Note.f:
+            elif subaction == Note.f and is_same_octave:
                 self._logger.show_message("Stop current track clip.")
                 self._song.view.selected_track.stop_all_clips()
             else:
@@ -190,19 +193,19 @@ class TransportController:
 
         # Recording actions
         elif action == Note.c_sharp:
-            if subaction == Note.c:
+            if subaction == Note.c and is_same_octave:
                 self._logger.show_message("Back to arrangement.")
                 self._song.back_to_arranger = False
-            elif subaction == Note.d:
+            elif subaction == Note.d and is_same_octave:
                 self._logger.show_message("Toggle MIDI arrangement overdub.")
                 self._song.arrangement_overdub = not self._song.arrangement_overdub
-            elif subaction == Note.d_sharp:
+            elif subaction == Note.d_sharp and is_same_octave:
                 self._logger.show_message("Toggle Session record.")
                 self._song.session_record = not self._song.session_record
-            elif subaction == Note.e:
+            elif subaction == Note.e and is_same_octave:
                 self._logger.show_message("Toggle automation arm.")
                 self._song.session_automation_record = not self._song.session_automation_record
-            elif subaction == Note.f:
+            elif subaction == Note.f and is_same_octave:
                 self._logger.show_message("Re-enable automation.")
                 self._song.re_enable_automation() 
             else:
@@ -219,13 +222,13 @@ class TransportController:
                 # self._song.scrub_by(distance) 
                 self._song.jump_by(jump_value) # compred to scrub_by, this one keeps playback in sync
             else:
-                if subaction == Note.c_sharp:
+                if subaction == Note.c_sharp and is_same_octave:
                     self._song.jump_to_prev_cue()
                     self._logger.show_message("Jump to previous cue.")
-                elif subaction == Note.d_sharp:
+                elif subaction == Note.d_sharp and is_same_octave:
                     self._song.jump_to_next_cue()
                     self._logger.show_message("Jump to next cue.")
-                elif subaction == Note.f_sharp:
+                elif subaction == Note.f_sharp and is_same_octave:
                     self._logger.show_message("Play from selection.")
                     self._song.continue_playing()   # Continue playing the song from the current position
                     self._current_action_key = None # Consume action (force to press again first note to redo action)
@@ -233,16 +236,16 @@ class TransportController:
                 
         # Tempo actions
         elif action == Note.e:
-            if subaction == Note.d:
+            if subaction == Note.d and is_same_octave:
                 if not self._current_action_skips_ending:
                     self._logger.show_message("Tap Tempo.")
                 self._song.tap_tempo()
-            elif subaction == Note.f:
+            elif subaction == Note.f and is_same_octave:
                 SongUtil.set_previous_clip_trigger_quantization(self._song)
-            elif subaction == Note.f_sharp:
+            elif subaction == Note.f_sharp and is_same_octave:
                 self._song.clip_trigger_quantization = Live.Song.Quantization.q_bar
                 self._logger.show_message("Reset clip trigger quantization to 1 bar.")
-            elif subaction == Note.g:
+            elif subaction == Note.g and is_same_octave:
                 SongUtil.set_next_clip_trigger_quantization(self._song)
             else:
                 self._current_action_key = None # Consume action (force to press again first note to redo action)
@@ -252,17 +255,17 @@ class TransportController:
         elif action == Note.f:
             selected_track = self._song.view.selected_track
 
-            if subaction == Note.c:
+            if subaction == Note.c and is_same_octave:
                 if selected_track != self._song.master_track:
                     selected_track.mute = not selected_track.mute
-            elif subaction == Note.c_sharp:
+            elif subaction == Note.c_sharp and is_same_octave:
                 if selected_track.can_be_armed:
                     selected_track.arm = not selected_track.arm
-            elif subaction == Note.d:
+            elif subaction == Note.d and is_same_octave:
                 if selected_track != self._song.master_track:
                     selected_track.solo = not selected_track.solo
 
-            elif subaction == Note.e or subaction == Note.g:
+            elif (subaction == Note.e or subaction == Note.g) and is_same_octave:
                 all_tracks = self._song.tracks + self._song.return_tracks + (self._song.master_track,)
                 current_index = list(all_tracks).index(selected_track)
                 if subaction == Note.e and current_index > 0:
@@ -270,7 +273,7 @@ class TransportController:
                 elif subaction == Note.g and current_index < (len(all_tracks) - 1):
                     self._song.view.selected_track = all_tracks[current_index + 1]
 
-            elif subaction == Note.a and selected_track.has_midi_input:
+            elif subaction == Note.a and is_same_octave and selected_track.has_midi_input:
                 selected_track.view.select_instrument()
             
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
@@ -278,41 +281,41 @@ class TransportController:
         # Clip actions
         elif action == Note.g:
             selected_clip = self._song.view.highlighted_clip_slot
-            if subaction == Note.c:
+            if subaction == Note.c and is_same_octave:
                 selected_clip.stop()
-            elif subaction == Note.c_sharp:
+            elif subaction == Note.c_sharp and is_same_octave:
                 if selected_clip.has_clip:
                     selected_clip.delete_clip()
-            elif subaction == Note.d:
+            elif subaction == Note.d and is_same_octave:
                 selected_clip.fire()
-            elif subaction == Note.e:
+            elif subaction == Note.e and is_same_octave:
                 self._song.view.selected_scene.fire()
-            elif subaction == Note.f:
+            elif subaction == Note.f and is_same_octave:
                 SongUtil.select_previous_clip_slot(self._song)
-            elif subaction == Note.a:
+            elif subaction == Note.a and is_same_octave:
                 SongUtil.select_next_clip_slot(self._song)
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
         # Device actions
         elif action == Note.a:
-            if subaction == Note.c:
+            if subaction == Note.c and is_same_octave:
                 appointed_device = self._song.appointed_device
                 if appointed_device is not None:
                     SongUtil.toggle_device_on_off(appointed_device)
-            elif subaction == Note.g:
+            elif subaction == Note.g and is_same_octave:
                 Live.Application.get_application().view.scroll_view(NavDirection.left, 'Detail/DeviceChain', False)
-            elif subaction == Note.b:
+            elif subaction == Note.b and is_same_octave:
                 Live.Application.get_application().view.scroll_view(NavDirection.right, 'Detail/DeviceChain', False)
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
         # Edit actions
         elif action == Note.a_sharp:
-            if subaction == Note.a:
+            if subaction == Note.a and is_same_octave:
                 self._song.undo()
                 self._logger.show_message("Undo.")
-            elif subaction == Note.b:
+            elif subaction == Note.b and is_same_octave:
                 self._song.redo()
                 self._logger.show_message("Redo.")
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
@@ -328,7 +331,7 @@ class TransportController:
                 except:
                     self._logger.log("Cannot set loop start behind song length.")
             else:
-                if subaction == Note.d_sharp:
+                if subaction == Note.d_sharp and is_same_octave:
                     try:
                         if self._song.is_playing:
                             self._song.jump_by(round(self._song.loop_start - self._song.current_song_time))
@@ -336,16 +339,16 @@ class TransportController:
                             self._song.current_song_time = self._song.loop_start
                     except:
                         self._logger.log("Cannot set time behind song length")
-                elif subaction == Note.f_sharp:
+                elif subaction == Note.f_sharp and is_same_octave:
                     loop_length = self._song.loop_length  # Loop length in beats
                     self._song.loop_length = max(1, loop_length / 2)
-                elif subaction == Note.g_sharp:
+                elif subaction == Note.g_sharp and is_same_octave:
                     loop_length = self._song.loop_length  # Loop length in beats
                     try:
                         self._song.loop_length = loop_length * 2
                     except:
                         self._logger.log("Cannot set loop length longer that song length.")
-                elif subaction == Note.a_sharp:
+                elif subaction == Note.a_sharp and is_same_octave:
                     # set loop between prev/next cue. Uses song start/end positions in place of missing cue points.
                     start_pos, end_pos = SongUtil.get_nearest_cue_times(self._song)
                     self._song.loop_length = end_pos - start_pos
