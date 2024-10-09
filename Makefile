@@ -2,7 +2,7 @@
 .NOTPARALLEL:
 
 ABLETON_APP_DIR            := /Applications/Ableton Live 12 Suite.app
-ABLETON_PREFS_DIR          := $(HOME)/Library/Preferences/Ableton/Live 12.0.20
+ABLETON_PREFS_DIR          := $(HOME)/Library/Preferences/Ableton/Live 12.1
 SOURCE_SCRIPT_DIR          := ./Reface_CP
 TARGET_SCRIPT_DIR          := $(ABLETON_APP_DIR)/Contents/App-Resources/MIDI Remote Scripts
 
