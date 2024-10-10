@@ -27,6 +27,7 @@ from _Framework.ChannelStripComponent import ChannelStripComponent
 from .RotaryToggleElement import RotaryToggleElement
 from .TransportController import TransportController
 from .NavigationController import NavigationController
+from .Settings import DISABLE_SPEAKER
 
 # Live Routing Category values
 ROUTING_CATEGORY_NONE = 6
@@ -84,6 +85,7 @@ class RefaceCPControlSurface(ControlSurface):
     def _on_device_identified(self):
         self._logger.log("RefaceCP Identification Succeeded.")
         self._refaceCP.set_midi_control(True)
+        self._refaceCP.set_speaker_output(not DISABLE_SPEAKER)
         self._refaceCP.request_current_values()
         self._setup_buttons()
         self._setup_device_control()
@@ -399,6 +401,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._all_controls = []
 
         # TODO: Restore previous reface midi transmit channel ?
+        self._refaceCP.set_speaker_output(True)
         self._refaceCP.disconnect()
 
         # Calling disconnect on parent sends some MIDI that messes up or resets the reface. Why?

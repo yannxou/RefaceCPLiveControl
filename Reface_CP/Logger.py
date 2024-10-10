@@ -9,7 +9,7 @@
 #
 # Distributed under the MIT License, see LICENSE
 
-from .Settings import *
+from .Settings import DEBUG_ENABLED
 
 class Logger:
 	def __init__(self, c_instance):
