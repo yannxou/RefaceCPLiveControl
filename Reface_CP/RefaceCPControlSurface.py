@@ -83,6 +83,7 @@ class RefaceCPControlSurface(ControlSurface):
 
     def _on_device_identified(self):
         self._logger.log("RefaceCP Identification Succeeded.")
+        self._refaceCP.set_midi_control(True)
         self._refaceCP.request_current_values()
         self._setup_buttons()
         self._setup_device_control()

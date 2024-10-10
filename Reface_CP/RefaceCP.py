@@ -111,6 +111,12 @@ class RefaceCP:
         sys_ex_message = self._reface_sysex_header(0x10) + (0x00, 0x00, 0x00, channel, SYSEX_END)
         self._send_midi(sys_ex_message)
 
+    def set_midi_control(self, enabled: bool):
+        if not self._is_identified:
+            return
+        sys_ex_message = self._reface_sysex_header(0x10) + (0x00, 0x00, 0x0E, 0x01 if enabled else 0x00, SYSEX_END)
+        self._send_midi(sys_ex_message)
+
     # See: MIDI PARAMETER CHANGE TABLE (Tone Generator)
     def request_tone_parameter(self, parameter):
         if not self._is_identified:
