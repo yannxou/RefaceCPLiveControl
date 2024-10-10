@@ -44,6 +44,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._logger.log("RefaceCPControlSurface Init Started")
             self._refaceCP = RefaceCP(
                 self._logger, self._send_midi,
+                on_device_identified = self._on_device_identified,
                 receive_type_value = self.set_channel,
                 receive_tremolo_toggle_value = self._set_tremolo_toggle,
                 receive_chorus_toggle_value = self._set_chorus_toggle,
@@ -68,20 +69,26 @@ class RefaceCPControlSurface(ControlSurface):
                 self.song(),
                 channel=self._channel
             )
-            self._setup_initial_values()
-            self._setup_buttons()
-            self._setup_device_control()
-            self._setup_song_listeners()
-            self._setup_channel_strip()
-            self._setup_navigation_controller()
 
-            self._logger.log("RefaceCP Init Succeeded.")
+            self._waiting_for_first_response = True
+            self.schedule_message(10, self._continue_init) # delay call otherwise it silently fails during init stage
+
+
+            self._logger.log("RefaceCP Init.")
 
 # --- Setup
 
-    def _setup_initial_values(self):
-        self._waiting_for_first_response = True
-        self.schedule_message(10, self._refaceCP.request_current_values) # delay call otherwise it silently fails during init stage
+    def _continue_init(self):
+        self._refaceCP.request_identity()
+
+    def _on_device_identified(self):
+        self._logger.log("RefaceCP Identification Succeeded.")
+        self._refaceCP.request_current_values()
+        self._setup_buttons()
+        self._setup_device_control()
+        self._setup_song_listeners()
+        self._setup_channel_strip()
+        self._setup_navigation_controller()
 
     def _setup_buttons(self):
         self._type_select_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TYPE_SELECT_KNOB)
@@ -376,7 +383,8 @@ class RefaceCPControlSurface(ControlSurface):
     def disconnect(self):
         self._logger.log("RefaceCP Disconnected")
 
-        self.song().view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
+        if self.song().view.selected_parameter_has_listener(self._on_selected_parameter_changed):
+            self.song().view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
 
         self.disable_track_mode()
         self._transport_controller.disconnect()

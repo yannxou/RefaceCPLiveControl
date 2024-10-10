@@ -70,64 +70,90 @@ reface_toggle_map = {
 }
 
 class RefaceCP:
-    def __init__(self, logger: Logger, send_midi, 
+    IDENTITY_REPLY = (0xF0, 0x7E, 0x7F, 0x06, 0x02, 0x43, 0x00, 0x41, 0x52, 0x06, 0x00, 0x00, 0x00, 0x7F, 0xF7)
+
+    def __init__(self, logger: Logger, send_midi,
+                 on_device_identified = None,
                  receive_type_value = None,
                  receive_tremolo_toggle_value = None,
                  receive_chorus_toggle_value = None,
                  receive_delay_toggle_value = None):
         self._logger = logger
         self._send_midi = send_midi
+        self._on_device_identified = on_device_identified
         self._receive_type_value = receive_type_value
         self._receive_tremolo_toggle_value = receive_tremolo_toggle_value
         self._receive_chorus_toggle_value = receive_chorus_toggle_value
         self._receive_delay_toggle_value = receive_delay_toggle_value
+        self._device_number = 0x00
+        self._is_identified = False
 
     def request_current_values(self):
-        self.request_parameter(REFACE_PARAM_TYPE)
-        self.request_parameter(REFACE_PARAM_TREMOLO_TOGGLE)
-        self.request_parameter(REFACE_PARAM_CHORUS_TOGGLE)
-        self.request_parameter(REFACE_PARAM_DELAY_TOGGLE)
+        self.request_tone_parameter(REFACE_PARAM_TYPE)
+        self.request_tone_parameter(REFACE_PARAM_TREMOLO_TOGGLE)
+        self.request_tone_parameter(REFACE_PARAM_CHORUS_TOGGLE)
+        self.request_tone_parameter(REFACE_PARAM_DELAY_TOGGLE)
+
+    def request_identity(self):
+        # F0H 7EH 0nH 06H 01H F7H
+        # (“n” = Device No. However, this instrument receives under “omni.”)
+        self._send_midi((SYSEX_START, 0x7E, 0x00 | self._device_number, 0x06, 0x01, SYSEX_END))
 
 # --- Reface Sysex commands
 
-    def _reface_sysex_header(self, device_number):
+    def _reface_sysex_header(self, prefix):
         # Returns the sysex prefix up to the address field
-        return (SYSEX_START, DEVICE_ID, device_number, GROUP_HIGH, GROUP_LOW, MODEL_ID)
+        return (SYSEX_START, DEVICE_ID, prefix | self._device_number, GROUP_HIGH, GROUP_LOW, MODEL_ID)
 
     def set_transmit_channel(self, channel):
+        if not self._is_identified:
+            return
         sys_ex_message = self._reface_sysex_header(0x10) + (0x00, 0x00, 0x00, channel, SYSEX_END)
         self._send_midi(sys_ex_message)
 
-    def request_parameter(self, parameter):
+    # See: MIDI PARAMETER CHANGE TABLE (Tone Generator)
+    def request_tone_parameter(self, parameter):
+        if not self._is_identified:
+            return
         sys_ex_message = self._reface_sysex_header(0x30) + (0x30, 0x00, parameter, SYSEX_END)
         self._send_midi(sys_ex_message)
 
     def handle_sysex(self, midi_bytes):
-        param_change_header = self._reface_sysex_header(0x10)
-        self._logger.log(f"handle_sysex: {midi_bytes}. param_change_header: {param_change_header}")
-        if midi_bytes[:len(param_change_header)] == param_change_header:
-            param_id = midi_bytes[-3]
-            param_value = midi_bytes[-2]
-            self._logger.log(f"parameter sysex response. id: {param_id}, value: {param_value}")
-            if param_id == REFACE_PARAM_TYPE:
-                if self._receive_type_value is not None:
-                    self._receive_type_value(param_value)
-            elif param_id == REFACE_PARAM_TREMOLO_TOGGLE:
-                if self._receive_tremolo_toggle_value is not None:
-                    self._receive_tremolo_toggle_value(param_value)
-            elif param_id == REFACE_PARAM_CHORUS_TOGGLE:
-                if self._receive_chorus_toggle_value is not None:
-                    self._receive_chorus_toggle_value(param_value)
-            elif param_id == REFACE_PARAM_DELAY_TOGGLE:
-                if self._receive_delay_toggle_value is not None:
-                    self._receive_delay_toggle_value(param_value)
+        # self._logger.log(f"handle_sysex: {midi_bytes}.")
+        if len(midi_bytes) > 2:
+            if midi_bytes[1] == 0x7E:
+                if midi_bytes[:len(RefaceCP.IDENTITY_REPLY)] == RefaceCP.IDENTITY_REPLY:
+                    self._is_identified = True
+                    if self._on_device_identified is not None:
+                        self._on_device_identified()
+            else:
+                param_change_header = self._reface_sysex_header(0x10)
+                self._logger.log(f"handle_sysex: {midi_bytes}. param_change_header: {param_change_header}")
+                if midi_bytes[:len(param_change_header)] == param_change_header:
+                    param_id = midi_bytes[-3]
+                    param_value = midi_bytes[-2]
+                    self._logger.log(f"parameter sysex response. id: {param_id}, value: {param_value}")
+                    if param_id == REFACE_PARAM_TYPE:
+                        if self._receive_type_value is not None:
+                            self._receive_type_value(param_value)
+                    elif param_id == REFACE_PARAM_TREMOLO_TOGGLE:
+                        if self._receive_tremolo_toggle_value is not None:
+                            self._receive_tremolo_toggle_value(param_value)
+                    elif param_id == REFACE_PARAM_CHORUS_TOGGLE:
+                        if self._receive_chorus_toggle_value is not None:
+                            self._receive_chorus_toggle_value(param_value)
+                    elif param_id == REFACE_PARAM_DELAY_TOGGLE:
+                        if self._receive_delay_toggle_value is not None:
+                            self._receive_delay_toggle_value(param_value)
 
 # ---
 
     def disconnect(self):
         self._logger = None
         self._send_midi = None
+        self._on_device_identified = None
         self._receive_type_value = None
         self._receive_tremolo_toggle_value = None
         self._receive_chorus_toggle_value = None
         self._receive_delay_toggle_value = None
+        self._is_identified = False
