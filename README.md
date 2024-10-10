@@ -92,10 +92,10 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 #### E ⏐ *Tempo actions*
 
 * Press and release the key to toggle the Metronome.
-* Press and hold + D to Tap Tempo.
 * Press and hold + F to decrease the clip trigger quantization.
 * Press and hold + F# to reset the clip trigger quantization to 1 bar.
 * Press and hold + G to increase the clip trigger quantization.
+* Press and hold + A to Tap Tempo.
 
 #### F ⏐ *Track actions*
 

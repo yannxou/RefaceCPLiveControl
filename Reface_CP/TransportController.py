@@ -109,7 +109,7 @@ class TransportController:
         elif action == Note.d:
             self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. ▶│◀︎ Hold+C#/D#: Jump to prev/next cue. │▶ Hold+F#: Continue playback.")
         elif action == Note.e:
-            self._logger.show_message("[○ ●] Release to toggle metronome. [TAP] Hold+D. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization.")
+            self._logger.show_message("[○ ●] Release to toggle metronome. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization. [TAP] Hold+A.")
         elif action == Note.f:
             if self._song.view.selected_track.has_midi_input:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. 🎹 Hold+A: Select instrument.")
@@ -236,17 +236,17 @@ class TransportController:
                 
         # Tempo actions
         elif action == Note.e:
-            if subaction == Note.d and is_same_octave:
-                if not self._current_action_skips_ending:
-                    self._logger.show_message("Tap Tempo.")
-                self._song.tap_tempo()
-            elif subaction == Note.f and is_same_octave:
+            if subaction == Note.f and is_same_octave:
                 SongUtil.set_previous_clip_trigger_quantization(self._song)
             elif subaction == Note.f_sharp and is_same_octave:
                 self._song.clip_trigger_quantization = Live.Song.Quantization.q_bar
                 self._logger.show_message("Reset clip trigger quantization to 1 bar.")
             elif subaction == Note.g and is_same_octave:
                 SongUtil.set_next_clip_trigger_quantization(self._song)
+            elif subaction == Note.a and is_same_octave:
+                if not self._current_action_skips_ending:
+                    self._logger.show_message("Tap Tempo.")
+                self._song.tap_tempo()
             else:
                 self._current_action_key = None # Consume action (force to press again first note to redo action)
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
