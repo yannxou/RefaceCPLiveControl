@@ -138,11 +138,18 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + A# to set the loop between the nearest cue points.
 * Press and hold + use the white keys to change the loop start position according to the distance between the first key (G) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 
-
 ## Constraints
 
 Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders. It's also a pity that the Type knob is not an endless encoder. This limits the possibilities of what could be achieved when used as a controller but I hope this still brings a new dimension to your great Reface CP. 
 
+## Support
+
+If you'd like to receive support, please send your feedback in the form of suggestions or bug reporting using the github issues.
+
+If you’d like to send support for this project or other hundreds of ideas you can bring the drinks using the button below.
+I will happily implement something similar for other synths if I receive enough support or someone gifts me a unit.
+
+<a href="https://www.buymeacoffee.com/yannxou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
 ## Links
 
