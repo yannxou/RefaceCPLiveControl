@@ -41,12 +41,6 @@ TREMOLO_WAH_TOGGLE = 17
 CHORUS_PHASER_TOGGLE = 85
 DELAY_TOGGLE = 88
 
-# Reface CP Parameter IDs:
-REFACE_PARAM_TYPE = 0x02
-REFACE_PARAM_TREMOLO_TOGGLE = 0x04
-REFACE_PARAM_CHORUS_TOGGLE = 0x07
-REFACE_PARAM_DELAY_TOGGLE = 0x0A
-
 # Reface toggle constants
 REFACE_TOGGLE_OFF = 0
 REFACE_TOGGLE_UP = 1
@@ -69,6 +63,13 @@ reface_toggle_map = {
     127: REFACE_TOGGLE_DOWN
 }
 
+class ToneParameter:
+    # Reface CP Parameter IDs:
+    REFACE_PARAM_TYPE = 0x02
+    REFACE_PARAM_TREMOLO_TOGGLE = 0x04
+    REFACE_PARAM_CHORUS_TOGGLE = 0x07
+    REFACE_PARAM_DELAY_TOGGLE = 0x0A
+
 class RefaceCP:
     IDENTITY_REPLY = (0xF0, 0x7E, 0x7F, 0x06, 0x02, 0x43, 0x00, 0x41, 0x52, 0x06, 0x00, 0x00, 0x00, 0x7F, 0xF7)
 
@@ -89,10 +90,10 @@ class RefaceCP:
         self._is_identified = False
 
     def request_current_values(self):
-        self.request_tone_parameter(REFACE_PARAM_TYPE)
-        self.request_tone_parameter(REFACE_PARAM_TREMOLO_TOGGLE)
-        self.request_tone_parameter(REFACE_PARAM_CHORUS_TOGGLE)
-        self.request_tone_parameter(REFACE_PARAM_DELAY_TOGGLE)
+        self.request_tone_parameter(ToneParameter.REFACE_PARAM_TYPE)
+        self.request_tone_parameter(ToneParameter.REFACE_PARAM_TREMOLO_TOGGLE)
+        self.request_tone_parameter(ToneParameter.REFACE_PARAM_CHORUS_TOGGLE)
+        self.request_tone_parameter(ToneParameter.REFACE_PARAM_DELAY_TOGGLE)
 
     def request_identity(self):
         # F0H 7EH 0nH 06H 01H F7H
@@ -130,10 +131,16 @@ class RefaceCP:
         self._send_midi(sys_ex_message)
 
     # See: MIDI PARAMETER CHANGE TABLE (Tone Generator)
-    def request_tone_parameter(self, parameter):
+    def request_tone_parameter(self, parameter: ToneParameter):
         if not self._is_identified:
             return
         sys_ex_message = self._reface_sysex_header(0x30) + (0x30, 0x00, parameter, SYSEX_END)
+        self._send_midi(sys_ex_message)
+
+    def set_tone_parameter(self, parameter: ToneParameter, value):
+        if not self._is_identified:
+            return
+        sys_ex_message = self._reface_sysex_header(0x10) + (0x30, 0x00, parameter, value, SYSEX_END)
         self._send_midi(sys_ex_message)
 
     def handle_sysex(self, midi_bytes):
@@ -151,16 +158,16 @@ class RefaceCP:
                     param_id = midi_bytes[-3]
                     param_value = midi_bytes[-2]
                     self._logger.log(f"parameter sysex response. id: {param_id}, value: {param_value}")
-                    if param_id == REFACE_PARAM_TYPE:
+                    if param_id == ToneParameter.REFACE_PARAM_TYPE:
                         if self._receive_type_value is not None:
                             self._receive_type_value(param_value)
-                    elif param_id == REFACE_PARAM_TREMOLO_TOGGLE:
+                    elif param_id == ToneParameter.REFACE_PARAM_TREMOLO_TOGGLE:
                         if self._receive_tremolo_toggle_value is not None:
                             self._receive_tremolo_toggle_value(param_value)
-                    elif param_id == REFACE_PARAM_CHORUS_TOGGLE:
+                    elif param_id == ToneParameter.REFACE_PARAM_CHORUS_TOGGLE:
                         if self._receive_chorus_toggle_value is not None:
                             self._receive_chorus_toggle_value(param_value)
-                    elif param_id == REFACE_PARAM_DELAY_TOGGLE:
+                    elif param_id == ToneParameter.REFACE_PARAM_DELAY_TOGGLE:
                         if self._receive_delay_toggle_value is not None:
                             self._receive_delay_toggle_value(param_value)
 

@@ -147,7 +147,7 @@ Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders.
 If you'd like to receive support, please send your feedback in the form of suggestions or bug reporting using the github issues.
 
 If you’d like to send support for this project or other hundreds of ideas you can bring the drinks using the button below.
-I will happily implement something similar for other synths if I receive enough support or someone gifts me a unit.
+I will happily implement something similar for other synths if I receive enough feedback or someone gifts me a unit.
 
 <a href="https://www.buymeacoffee.com/yannxou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
