@@ -13,6 +13,7 @@ import math
 import threading
 import time
 import Live
+import Live.Application
 import Live.Song
 from .Logger import Logger
 from _Framework.ButtonElement import ButtonElement
@@ -69,6 +70,10 @@ class NavigationController:
             self._logger.log(f"Select track: {selected_track.name}")
 
     def _on_clip_navigation_button_changed(self, value):
+        view = Live.Application.get_application().view
+        if not view.is_view_visible("Detail/Clip"):
+            view.show_view("Detail/Clip")
+
         selected_track = self._song.view.selected_track
         total_clip_slots = len(selected_track.clip_slots)
         if total_clip_slots > 0:
@@ -77,8 +82,13 @@ class NavigationController:
             self._song.view.highlighted_clip_slot = selected_clip_slot
 
     def _on_device_navigation_button_changed(self, value):
+        view = Live.Application.get_application().view
+        if not view.is_view_visible("Detail/DeviceChain"):
+            view.show_view("Detail/DeviceChain")
+
         selected_track = self._song.view.selected_track
         devices = selected_track.devices
+        # TODO: Build list with subdevices from groups?
         total_devices = len(devices)
         if total_devices > 0:
             device_index = int((value / 127.0) * (total_devices - 1))
