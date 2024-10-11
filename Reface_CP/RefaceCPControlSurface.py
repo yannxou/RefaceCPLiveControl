@@ -400,8 +400,10 @@ class RefaceCPControlSurface(ControlSurface):
 
         self._all_controls = []
 
-        # TODO: Restore previous reface midi transmit channel ?
+        # Restore defaults
         self._refaceCP.set_speaker_output(True)
+        self._refaceCP.set_transmit_channel(0)
+
         self._refaceCP.disconnect()
 
         # Calling disconnect on parent sends some MIDI that messes up or resets the reface. Why?
