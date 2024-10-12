@@ -112,9 +112,9 @@ class TransportController:
             self._logger.show_message("[○ ●] Release to toggle metronome. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization. [TAP] Hold+A.")
         elif action == Note.f:
             if self._song.view.selected_track.has_midi_input:
-                self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. 🎹 Hold+A: Select instrument.")
+                self._logger.show_message("⚙︎ Release to toggle device/clip view. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. |←|→| Hold+E/G: Prev/Next track. 🎹 Hold+A: Select instrument.")
             else:
-                self._logger.show_message("⚙︎ Release to toggle device/clip view. |←|→| Hold+E/G: Prev/Next track. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo.")
+                self._logger.show_message("⚙︎ Release to toggle device/clip view. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. |←|→| Hold+E/G: Prev/Next track.")
         elif action == Note.g:
             self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip. [▶..] Hold+E: Fire scene. [←|→] Hold+F/A: Prev/Next clip slot.")
         elif action == Note.a:

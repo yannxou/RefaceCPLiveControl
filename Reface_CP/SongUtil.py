@@ -119,8 +119,8 @@ class SongUtil:
 
         for cue_point in song.cue_points:
             cue_time = cue_point.time
-            if cue_time < current_position:
-                if prev_cue is None or cue_time > prev_cue.time:
+            if cue_time <= current_position:
+                if prev_cue is None or cue_time >= prev_cue.time:
                     prev_cue = cue_point
             elif cue_time > current_position:
                 if next_cue is None or cue_time < next_cue.time:
