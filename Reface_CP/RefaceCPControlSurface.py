@@ -91,7 +91,8 @@ class RefaceCPControlSurface(ControlSurface):
         self._note_repeat_controller = NoteRepeatController(
             self._logger, 
             self._c_instance.note_repeat, 
-            repeat_rate_button=self._delay_time_knob
+            repeat_rate_button=self._delay_time_knob,
+            notes_per_bar_button=self._delay_depth_knob
         )
         self._setup_device_control()
         self._setup_song_listeners()
