@@ -27,6 +27,7 @@ from _Framework.ChannelStripComponent import ChannelStripComponent
 from .RotaryToggleElement import RotaryToggleElement
 from .TransportController import TransportController
 from .NavigationController import NavigationController
+from .NoteRepeatController import NoteRepeatController
 from .Settings import DISABLE_SPEAKER
 
 # Live Routing Category values
@@ -65,12 +66,6 @@ class RefaceCPControlSurface(ControlSurface):
             self._suggested_input_port = MODEL_NAME
             self._suggested_output_port = MODEL_NAME
 
-            self._transport_controller = TransportController(
-                self._logger,
-                self.song(),
-                channel=self._channel
-            )
-
             self._waiting_for_first_response = True
             self.schedule_message(10, self._continue_init) # delay call otherwise it silently fails during init stage
 
@@ -88,6 +83,16 @@ class RefaceCPControlSurface(ControlSurface):
         self._refaceCP.set_speaker_output(not DISABLE_SPEAKER)
         self._refaceCP.request_current_values()
         self._setup_buttons()
+        self._transport_controller = TransportController(
+            self._logger,
+            self.song(),
+            channel=self._channel
+        )
+        self._note_repeat_controller = NoteRepeatController(
+            self._logger, 
+            self._c_instance.note_repeat, 
+            repeat_rate_button=self._delay_time_knob
+        )
         self._setup_device_control()
         self._setup_song_listeners()
         self._setup_channel_strip()
@@ -144,15 +149,12 @@ class RefaceCPControlSurface(ControlSurface):
         self._channel_strip.set_volume_control(self._tremolo_depth_knob)
         self._channel_strip.set_pan_control(self._tremolo_rate_knob)
         self._channel_strip.set_send_controls([self._chorus_depth_knob, self._chorus_speed_knob])
-        mute_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB)
-        self._channel_strip.set_mute_button(mute_button)
-        self._all_controls.append(mute_button)
-        solo_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB)
-        self._channel_strip.set_solo_button(solo_button)
-        self._all_controls.append(solo_button)
-        arm_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB)
-        self._channel_strip.set_arm_button(arm_button)
-        self._all_controls.append(arm_button)
+        self._mute_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB)
+        self._all_controls.append(self._mute_button)
+        self._solo_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB)
+        self._all_controls.append(self._solo_button)
+        self._arm_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB)
+        self._all_controls.append(self._arm_button)
 
     def _setup_navigation_controller(self):
         navigation_controller = NavigationController(
@@ -311,12 +313,25 @@ class RefaceCPControlSurface(ControlSurface):
 
     def _reenable_selected_mode(self):
         if self._delay_toggle_value == REFACE_TOGGLE_DOWN:
+            self._note_repeat_controller.set_enabled(False)
             self.disable_track_mode()
             self._device.set_parameter_controls(None)
             self._transport_controller.set_enabled(True)
             self._navigation_controller.set_enabled(True)
             self._logger.show_message("Transport/Navigation mode enabled.")
+        
+        elif self._delay_toggle_value == REFACE_TOGGLE_UP:
+            self.disable_track_mode()
+            self._unlock_from_device()
+            self._device.set_parameter_controls(None)
+            self.set_device_component(None)
+            self._transport_controller.set_enabled(False)
+            self._navigation_controller.set_enabled(False)
+            self._note_repeat_controller.set_enabled(True)
+            self._logger.show_message("Note repeat enabled.")
+
         else:
+            self._note_repeat_controller.set_enabled(False)
             self._transport_controller.set_enabled(False)
             self._navigation_controller.set_enabled(False)
 
@@ -358,11 +373,17 @@ class RefaceCPControlSurface(ControlSurface):
         self.disable_track_mode()
         self._drive_knob.connect_to(self._selected_parameter)
         self._channel_strip.set_track(self._selected_track)
+        self._channel_strip.set_mute_button(self._mute_button)
+        self._channel_strip.set_solo_button(self._solo_button)
+        self._channel_strip.set_arm_button(self._arm_button)
 
     def disable_track_mode(self):
         for element in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
             element.connect_to(None)
         self._channel_strip.set_track(None)
+        self._channel_strip.set_mute_button(None)
+        self._channel_strip.set_solo_button(None)
+        self._channel_strip.set_arm_button(None)
 
 # -- Navigation/Transport Mode
 
@@ -392,6 +413,7 @@ class RefaceCPControlSurface(ControlSurface):
         self.disable_track_mode()
         self._transport_controller.disconnect()
         self._navigation_controller.disconnect()
+        self._note_repeat_controller.disconnect()
 
         self._type_select_button.remove_value_listener(self._reface_type_select_changed)
         self._tremolo_toggle_button.remove_value_listener(self._reface_tremolo_toggle_changed)
