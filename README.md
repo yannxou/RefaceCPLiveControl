@@ -138,6 +138,15 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + A# to set the loop between the nearest cue points.
 * Press and hold + use the white keys to change the loop start position according to the distance between the first key (G) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 
+### D.Delay switch:
+
+Enables the **Note repeat mode**. In this mode, the MIDI notes from the keyboard are repeated automatically while they're pressed. Once enabled, the knobs control some settings for the note repeat:
+
+* **Delay Time**: Sets the note repeat rate.
+
+*TODO: Add image*
+
+
 ## Constraints
 
 Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders. It's also a pity that the Type knob is not an endless encoder. This limits the possibilities of what could be achieved when used as a controller but I hope this still brings a new dimension to your great Reface CP. 
