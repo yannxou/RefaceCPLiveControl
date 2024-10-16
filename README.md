@@ -142,14 +142,22 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 
 Enables the **Note repeat mode**. In this mode, the MIDI notes from the keyboard are repeated automatically while they're pressed. Once enabled, the knobs control some settings for the note repeat:
 
-* **Delay Time**: Sets the note repeat rate.
+* **Delay Time**: Sets the note repeat rate using fixed values from 1/32T to 1 bar.
 
-*TODO: Add image*
+* **Delay Depth**: Sets the note repeat rate by specifying the number of notes per bar.
+
+<p align="center">
+	<img src="Images/note_repeat.jpg" alt="Note Repeat Mode" width="50%" />
+</p>
 
 
 ## Constraints
 
 Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders. It's also a pity that the Type knob is not an endless encoder. This limits the possibilities of what could be achieved when used as a controller but I hope this still brings a new dimension to your great Reface CP. 
+
+## Troubleshooting
+
+In case your Reface CP does not produce any sound after using the script you can restore it to factory defaults by holding down the right-most C-key on the keyboard while pressing the Power (Standby/On) switch. This could happen in case of application crash or if the device is disconnected before closing Live. To avoid this, make sure Live application is closed before turning off the Reface. The script will restore the settings (like the speaker output) automatically when closing.
 
 ## Support
 
