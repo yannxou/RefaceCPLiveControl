@@ -1,17 +1,12 @@
 .EXPORT_ALL_VARIABLES:
 .NOTPARALLEL:
 
-ABLETON_APP_DIR            := /Applications/Ableton Live 12 Suite.app
 ABLETON_PREFS_DIR          := $(HOME)/Library/Preferences/Ableton/Live 12.1
 SOURCE_SCRIPT_DIR          := ./Reface_CP
-TARGET_SCRIPT_DIR          := $(ABLETON_APP_DIR)/Contents/App-Resources/MIDI Remote Scripts
+TARGET_SCRIPT_DIR          := $(HOME)/Music/Ableton/User Library/Remote Scripts
 
 
 define HELP_BODY
-\033[31mMake sure the following constants from this file point to the correct Live installation folder:\033[0m
-* ABLETON_APP_DIR=$(ABLETON_APP_DIR)
-* ABLETON_PREFS_DIR=$(ABLETON_PREFS_DIR)
-
 \033[1mall\033[0m
     Cleans log and updates the script.
 

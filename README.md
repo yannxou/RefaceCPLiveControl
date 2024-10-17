@@ -11,7 +11,7 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
    
 2. Place the remote script folder called `RefaceCP` (the folder you found this README.md in) into the `Remote Scripts` from previous step.
 
-You can also do this automatically with the `make install` command after setting the correct Live installation path in the `Makefile`.
+This can also be done automatically with the `make install` command.
 
 ## Controls
 
