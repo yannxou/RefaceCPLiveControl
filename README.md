@@ -13,6 +13,8 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
 
 This can also be done automatically with the `make install` command.
 
+For more help, see [Installing third-party remote scripts](https://help.ableton.com/hc/en-us/articles/209072009-Installing-third-party-remote-scripts) from Ableton.
+
 ## Controls
 
 ### Wave type knob:
