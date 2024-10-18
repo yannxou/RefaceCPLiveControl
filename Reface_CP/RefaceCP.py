@@ -75,17 +75,11 @@ class RefaceCP:
 
     def __init__(self, logger: Logger, send_midi,
                  on_device_identified = None,
-                 receive_type_value = None,
-                 receive_tremolo_toggle_value = None,
-                 receive_chorus_toggle_value = None,
-                 receive_delay_toggle_value = None):
+                 receive_tone_parameter = None):
         self._logger = logger
         self._send_midi = send_midi
         self._on_device_identified = on_device_identified
-        self._receive_type_value = receive_type_value
-        self._receive_tremolo_toggle_value = receive_tremolo_toggle_value
-        self._receive_chorus_toggle_value = receive_chorus_toggle_value
-        self._receive_delay_toggle_value = receive_delay_toggle_value
+        self._receive_tone_parameter = receive_tone_parameter
         self._device_number = 0x00
         self._is_identified = False
 
@@ -158,18 +152,8 @@ class RefaceCP:
                     param_id = midi_bytes[-3]
                     param_value = midi_bytes[-2]
                     self._logger.log(f"parameter sysex response. id: {param_id}, value: {param_value}")
-                    if param_id == ToneParameter.REFACE_PARAM_TYPE:
-                        if self._receive_type_value is not None:
-                            self._receive_type_value(param_value)
-                    elif param_id == ToneParameter.REFACE_PARAM_TREMOLO_TOGGLE:
-                        if self._receive_tremolo_toggle_value is not None:
-                            self._receive_tremolo_toggle_value(param_value)
-                    elif param_id == ToneParameter.REFACE_PARAM_CHORUS_TOGGLE:
-                        if self._receive_chorus_toggle_value is not None:
-                            self._receive_chorus_toggle_value(param_value)
-                    elif param_id == ToneParameter.REFACE_PARAM_DELAY_TOGGLE:
-                        if self._receive_delay_toggle_value is not None:
-                            self._receive_delay_toggle_value(param_value)
+                    if self._receive_tone_parameter is not None:
+                        self._receive_tone_parameter(param_id, param_value)
 
 # ---
 

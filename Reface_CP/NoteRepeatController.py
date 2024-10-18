@@ -45,25 +45,29 @@ class NoteRepeatController:
         self._notes_per_bar_button = notes_per_bar_button
 
     def set_enabled(self, enabled):
-        if self._enabled == enabled:
-            return
-        if enabled:
-            self._setup_button_listeners()
-        else:
-            self._disable_button_listeners()
+        """Enables/Disables the note repeat functionality."""
         self._note_repeat.enabled = enabled
         self._enabled = enabled
+        self.set_controls_enabled(enabled)
+
+    def set_controls_enabled(self, enabled):
+        """Enables the buttons for controlling the note repeat parameters."""
+        if enabled:
+            if self._enabled:
+                self._setup_button_listeners()
+        else:
+            self._disable_button_listeners()
 
     def _setup_button_listeners(self):
-        if self._repeat_rate_button:
+        if self._repeat_rate_button and not self._repeat_rate_button.value_has_listener(self._on_repeat_rate_button_changed):
             self._repeat_rate_button.add_value_listener(self._on_repeat_rate_button_changed)
-        if self._notes_per_bar_button:
+        if self._notes_per_bar_button and not self._notes_per_bar_button.value_has_listener(self._on_notes_per_bar_button_changed):
             self._notes_per_bar_button.add_value_listener(self._on_notes_per_bar_button_changed)
 
     def _disable_button_listeners(self):
-        if self._repeat_rate_button:
+        if self._repeat_rate_button and self._repeat_rate_button.value_has_listener(self._on_repeat_rate_button_changed):
             self._repeat_rate_button.remove_value_listener(self._on_repeat_rate_button_changed)
-        if self._notes_per_bar_button:
+        if self._notes_per_bar_button and self._notes_per_bar_button.value_has_listener(self._on_notes_per_bar_button_changed):
             self._notes_per_bar_button.remove_value_listener(self._on_notes_per_bar_button_changed)
 
     def _on_repeat_rate_button_changed(self, value):
