@@ -152,6 +152,7 @@ Enables the **Note repeat mode**. In this mode, the MIDI notes from the keyboard
 	<img src="Images/note_repeat.jpg" alt="Note Repeat Mode" width="50%" />
 </p>
 
+Selecting the track/device mode after enabling the note repeat allows using the knobs for automation and the note repeat functionality at the same time. To change the note repeat settings again using the knobs it needs to be disabled and enabled again.
 
 ## Constraints
 
