@@ -277,6 +277,7 @@ class TransportController:
                     self._song.view.selected_track = all_tracks[current_index + 1]
 
             elif subaction == Note.a and is_same_octave and selected_track.has_midi_input:
+                Live.Application.get_application().view.show_view("Detail/DeviceChain")
                 selected_track.view.select_instrument()
             
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
