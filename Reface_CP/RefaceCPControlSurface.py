@@ -240,7 +240,6 @@ class RefaceCPControlSurface(ControlSurface):
             self._waiting_for_first_response = False
             self._suppress_send_midi = False
         else:
-            # Only do this once initialized to not interfere with saved state from Live Set
             self._arm_tracks_for_channel(channel, select=True)
 
         self._channel = channel

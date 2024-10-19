@@ -37,12 +37,13 @@ class TransportController:
         self._current_action_skips_ending = False
         self._action_timer = None
         self._locked_device = None
+        self._setup_buttons()
 
     def set_enabled(self, enabled):
         if self._enabled == enabled:
             return
         if enabled:
-            self._setup_transport_keys()
+            self._enable_transport_keys()
         else:
             self._disable_transport_keys()
         self._enabled = enabled
@@ -57,21 +58,23 @@ class TransportController:
 
 # - Private
 
-    def _setup_transport_keys(self):
+    def _setup_buttons(self):
+        for index in range(127):
+            button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
+            self._note_key_buttons.append(button)
+
+    def _enable_transport_keys(self):
         self._logger.log("Transport keys mode enabled.")
         self._disable_transport_keys(debug=False)
         # Enable note key listeners
-        for index in range(127):
-            button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
+        for button in self._note_key_buttons:
             button.add_value_listener(self._on_note_key, identify_sender=True)
-            self._note_key_buttons.append(button)
 
     def _disable_transport_keys(self, debug=True):
         if debug:
             self._logger.log("Transport keys mode disabled.")
         for button in self._note_key_buttons:
             button.remove_value_listener(self._on_note_key)
-        self._note_key_buttons = []
         self._pressed_keys = []
 
     def _on_note_key(self, value, sender):
