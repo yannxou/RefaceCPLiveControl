@@ -112,6 +112,10 @@ class RefaceCPControlSurface(ControlSurface):
         if self.is_navigation_mode_enabled:
             self._enable_navigation_mode()
         else:
+            if self.is_note_repeat_enabled:
+                self._note_repeat_controller.set_enabled(True)
+                self._note_repeat_controller.set_controls_enabled(False)
+
             if self.is_track_mode_enabled:
                 self._enable_track_mode()
             elif self.is_device_lock_mode_enabled:
@@ -244,7 +248,6 @@ class RefaceCPControlSurface(ControlSurface):
         for control in self._all_controls:
             control.set_channel(channel)
         self._transport_controller.set_channel(channel)
-        # self._reenable_selected_mode()
 
     def _set_chorus_toggle(self, value):
         self._logger.log(f"_set_chorus_toggle: {value}")
@@ -342,9 +345,9 @@ class RefaceCPControlSurface(ControlSurface):
         # self._logger.log(f"_set_tremolo_toggle: {value}")
         if self._tremolo_toggle_value == value:
             return
+        self._tremolo_toggle_value = value
 
         if self.is_navigation_mode_enabled: # Navigation mode prevails over other modes
-            self._tremolo_toggle_value = value
             return
         
         self._note_repeat_controller.set_controls_enabled(False)
@@ -361,7 +364,6 @@ class RefaceCPControlSurface(ControlSurface):
         else:
             self._enable_device_follow_mode()
 
-        self._tremolo_toggle_value = value
         self.request_rebuild_midi_map()
 
     @property
@@ -407,12 +409,17 @@ class RefaceCPControlSurface(ControlSurface):
 
     @property
     def is_navigation_mode_enabled(self):
-        self._delay_toggle_value == REFACE_TOGGLE_DOWN
+        return self._delay_toggle_value == REFACE_TOGGLE_DOWN
+
+    @property
+    def is_note_repeat_enabled(self):
+        return self._delay_toggle_value == REFACE_TOGGLE_UP
 
     def _set_delay_toggle(self, value):
         self._logger.log(f"_set_delay_toggle: {value}")
         if self._delay_toggle_value == value:
             return
+        self._delay_toggle_value = value
 
         if value == REFACE_TOGGLE_UP:
             self.disable_track_mode()
@@ -432,8 +439,6 @@ class RefaceCPControlSurface(ControlSurface):
             self._transport_controller.set_enabled(False)
             self._navigation_controller.set_enabled(False)
             self._check_current_mode()
-
-        self._delay_toggle_value = value
         
     def _enable_navigation_mode(self):
         self._note_repeat_controller.set_enabled(False)
