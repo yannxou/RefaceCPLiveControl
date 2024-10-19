@@ -28,7 +28,6 @@ from .RotaryToggleElement import RotaryToggleElement
 from .TransportController import TransportController
 from .NavigationController import NavigationController
 from .NoteRepeatController import NoteRepeatController
-from .Settings import DISABLE_SPEAKER
 
 # Live Routing Category values
 ROUTING_CATEGORY_NONE = 6
@@ -76,7 +75,7 @@ class RefaceCPControlSurface(ControlSurface):
     def _on_device_identified(self):
         self._logger.log("RefaceCP Identification Succeeded.")
         self._refaceCP.set_midi_control(True)
-        self._refaceCP.set_speaker_output(not DISABLE_SPEAKER)
+        self._refaceCP.set_speaker_output(False)
         self._setup_buttons()
         self._setup_song_listeners()
         self._setup_channel_strip()
