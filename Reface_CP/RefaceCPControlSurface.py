@@ -67,6 +67,7 @@ class RefaceCPControlSurface(ControlSurface):
 
             self._logger.log("RefaceCP Init.")
 
+
 # --- Setup
 
     def _continue_init(self):
@@ -106,22 +107,6 @@ class RefaceCPControlSurface(ControlSurface):
 
         if self._is_initialized:
             self._check_current_mode()
-
-    def _check_current_mode(self):
-        if self.is_navigation_mode_enabled:
-            self._enable_navigation_mode()
-        else:
-            if self.is_note_repeat_enabled:
-                self._note_repeat_controller.set_enabled(True)
-                self._note_repeat_controller.set_controls_enabled(False)
-
-            if self.is_track_mode_enabled:
-                self._enable_track_mode()
-            elif self.is_device_lock_mode_enabled:
-                self._enable_device_lock_mode()
-            else:
-                self._enable_device_follow_mode()
-            
 
     def _setup_buttons(self):
         self._type_select_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, TYPE_SELECT_KNOB)
@@ -247,10 +232,6 @@ class RefaceCPControlSurface(ControlSurface):
             control.set_channel(channel)
         self._transport_controller.set_channel(channel)
 
-    def _set_chorus_toggle(self, value):
-        self._logger.log(f"_set_chorus_toggle: {value}")
-        self._chorus_toggle_value = value
-
 # --- Listeners
 
     @subject_slot('device')
@@ -268,6 +249,7 @@ class RefaceCPControlSurface(ControlSurface):
         channel = reface_type_map.get(value, 0)
         self._logger.log(f"Type changed: {value} -> {channel}")
         self.set_channel(channel)
+        self._check_device_track_modes()
 
     def _reface_tremolo_toggle_changed(self, value):
         self._set_tremolo_toggle(reface_toggle_map.get(value, REFACE_TOGGLE_OFF))
@@ -337,6 +319,23 @@ class RefaceCPControlSurface(ControlSurface):
 
 # -- Modes
 
+    def _check_current_mode(self):
+        if self.is_navigation_mode_enabled:
+            self._enable_navigation_mode()
+        else:
+            if self.is_note_repeat_enabled:
+                self._note_repeat_controller.set_enabled(True)
+                self._note_repeat_controller.set_controls_enabled(False)
+            self._check_device_track_modes()
+            
+    def _check_device_track_modes(self):
+        if self.is_navigation_mode_enabled:
+            return
+        if self.is_track_mode_enabled:
+            self._enable_track_mode()
+        elif self.is_device_follow_mode_enabled:
+            self._enable_device_follow_mode()
+
 # -- Track mode
 
     def _set_tremolo_toggle(self, value):        
@@ -367,6 +366,10 @@ class RefaceCPControlSurface(ControlSurface):
     @property
     def is_track_mode_enabled(self):
         return self._tremolo_toggle_value == REFACE_TOGGLE_DOWN and not self.is_navigation_mode_enabled
+
+    @property
+    def is_device_follow_mode_enabled(self):
+        return self._tremolo_toggle_value == REFACE_TOGGLE_OFF and not self.is_navigation_mode_enabled
 
     @property
     def is_device_lock_mode_enabled(self):
@@ -402,6 +405,14 @@ class RefaceCPControlSurface(ControlSurface):
         self._channel_strip.set_mute_button(None)
         self._channel_strip.set_solo_button(None)
         self._channel_strip.set_arm_button(None)
+
+    def _set_chorus_toggle(self, value):
+        self._logger.log(f"_set_chorus_toggle: {value}")
+        self._chorus_toggle_value = value
+
+        if value == REFACE_TOGGLE_UP:
+            pass
+        
 
 # -- Navigation/Transport Mode
 
