@@ -28,6 +28,7 @@ from .RotaryToggleElement import RotaryToggleElement
 from .TransportController import TransportController
 from .NavigationController import NavigationController
 from .NoteRepeatController import NoteRepeatController
+from .ScaleModeController import ScaleModeController
 
 # Live Routing Category values
 ROUTING_CATEGORY_NONE = 6
@@ -91,6 +92,11 @@ class RefaceCPControlSurface(ControlSurface):
             self._c_instance.note_repeat, 
             repeat_rate_button=self._delay_time_knob,
             notes_per_bar_button=self._delay_depth_knob
+        )
+        self._scale_controller = ScaleModeController(
+            self._logger,
+            song=self.song(),
+            root_note_button=self._chorus_depth_knob
         )
         self._setup_device_control()
         self._refaceCP.request_current_values()
@@ -231,6 +237,7 @@ class RefaceCPControlSurface(ControlSurface):
         for control in self._all_controls:
             control.set_channel(channel)
         self._transport_controller.set_channel(channel)
+        self._scale_controller.set_channel(channel)
 
 # --- Listeners
 
@@ -326,6 +333,8 @@ class RefaceCPControlSurface(ControlSurface):
             if self.is_note_repeat_enabled:
                 self._note_repeat_controller.set_enabled(True)
                 self._note_repeat_controller.set_controls_enabled(False)
+            if self.is_scale_mode_enabled:
+                self._scale_controller.set_play_mode_enabled(True, enable_controls=False)
             self._check_device_track_modes()
             
     def _check_device_track_modes(self):
@@ -348,6 +357,7 @@ class RefaceCPControlSurface(ControlSurface):
             return
         
         self._note_repeat_controller.set_controls_enabled(False)
+        self._scale_controller.set_controls_enabled(False)
 
         if value == REFACE_TOGGLE_UP:
             self.disable_track_mode()
@@ -406,12 +416,23 @@ class RefaceCPControlSurface(ControlSurface):
         self._channel_strip.set_solo_button(None)
         self._channel_strip.set_arm_button(None)
 
+# -- Scale Mode
+
+    @property
+    def is_scale_mode_enabled(self):
+        return self._chorus_toggle_value == REFACE_TOGGLE_UP
+
     def _set_chorus_toggle(self, value):
         self._logger.log(f"_set_chorus_toggle: {value}")
         self._chorus_toggle_value = value
 
         if value == REFACE_TOGGLE_UP:
-            pass
+            self._note_repeat_controller.set_controls_enabled(False)
+            self.disable_track_mode()
+            self._device.set_parameter_controls(None)
+            self._scale_controller.set_enabled(True)
+        else:
+            self._scale_controller.set_enabled(False)
         
 
 # -- Navigation/Transport Mode
@@ -437,6 +458,7 @@ class RefaceCPControlSurface(ControlSurface):
             self.set_device_component(None)
             self._transport_controller.set_enabled(False)
             self._navigation_controller.set_enabled(False)
+            self._scale_controller.set_controls_enabled(False)
             self._note_repeat_controller.set_enabled(True)
             self._logger.show_message("Note repeat enabled.")
 
@@ -451,6 +473,7 @@ class RefaceCPControlSurface(ControlSurface):
         
     def _enable_navigation_mode(self):
         self._note_repeat_controller.set_enabled(False)
+        self._scale_controller.set_enabled(False)
         self.disable_track_mode()
         self._device.set_parameter_controls(None)
         self._transport_controller.set_enabled(True)
@@ -479,6 +502,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._transport_controller.disconnect()
         self._navigation_controller.disconnect()
         self._note_repeat_controller.disconnect()
+        self._scale_controller.disconnect()
 
         self._type_select_button.remove_value_listener(self._reface_type_select_changed)
         self._tremolo_toggle_button.remove_value_listener(self._reface_tremolo_toggle_changed)
