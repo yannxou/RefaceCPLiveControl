@@ -22,17 +22,20 @@ class ScaleModeController:
                  logger: Logger,
                  song: Live.Song.Song,
                  channel = 0,
-                 root_note_button = None
+                 root_note_button = None,
+                 scale_mode_button = None
                  ):
         self._logger = logger
         self._enabled = False
         self._song = song
         self._channel = channel
         self._root_note_button = root_note_button
+        self._scale_mode_button = scale_mode_button
         self._note_key_buttons = []
         self._pressed_keys = []
         self._current_root_note = -1
         self._current_scale_intervals = None
+        self._all_scales = Live.Song.get_all_scales_ordered()
         self._setup_song_listeners()
         for index in range(128):
             button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
@@ -98,10 +101,14 @@ class ScaleModeController:
     def _setup_button_listeners(self):
         if self._root_note_button and not self._root_note_button.value_has_listener(self._on_root_note_button_changed):
             self._root_note_button.add_value_listener(self._on_root_note_button_changed)
+        if self._scale_mode_button and not self._scale_mode_button.value_has_listener(self._on_scale_mode_button_changed):
+            self._scale_mode_button.add_value_listener(self._on_scale_mode_button_changed)
 
     def _remove_button_listeners(self):
         if self._root_note_button and self._root_note_button.value_has_listener(self._on_root_note_button_changed):
             self._root_note_button.remove_value_listener(self._on_root_note_button_changed)
+        if self._scale_mode_button and self._scale_mode_button.value_has_listener(self._on_scale_mode_button_changed):
+            self._scale_mode_button.remove_value_listener(self._on_scale_mode_button_changed)
 
     def _on_root_note_button_changed(self, value):
         total_notes = 12
@@ -109,6 +116,11 @@ class ScaleModeController:
         if note != self._song.root_note:
             self._song.root_note = note
             # self._logger.show_message(f"Scale root: {note}")
+
+    def _on_scale_mode_button_changed(self, value):
+        total_scales = len(self._all_scales)
+        scale_index = int((value / 127.0) * (total_scales - 1))
+        self._song.scale_name = self._all_scales[scale_index][0]
 
     def _on_root_note_changed(self):
         if self._enabled:

@@ -96,7 +96,8 @@ class RefaceCPControlSurface(ControlSurface):
         self._scale_controller = ScaleModeController(
             self._logger,
             song=self.song(),
-            root_note_button=self._chorus_depth_knob
+            root_note_button=self._chorus_depth_knob,
+            scale_mode_button=self._chorus_speed_knob
         )
         self._setup_device_control()
         self._refaceCP.request_current_values()
