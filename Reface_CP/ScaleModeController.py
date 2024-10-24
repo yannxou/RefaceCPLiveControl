@@ -53,7 +53,7 @@ class ScaleModeController:
         """Enables/Disables the scale play mode functionality."""
         self._enabled = enabled
         if enabled:
-            self._logger.log("Scale play mode enabled.")
+            # self._logger.log("Scale play mode enabled.")
             self._update_play_mode_key_listeners()
             self.set_controls_enabled(enable_controls)
 
@@ -115,7 +115,6 @@ class ScaleModeController:
         note = int((value / 127.0) * (total_notes - 1))
         if note != self._song.root_note:
             self._song.root_note = note
-            # self._logger.show_message(f"Scale root: {note}")
 
     def _on_scale_mode_button_changed(self, value):
         total_scales = len(self._all_scales)

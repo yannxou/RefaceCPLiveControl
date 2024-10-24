@@ -432,6 +432,7 @@ class RefaceCPControlSurface(ControlSurface):
             self.disable_track_mode()
             self._device.set_parameter_controls(None)
             self._scale_controller.set_enabled(True)
+            self._logger.show_message("Scale mode enabled.")
         else:
             self._scale_controller.set_enabled(False)
         
