@@ -81,7 +81,7 @@ class ScaleModeController:
         if self._current_root_note == root_note and self._current_scale_intervals == scale_intervals:
             return
 
-        self._logger.log(f"intervals: {list(scale_intervals)}")
+        # self._logger.log(f"intervals: {list(scale_intervals)}")
         for midi_note in range(128):
             button = self._note_key_buttons[midi_note]
             is_matching = (12 + midi_note - root_note) % 12 in scale_intervals

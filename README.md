@@ -46,6 +46,18 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 	<img src="Images/track_mode.jpg" alt="Track Mode" width="50%" />
 </p>
 
+### Chorus switch:
+
+Enables the **Scale mode**. In this mode only the note keys that are part of the current scale will reach Live's input.
+
+* **Chorus Depth**: Root note. Move the knob to select the current root note.
+
+* **Chorus Speed**: Scale mode. Move the knob to select the current scale mode.
+
+<p align="center">
+	<img src="Images/scale_mode.jpg" alt="Scale Mode" width="50%" />
+</p>
+
 ### A.Delay switch:
 
 Enables the **Navigation/Transport mode**. In this mode the knobs are used for navigation and the note keys for transport actions and more.
@@ -157,6 +169,13 @@ Selecting the track/device mode after enabling the note repeat allows using the 
 ## Constraints
 
 Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders. It's also a pity that the Type knob is not an endless encoder. This limits the possibilities of what could be achieved when used as a controller but I hope this still brings a new dimension to your great Reface CP. 
+
+Control surface scripting in Ableton Live can be very powerful but I found some limitations that I wish are added in the future. For instance:
+
+* Being able to define a mapping of MIDI notes so a particular MIDI note key is processed in Live's input as another MIDI note. That'd be a better way to implement a scale mode for a keyboard where notes outside a given scale would be mapped to another note in that scale. Muting those notes (by capturing their events in the script) is the only way I've been able to do this.
+
+* Integrated MIDI effect chain. Similarly to how the `note_repeat` works, it would be awesome to have access to standard MIDI effects like velocity, note repeat, arpeggiator, etc so they could be configured from the script and the chain's output sent to Live to record the notes directly. This feature actually would solve the need for the previous point by just having access to a scale device.
+
 
 ## Troubleshooting
 
