@@ -78,9 +78,6 @@ class ScaleModeController:
         """Updates the note key listeners so notes not corresponding to the current scale mode are captured by the script (thus silenced)"""
         root_note = self._song.root_note
         scale_intervals = self._song.scale_intervals
-        if self._current_root_note == root_note and self._current_scale_intervals == scale_intervals:
-            return
-
         # self._logger.log(f"intervals: {list(scale_intervals)}")
         for midi_note in range(128):
             button = self._note_key_buttons[midi_note]
@@ -123,11 +120,15 @@ class ScaleModeController:
 
     def _on_root_note_changed(self):
         if self._enabled:
+            if self._current_root_note == self._song.root_note and self._current_scale_intervals == self._song.scale_intervals:
+                return
             self._update_play_mode_key_listeners()
         self._current_root_note = self._song.root_note
         
     def _on_scale_intervals_changed(self):
         if self._enabled:
+            if self._current_root_note == self._song.root_note and self._current_scale_intervals == self._song.scale_intervals:
+                return
             self._update_play_mode_key_listeners()
         self._current_scale_intervals = self._song.scale_intervals
 
