@@ -2,6 +2,29 @@
 
 RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Reface CP keyboard.
 
+## Table of Contents
+
+1. [Installation](#installation)
+2. [Controls](#controls)
+   1. [Wave type knob (MIDI Channel Change)](#wave-type-knob)
+   2. [Tremolo/Wah toggle (Device control)](#tremolowah-toggle)
+   3. [Chorus toggle (Scale mode)](#chorus-toggle)
+   4. [D.Delay toggle (Note repeat)](#ddelay-toggle)
+   5. [A.Delay toggle (Navigation/Transport mode)](#adelay-toggle)
+      1. [C  (*Stop actions*)](#c--stop-actions)
+	  2. [C# (*Recording actions*)](#c--recording-actions)
+	  3. [D  (*Play actions*)](#d--play-actions)
+	  4. [E  (*Tempo actions*)](#e--tempo-actions)
+	  5. [F  (*Track actions*)](#f--track-actions)
+	  6. [G  (*Clip actions*)](#g--clip-actions)
+	  7. [A  (*Device actions*)](#a--device-actions)
+	  8. [A# (*Edit actions*)](#a--edit-actions)
+	  9. [B  (*Loop actions*)](#b--loop-actions)
+3. [Constraints](#constraints)
+4. [Troubleshooting](#troubleshooting)
+5. [Support](#support)
+6. [Links](#links)
+
 ## Installation
 
 1. Manually create a folder called `Remote Scripts` within your User Library if it does not already exist. The default User Library locations are:
@@ -25,7 +48,7 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 
 *Note*: When mapping a control or key from the Reface using the custom user mapping Live overrides any special behaviour added by the script but in this case its functionality can still be reached by changing to any of the remaining unmapped MIDI channels for that control. Just prevent MIDI mapping the `type` knob so the channel can be changed.
 
-### Tremolo/Wah switch:
+### Tremolo/Wah toggle:
 
 * **Off**: When the switch is in the middle position (off), the 8 right-most knobs follow and control the selected device.
 
@@ -46,7 +69,7 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 	<img src="Images/track_mode.jpg" alt="Track Mode" width="50%" />
 </p>
 
-### Chorus switch:
+### Chorus toggle:
 
 Enables the **Scale mode**. In this mode only the note keys that are part of the current scale will reach Live's input.
 
@@ -58,7 +81,21 @@ Enables the **Scale mode**. In this mode only the note keys that are part of the
 	<img src="Images/scale_mode.jpg" alt="Scale Mode" width="50%" />
 </p>
 
-### A.Delay switch:
+### D.Delay toggle:
+
+Enables the **Note repeat mode**. In this mode, the MIDI notes from the keyboard are repeated automatically while they're pressed. Once enabled, the knobs control some settings for the note repeat:
+
+* **Delay Time**: Sets the note repeat rate using fixed values from 1/32T to 1 bar.
+
+* **Delay Depth**: Sets the note repeat rate by specifying the number of notes per bar.
+
+<p align="center">
+	<img src="Images/note_repeat.jpg" alt="Note Repeat Mode" width="50%" />
+</p>
+
+Selecting the track/device mode after enabling the note repeat allows using the knobs for automation and the note repeat functionality at the same time. To change the note repeat settings again using the knobs it needs to be disabled and enabled again.
+
+### A.Delay toggle:
 
 Enables the **Navigation/Transport mode**. In this mode the knobs are used for navigation and the note keys for transport actions and more.
 
@@ -152,20 +189,6 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + A# to set the loop between the nearest cue points.
 * Press and hold + use the white keys to change the loop start position according to the distance between the first key (G) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 
-### D.Delay switch:
-
-Enables the **Note repeat mode**. In this mode, the MIDI notes from the keyboard are repeated automatically while they're pressed. Once enabled, the knobs control some settings for the note repeat:
-
-* **Delay Time**: Sets the note repeat rate using fixed values from 1/32T to 1 bar.
-
-* **Delay Depth**: Sets the note repeat rate by specifying the number of notes per bar.
-
-<p align="center">
-	<img src="Images/note_repeat.jpg" alt="Note Repeat Mode" width="50%" />
-</p>
-
-Selecting the track/device mode after enabling the note repeat allows using the knobs for automation and the note repeat functionality at the same time. To change the note repeat settings again using the knobs it needs to be disabled and enabled again.
-
 ## Constraints
 
 Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders. It's also a pity that the Type knob is not an endless encoder. This limits the possibilities of what could be achieved when used as a controller but I hope this still brings a new dimension to your great Reface CP. 
@@ -175,7 +198,6 @@ Control surface scripting in Ableton Live can be very powerful but I found some 
 * Being able to define a mapping of MIDI notes so a particular MIDI note key is processed in Live's input as another MIDI note. That'd be a better way to implement a scale mode for a keyboard where notes outside a given scale would be mapped to another note in that scale. Muting those notes (by capturing their events in the script) is the only way I've been able to do this.
 
 * Integrated MIDI effect chain. Similarly to how the `note_repeat` works, it would be awesome to have access to standard MIDI effects like velocity, note repeat, arpeggiator, etc so they could be configured from the script and the chain's output sent to Live to record the notes directly. This feature actually would solve the need for the previous point by just having access to a scale device.
-
 
 ## Troubleshooting
 
