@@ -187,7 +187,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + F# to decrease the loop length.
 * Press and hold + G# to increase the loop length.
 * Press and hold + A# to set the loop between the nearest cue points.
-* Press and hold + use the white keys to change the loop start position according to the distance between the first key (G) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
+* Press and hold + use the white keys to change the loop start position according to the distance between the first key (B) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 
 ## Constraints
 
