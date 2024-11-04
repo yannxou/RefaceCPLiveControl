@@ -61,7 +61,7 @@ class NavigationController:
 
     def _on_track_navigation_button_changed(self, value):
         # self._logger.log(f"_on_track_navigation_button_change: {value}")
-        all_tracks = list(self._song.tracks) + list(self._song.return_tracks) + [self._song.master_track]
+        all_tracks = list(self._song.visible_tracks) + list(self._song.return_tracks) + [self._song.master_track]
         total_tracks = len(all_tracks)
         track_index = int((value / 127.0) * (total_tracks - 1))
         selected_track = all_tracks[track_index]

@@ -269,7 +269,7 @@ class TransportController:
                     selected_track.solo = not selected_track.solo
 
             elif (subaction == Note.e or subaction == Note.g) and is_same_octave:
-                all_tracks = self._song.tracks + self._song.return_tracks + (self._song.master_track,)
+                all_tracks = self._song.visible_tracks + self._song.return_tracks + (self._song.master_track,)
                 current_index = list(all_tracks).index(selected_track)
                 if subaction == Note.e and current_index > 0:
                     self._song.view.selected_track = all_tracks[current_index - 1]
