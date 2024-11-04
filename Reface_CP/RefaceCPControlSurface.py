@@ -417,6 +417,10 @@ class RefaceCPControlSurface(ControlSurface):
         self._channel_strip.set_solo_button(self._solo_button)
         self._channel_strip.set_arm_button(self._arm_button)
         self._send_midi((0xB0, TREMOLO_WAH_TOGGLE, 127))  # Update led in device since we disabled local control
+        if self._selected_track.can_be_armed:
+            self._send_midi((0xB0, REVERB_DEPTH_KNOB, 127 if self._selected_track.arm else 0))
+        else:
+            self._send_midi((0xB0, REVERB_DEPTH_KNOB, 0))
 
     def disable_track_mode(self):
         for element in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
