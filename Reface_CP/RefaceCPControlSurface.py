@@ -351,6 +351,8 @@ class RefaceCPControlSurface(ControlSurface):
             self._enable_track_mode()
         elif self.is_device_follow_mode_enabled:
             self._enable_device_follow_mode()
+        elif self._locked_device is not None:
+            self._send_midi((0xB0, TREMOLO_WAH_TOGGLE, 64))
 
 # -- Track mode
 
@@ -497,7 +499,11 @@ class RefaceCPControlSurface(ControlSurface):
         self._transport_controller.set_enabled(True)
         self._navigation_controller.set_enabled(True)
         self._logger.show_message("Transport/Navigation mode enabled.")
-        self._send_midi((0xB0, DELAY_TOGGLE, 127))  # Update led in device since we disabled local control
+        # Update device leds:
+        self._send_midi((0xB0, DELAY_TOGGLE, 127))  
+        self._send_midi((0xB0, CHORUS_PHASER_TOGGLE, 0))
+        self._send_midi((0xB0, TREMOLO_WAH_TOGGLE, 0))
+        self._send_midi((0xB0, REVERB_DEPTH_KNOB, 0))
 
 # --- Live (ControlSurface Inherited)
 
