@@ -43,6 +43,7 @@ class ScaleModeController:
 
     def set_enabled(self, enabled):
         """Enables/Disables the scale play mode."""
+        self._enabled = enabled
         if enabled:
             self.set_play_mode_enabled(True)
         else:
