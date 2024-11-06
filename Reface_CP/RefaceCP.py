@@ -101,9 +101,17 @@ class RefaceCP:
         return (SYSEX_START, DEVICE_ID, prefix | self._device_number, GROUP_HIGH, GROUP_LOW, MODEL_ID)
 
     def set_transmit_channel(self, channel):
+        """Sets the Reface MIDI transmit channel. 00 - 0F, 7F (1 - 16, Off)"""
         if not self._is_identified:
             return
         sys_ex_message = self._reface_sysex_header(0x10) + (0x00, 0x00, 0x00, channel, SYSEX_END)
+        self._send_midi(sys_ex_message)
+
+    def set_receive_channel(self, channel):
+        """Sets the Reface MIDI receive channel. 00 - 0F, 10 (1 - 16, All)"""
+        if not self._is_identified:
+            return
+        sys_ex_message = self._reface_sysex_header(0x10) + (0x00, 0x00, 0x01, channel, SYSEX_END)
         self._send_midi(sys_ex_message)
 
     def set_local_control(self, enabled: bool):

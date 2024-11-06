@@ -56,6 +56,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._selected_track = self.song().view.selected_track
             self._selected_parameter = self.song().view.selected_parameter
             self._channel = 0
+            self._rx_channel = 0x0F # Reface MIDI receive channel (used for manual feedback like updating leds)
             self._tremolo_toggle_value = -1
             self._chorus_toggle_value = -1
             self._delay_toggle_value = -1
@@ -77,6 +78,7 @@ class RefaceCPControlSurface(ControlSurface):
     def _on_device_identified(self):
         self._logger.log("RefaceCP Identification Succeeded.")
         self._refaceCP.set_midi_control(True)
+        self._refaceCP.set_receive_channel(0x0F)
         self._refaceCP.set_local_control(False)
         self._refaceCP.set_speaker_output(False)
         self._setup_buttons()
@@ -259,7 +261,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._logger.log(f"Type changed: {value} -> {channel}")
         self.set_channel(channel)
         self._check_device_track_modes()
-        self._send_midi((0xB0, TYPE_SELECT_KNOB, value))  # Update led in device since we disabled local control
+        self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, value))  # Update led in device since we disabled local control
 
     def _reface_tremolo_toggle_changed(self, value):
         self._set_tremolo_toggle(reface_toggle_map.get(value, REFACE_TOGGLE_OFF))
@@ -336,12 +338,12 @@ class RefaceCPControlSurface(ControlSurface):
             if self.is_note_repeat_enabled:
                 self._note_repeat_controller.set_enabled(True)
                 self._note_repeat_controller.set_controls_enabled(False)
-                self._send_midi((0xB0, DELAY_TOGGLE, 64))  # Update led in device since we disabled local control
+                self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 64))  # Update led in device since we disabled local control
             else:
-                self._send_midi((0xB0, DELAY_TOGGLE, 0))  # Update led in device since we disabled local control
+                self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))  # Update led in device since we disabled local control
             if self.is_scale_mode_enabled:
                 self._scale_controller.set_play_mode_enabled(True, enable_controls=False)
-                self._send_midi((0xB0, CHORUS_PHASER_TOGGLE, 64))  # Update led in device since we disabled local control
+                self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))  # Update led in device since we disabled local control
             self._check_device_track_modes()
             
     def _check_device_track_modes(self):
@@ -352,7 +354,7 @@ class RefaceCPControlSurface(ControlSurface):
         elif self.is_device_follow_mode_enabled:
             self._enable_device_follow_mode()
         elif self._locked_device is not None:
-            self._send_midi((0xB0, TREMOLO_WAH_TOGGLE, 64))
+            self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))
 
 # -- Track mode
 
@@ -401,7 +403,7 @@ class RefaceCPControlSurface(ControlSurface):
         self.set_device_component(self._device)
         self.set_device_to_selected()
         self._logger.show_message("Following device selection.")
-        self._send_midi((0xB0, TREMOLO_WAH_TOGGLE, 0))  # Update led in device since we disabled local control
+        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))  # Update led in device since we disabled local control
 
     def _enable_device_lock_mode(self):
         selected_device = self.get_selected_device()
@@ -409,7 +411,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._setup_device_control_channel(self._channel)
         self.set_device_component(self._device)
         self._lock_to_device(selected_device)
-        self._send_midi((0xB0, TREMOLO_WAH_TOGGLE, 64))  # Update led in device since we disabled local control
+        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))  # Update led in device since we disabled local control
 
     def _enable_track_mode(self):
         self.disable_track_mode()
@@ -418,11 +420,11 @@ class RefaceCPControlSurface(ControlSurface):
         self._channel_strip.set_mute_button(self._mute_button)
         self._channel_strip.set_solo_button(self._solo_button)
         self._channel_strip.set_arm_button(self._arm_button)
-        self._send_midi((0xB0, TREMOLO_WAH_TOGGLE, 127))  # Update led in device since we disabled local control
+        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 127))  # Update led in device since we disabled local control
         if self._selected_track.can_be_armed:
-            self._send_midi((0xB0, REVERB_DEPTH_KNOB, 127 if self._selected_track.arm else 0))
+            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 127 if self._selected_track.arm else 0))
         else:
-            self._send_midi((0xB0, REVERB_DEPTH_KNOB, 0))
+            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
 
     def disable_track_mode(self):
         for element in [self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]:
@@ -448,10 +450,10 @@ class RefaceCPControlSurface(ControlSurface):
             self._device.set_parameter_controls(None)
             self._scale_controller.set_enabled(True)
             self._logger.show_message("Scale mode enabled.")
-            self._send_midi((0xB0, CHORUS_PHASER_TOGGLE, 64))  # Update led in device since we disabled local control
+            self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))  # Update led in device since we disabled local control
         else:
             self._scale_controller.set_enabled(False)
-            self._send_midi((0xB0, CHORUS_PHASER_TOGGLE, 0))  # Update led in device since we disabled local control
+            self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))  # Update led in device since we disabled local control
         
 
 # -- Navigation/Transport Mode
@@ -480,7 +482,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._scale_controller.set_controls_enabled(False)
             self._note_repeat_controller.set_enabled(True)
             self._logger.show_message("Note repeat enabled.")
-            self._send_midi((0xB0, DELAY_TOGGLE, 64))  # Update led in device since we disabled local control
+            self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 64))  # Update led in device since we disabled local control
 
         elif value == REFACE_TOGGLE_DOWN:
             self._enable_navigation_mode()
@@ -500,10 +502,10 @@ class RefaceCPControlSurface(ControlSurface):
         self._navigation_controller.set_enabled(True)
         self._logger.show_message("Transport/Navigation mode enabled.")
         # Update device leds:
-        self._send_midi((0xB0, DELAY_TOGGLE, 127))  
-        self._send_midi((0xB0, CHORUS_PHASER_TOGGLE, 0))
-        self._send_midi((0xB0, TREMOLO_WAH_TOGGLE, 0))
-        self._send_midi((0xB0, REVERB_DEPTH_KNOB, 0))
+        self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 127))  
+        self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
+        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))
+        self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
 
 # --- Live (ControlSurface Inherited)
 
@@ -539,6 +541,7 @@ class RefaceCPControlSurface(ControlSurface):
         # Restore defaults
         self._refaceCP.set_local_control(True)
         self._refaceCP.set_transmit_channel(0)
+        self._refaceCP.set_receive_channel(0x10)
         self._refaceCP.set_speaker_output(True)
 
         self._refaceCP.disconnect()
