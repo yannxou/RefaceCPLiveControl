@@ -23,14 +23,21 @@ class ScaleModeController:
                  song: Live.Song.Song,
                  channel = 0,
                  root_note_button = None,
-                 scale_mode_button = None
+                 scale_mode_button = None,
+                 edit_mode_button = None,
+                 on_edit_mode_changed = None,
+                 on_note_event = None
                  ):
         self._logger = logger
         self._enabled = False
+        self._edit_mode_enabled = False
         self._song = song
         self._channel = channel
         self._root_note_button = root_note_button
         self._scale_mode_button = scale_mode_button
+        self._edit_mode_button = edit_mode_button
+        self._on_edit_mode_changed = on_edit_mode_changed
+        self._on_note_event = on_note_event
         self._note_key_buttons = []
         self._pressed_keys = []
         self._current_root_note = -1
@@ -49,6 +56,7 @@ class ScaleModeController:
         else:
             self._remove_button_listeners()
             self._remove_note_key_listeners()
+            self.disable_edit_mode()
 
     def set_play_mode_enabled(self, enabled, enable_controls: bool = True):
         """Enables/Disables the scale play mode functionality."""
@@ -64,8 +72,22 @@ class ScaleModeController:
         else:
             self._remove_button_listeners()
 
+    def enable_edit_mode(self):
+        self._edit_mode_enabled = True
+        if self._enabled:
+            self._update_edit_mode_key_listeners()
+            self._on_edit_mode_changed(True)
+
+    def disable_edit_mode(self):
+        self._edit_mode_enabled = False
+        if self._enabled:
+            self._on_edit_mode_changed(False)
+            self._update_play_mode_key_listeners()
+
     def set_channel(self, channel):
         self._channel = channel
+        if self._edit_mode_button is not None:
+            self._edit_mode_button.set_channel(channel)
         for button in self._note_key_buttons:
             button.set_channel(channel)
 
@@ -88,6 +110,14 @@ class ScaleModeController:
                 if button.value_has_listener(self._on_note_key):
                     button.remove_value_listener(self._on_note_key)
             else:
+                if not button.value_has_listener(self._on_note_key):
+                    button.add_value_listener(self._on_note_key, identify_sender=True)
+
+    def _update_edit_mode_key_listeners(self):
+        """Updates the note key listeners so all notes are captured"""
+        for midi_note in range(128):
+            button = self._note_key_buttons[midi_note]
+            if not button.value_has_listener(self._on_note_key):
                 button.add_value_listener(self._on_note_key, identify_sender=True)
 
     def _remove_note_key_listeners(self):
@@ -101,12 +131,16 @@ class ScaleModeController:
             self._root_note_button.add_value_listener(self._on_root_note_button_changed)
         if self._scale_mode_button and not self._scale_mode_button.value_has_listener(self._on_scale_mode_button_changed):
             self._scale_mode_button.add_value_listener(self._on_scale_mode_button_changed)
+        if self._edit_mode_button and not self._edit_mode_button.value_has_listener(self._on_edit_mode_button_changed):
+            self._edit_mode_button.add_value_listener(self._on_edit_mode_button_changed)
 
     def _remove_button_listeners(self):
         if self._root_note_button and self._root_note_button.value_has_listener(self._on_root_note_button_changed):
             self._root_note_button.remove_value_listener(self._on_root_note_button_changed)
         if self._scale_mode_button and self._scale_mode_button.value_has_listener(self._on_scale_mode_button_changed):
             self._scale_mode_button.remove_value_listener(self._on_scale_mode_button_changed)
+        if self._edit_mode_button and self._edit_mode_button.value_has_listener(self._on_edit_mode_button_changed):
+            self._edit_mode_button.remove_value_listener(self._on_edit_mode_button_changed)
 
     def _on_root_note_button_changed(self, value):
         total_notes = 12
@@ -118,6 +152,12 @@ class ScaleModeController:
         total_scales = len(self._all_scales)
         scale_index = int((value / 127.0) * (total_scales - 1))
         self._song.scale_name = self._all_scales[scale_index][0]
+
+    def _on_edit_mode_button_changed(self, value):
+        if value > 0:
+            self.enable_edit_mode()
+        else:
+            self.disable_edit_mode()
 
     def _on_root_note_changed(self):
         if self._enabled:
@@ -134,13 +174,13 @@ class ScaleModeController:
         self._current_scale_intervals = self._song.scale_intervals
 
     def _on_note_key(self, value, sender):
-        return
         key = sender._msg_identifier
         if value > 0:
             self._pressed_keys.append(key)
         else:
             self._pressed_keys.remove(key)
-        # self._logger.log(f"Note: {key}")
+        # self._logger.log(f"Note: {key}, velocity: {value}")
+        self._on_note_event(key, value)
 
     def disconnect(self):
         self._remove_button_listeners()
@@ -148,3 +188,8 @@ class ScaleModeController:
         self._song.remove_root_note_listener(self._on_root_note_changed)
         self._song.remove_scale_intervals_listener(self._on_scale_intervals_changed)
         self._note_key_buttons = []
+        self._root_note_button = None
+        self._scale_mode_button = None
+        self._edit_mode_button = None
+        self._on_edit_mode_changed = None
+        self._on_note_event = None

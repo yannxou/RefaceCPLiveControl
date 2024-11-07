@@ -100,7 +100,10 @@ class RefaceCPControlSurface(ControlSurface):
             self._logger,
             song=self.song(),
             root_note_button=self._chorus_depth_knob,
-            scale_mode_button=self._chorus_speed_knob
+            scale_mode_button=self._chorus_speed_knob,
+            edit_mode_button=RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB),
+            on_edit_mode_changed=self._on_scale_edit_mode_changed,
+            on_note_event = self._play_note
         )
         self._setup_device_control()
         self._refaceCP.request_current_values()
@@ -459,6 +462,16 @@ class RefaceCPControlSurface(ControlSurface):
             self._scale_controller.set_enabled(False)
             self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))  # Update led in device since we disabled local control
         
+    def _on_scale_edit_mode_changed(self, enabled):
+        if enabled:
+            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 127))
+            self._refaceCP.set_speaker_output(True)
+        else:
+            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
+            self._refaceCP.set_speaker_output(False)
+
+    def _play_note(self, note, velocity):
+        self._send_midi((0x90 | self._rx_channel, note, velocity))
 
 # -- Navigation/Transport Mode
 
