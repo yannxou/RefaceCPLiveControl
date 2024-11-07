@@ -355,6 +355,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._enable_device_follow_mode()
         elif self._locked_device is not None:
             self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))
+            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
 
 # -- Track mode
 
@@ -403,7 +404,9 @@ class RefaceCPControlSurface(ControlSurface):
         self.set_device_component(self._device)
         self.set_device_to_selected()
         self._logger.show_message("Following device selection.")
-        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))  # Update led in device since we disabled local control
+        # Update leds in device since we disabled local control
+        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))
+        self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
 
     def _enable_device_lock_mode(self):
         selected_device = self.get_selected_device()
@@ -420,7 +423,8 @@ class RefaceCPControlSurface(ControlSurface):
         self._channel_strip.set_mute_button(self._mute_button)
         self._channel_strip.set_solo_button(self._solo_button)
         self._channel_strip.set_arm_button(self._arm_button)
-        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 127))  # Update led in device since we disabled local control
+        # Update leds in device since we disabled local control
+        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 127))
         if self._selected_track.can_be_armed:
             self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 127 if self._selected_track.arm else 0))
         else:
