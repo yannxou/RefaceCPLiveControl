@@ -1,7 +1,7 @@
 .EXPORT_ALL_VARIABLES:
 .NOTPARALLEL:
 
-ABLETON_PREFS_DIR          := $(HOME)/Library/Preferences/Ableton/Live 12.1
+ABLETON_PREFS_DIR          := $(HOME)/Library/Preferences/Ableton/Live 12.1.1
 SOURCE_SCRIPT_DIR          := ./Reface_CP
 TARGET_SCRIPT_DIR          := $(HOME)/Music/Ableton/User Library/Remote Scripts
 
