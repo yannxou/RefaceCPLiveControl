@@ -343,12 +343,8 @@ class RefaceCPControlSurface(ControlSurface):
             if self.is_note_repeat_enabled:
                 self._note_repeat_controller.set_enabled(True)
                 self._note_repeat_controller.set_controls_enabled(False)
-                self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 64))  # Update led in device since we disabled local control
-            else:
-                self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))  # Update led in device since we disabled local control
             if self.is_scale_mode_enabled:
                 self._scale_controller.set_enabled(True, enable_controls=False)
-                self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))  # Update led in device since we disabled local control
             self._check_device_track_modes()
             
     def _check_device_track_modes(self):
@@ -360,6 +356,8 @@ class RefaceCPControlSurface(ControlSurface):
             self._enable_device_follow_mode()
         elif self._locked_device is not None:
             self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))
+            self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
+            self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
             self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
 
 # -- Track mode
@@ -411,7 +409,9 @@ class RefaceCPControlSurface(ControlSurface):
         self.set_device_to_selected()
         self._logger.show_message("Following device selection.")
         # Update leds in device since we disabled local control
-        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))
+        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))
+        self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
+        self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
         self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
 
     def _enable_device_lock_mode(self):
@@ -421,6 +421,8 @@ class RefaceCPControlSurface(ControlSurface):
         self.set_device_component(self._device)
         self._lock_to_device(selected_device)
         self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))  # Update led in device since we disabled local control
+        self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
+        self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
 
     def _enable_track_mode(self):
         self.disable_track_mode()
@@ -431,6 +433,8 @@ class RefaceCPControlSurface(ControlSurface):
         self._channel_strip.set_arm_button(self._arm_button)
         # Update leds in device since we disabled local control
         self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 127))
+        self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
+        self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
         if self._selected_track.can_be_armed:
             self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 127 if self._selected_track.arm else 0))
         else:
@@ -454,6 +458,9 @@ class RefaceCPControlSurface(ControlSurface):
         self._logger.log(f"_set_chorus_toggle: {value}")
         self._chorus_toggle_value = value
 
+        if self.is_navigation_mode_enabled: # Navigation mode prevails over other modes
+            return
+
         if value == REFACE_TOGGLE_UP:
             self._note_repeat_controller.set_controls_enabled(False)
             self.disable_track_mode()
@@ -462,17 +469,23 @@ class RefaceCPControlSurface(ControlSurface):
             self._logger.show_message("Scale mode enabled.")
             # Update device leds
             self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))
+            self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))
+            self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
             self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
         else:
+            self._logger.show_message("Scale mode disabled.")
             self._scale_controller.set_enabled(False)
             self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))  # Update led in device since we disabled local control
+            self._check_current_mode()
         
     def _on_scale_edit_mode_changed(self, enabled):
         if enabled:
+            self._logger.show_message("Scale edit mode enabled.")
             self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 16))
             self._refaceCP.set_speaker_output(True)
             self._refaceCP.set_preset(RefaceCP.PLAIN_PIANO_PRESET)
         else:
+            self._logger.show_message("Scale play mode enabled.")
             self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
             self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == self._channel)))
             self._refaceCP.set_speaker_output(False)
@@ -508,6 +521,8 @@ class RefaceCPControlSurface(ControlSurface):
             self._note_repeat_controller.set_enabled(True)
             self._logger.show_message("Note repeat enabled.")
             self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 64))  # Update led in device since we disabled local control
+            self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))
+            self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
 
         elif value == REFACE_TOGGLE_DOWN:
             self._enable_navigation_mode()
