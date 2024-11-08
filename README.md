@@ -9,6 +9,8 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
 	1. [Wave type knob (MIDI Channel Change)](#wave-type-knob)
 	2. [Tremolo/Wah toggle (Device control)](#tremolowah-toggle)
 	3. [Chorus toggle (Scale mode)](#chorus-toggle)
+		1. [Scale Play Mode](#scale-play-mode)
+		2. [Scale Edit Mode](#scale-edit-mode)
 	4. [D.Delay toggle (Note repeat)](#ddelay-toggle)
 	5. [A.Delay toggle (Navigation/Transport mode)](#adelay-toggle)
 		1. [C  (*Stop actions*)](#c--stop-actions)
@@ -71,14 +73,34 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 
 ### Chorus toggle:
 
-Enables the **Scale mode**. In this mode only the note keys that are part of the current scale will reach Live's input.
+Enables the **Scale mode**. This includes two sub-modes (Play/Edit) which can be toggled by turning the **Reverb Depth** knob left/right.
+
+#### Scale Play Mode:
+
+In this mode, only the note keys that are part of the current scale will reach Live's input and keys outside the scale are muted.
+
+By default, when enabling the scale mode it always starts with the Scale Play mode.
+
+The following controls apply while in the Scale Play Mode:
 
 * **Chorus Depth**: Root note. Move the knob to select the current root note.
 
 * **Chorus Speed**: Scale mode. Move the knob to select the current scale mode.
 
 <p align="center">
-	<img src="Images/scale_mode.jpg" alt="Scale Mode" width="50%" />
+	<img src="Images/scale_play_mode.jpg" alt="Scale Play Mode" width="50%" />
+</p>
+
+#### Scale Edit Mode:
+
+In this mode, the first note pressed on the keyboard sets the root note. While holding down the root key, additional notes can be added to a list that defines the target scale. 
+
+Once all keys are released a list of all the possible scales that include all the entered notes will be populated and the first root and scale match is automatically changed in Live.
+
+* **Chorus Depth**: Matching scales. Move the knob to cycle between all the matching root/scales found that include all the entered notes.
+
+<p align="center">
+	<img src="Images/scale_edit_mode.jpg" alt="Scale Edit Mode" width="50%" />
 </p>
 
 ### D.Delay toggle:
