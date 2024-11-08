@@ -372,6 +372,7 @@ class RefaceCPControlSurface(ControlSurface):
             return
         
         self._note_repeat_controller.set_controls_enabled(False)
+        self._scale_controller.disable_edit_mode()
         self._scale_controller.set_controls_enabled(False)
 
         if value == REFACE_TOGGLE_UP:
@@ -496,6 +497,7 @@ class RefaceCPControlSurface(ControlSurface):
             self.set_device_component(None)
             self._transport_controller.set_enabled(False)
             self._navigation_controller.set_enabled(False)
+            self._scale_controller.disable_edit_mode()
             self._scale_controller.set_controls_enabled(False)
             self._note_repeat_controller.set_enabled(True)
             self._logger.show_message("Note repeat enabled.")

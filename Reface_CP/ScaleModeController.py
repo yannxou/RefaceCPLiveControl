@@ -52,7 +52,10 @@ class ScaleModeController:
         """Enables/Disables the scale play mode."""
         self._enabled = enabled
         if enabled:
-            self.set_play_mode_enabled(True)
+            if self._edit_mode_enabled:
+                self.enable_edit_mode()
+            else:
+                self.set_play_mode_enabled(True)
         else:
             self._remove_button_listeners()
             self._remove_note_key_listeners()
@@ -61,6 +64,7 @@ class ScaleModeController:
     def set_play_mode_enabled(self, enabled, enable_controls: bool = True):
         """Enables/Disables the scale play mode functionality."""
         self._enabled = enabled
+        self.disable_edit_mode()
         if enabled:
             # self._logger.log("Scale play mode enabled.")
             self._update_play_mode_key_listeners()
@@ -79,10 +83,11 @@ class ScaleModeController:
             self._on_edit_mode_changed(True)
 
     def disable_edit_mode(self):
-        self._edit_mode_enabled = False
-        if self._enabled:
+        if self._edit_mode_enabled:
+            self._edit_mode_enabled = False
             self._on_edit_mode_changed(False)
-            self._update_play_mode_key_listeners()
+            if self._enabled:
+                self._update_play_mode_key_listeners()
 
     def set_channel(self, channel):
         self._channel = channel
@@ -163,20 +168,26 @@ class ScaleModeController:
         if self._enabled:
             if self._current_root_note == self._song.root_note and self._current_scale_intervals == self._song.scale_intervals:
                 return
-            self._update_play_mode_key_listeners()
+            if not self._edit_mode_enabled:
+                self._update_play_mode_key_listeners()
         self._current_root_note = self._song.root_note
         
     def _on_scale_intervals_changed(self):
         if self._enabled:
             if self._current_root_note == self._song.root_note and self._current_scale_intervals == self._song.scale_intervals:
                 return
-            self._update_play_mode_key_listeners()
+            if not self._edit_mode_enabled:
+                self._update_play_mode_key_listeners()
         self._current_scale_intervals = self._song.scale_intervals
 
     def _on_note_key(self, value, sender):
+        if not self._edit_mode_enabled:
+            return
         key = sender._msg_identifier
         if value > 0:
             self._pressed_keys.append(key)
+            if len(self._pressed_keys) == 1:
+                self._song.root_note = key % 12
         else:
             self._pressed_keys.remove(key)
         # self._logger.log(f"Note: {key}, velocity: {value}")
