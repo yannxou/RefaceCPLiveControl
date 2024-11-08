@@ -460,7 +460,9 @@ class RefaceCPControlSurface(ControlSurface):
             self._device.set_parameter_controls(None)
             self._scale_controller.set_enabled(True)
             self._logger.show_message("Scale mode enabled.")
-            self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))  # Update led in device since we disabled local control
+            # Update device leds
+            self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))
+            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
         else:
             self._scale_controller.set_enabled(False)
             self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))  # Update led in device since we disabled local control
