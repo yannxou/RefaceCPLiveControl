@@ -347,7 +347,7 @@ class RefaceCPControlSurface(ControlSurface):
             else:
                 self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))  # Update led in device since we disabled local control
             if self.is_scale_mode_enabled:
-                self._scale_controller.enable_play_mode(enable_controls=False)
+                self._scale_controller.set_enabled(True, enable_controls=False)
                 self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))  # Update led in device since we disabled local control
             self._check_device_track_modes()
             

@@ -51,14 +51,14 @@ class ScaleModeController:
             button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
             self._note_key_buttons.append(button)
 
-    def set_enabled(self, enabled):
+    def set_enabled(self, enabled, enable_controls: bool = True):
         """Enables/Disables the scale play mode."""
         self._enabled = enabled
         if enabled:
             if self._edit_mode_enabled:
                 self.enable_edit_mode()
             else:
-                self.enable_play_mode(True)
+                self.enable_play_mode(enable_controls)
         else:
             self._remove_button_listeners()
             self._remove_note_key_listeners()
