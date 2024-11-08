@@ -261,6 +261,8 @@ class RefaceCPControlSurface(ControlSurface):
 
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
+        if self._scale_controller._enabled and self._scale_controller._edit_mode_enabled:
+            return
         self._logger.log(f"Type changed: {value} -> {channel}")
         self.set_channel(channel)
         self._check_device_track_modes()
@@ -345,7 +347,7 @@ class RefaceCPControlSurface(ControlSurface):
             else:
                 self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))  # Update led in device since we disabled local control
             if self.is_scale_mode_enabled:
-                self._scale_controller.set_play_mode_enabled(True, enable_controls=False)
+                self._scale_controller.enable_play_mode(enable_controls=False)
                 self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))  # Update led in device since we disabled local control
             self._check_device_track_modes()
             
@@ -465,10 +467,12 @@ class RefaceCPControlSurface(ControlSurface):
         
     def _on_scale_edit_mode_changed(self, enabled):
         if enabled:
-            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 127))
+            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 16))
             self._refaceCP.set_speaker_output(True)
+            self._refaceCP.set_preset(RefaceCP.PLAIN_PIANO_PRESET)
         else:
             self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
+            self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == self._channel)))
             self._refaceCP.set_speaker_output(False)
 
     def _play_note(self, note, velocity):

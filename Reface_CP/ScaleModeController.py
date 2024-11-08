@@ -58,17 +58,16 @@ class ScaleModeController:
             if self._edit_mode_enabled:
                 self.enable_edit_mode()
             else:
-                self.set_play_mode_enabled(True)
+                self.enable_play_mode(True)
         else:
             self._remove_button_listeners()
             self._remove_note_key_listeners()
             self.disable_edit_mode()
 
-    def set_play_mode_enabled(self, enabled, enable_controls: bool = True):
+    def enable_play_mode(self, enable_controls: bool = True):
         """Enables/Disables the scale play mode functionality."""
-        self._enabled = enabled
         self.disable_edit_mode()
-        if enabled:
+        if self._enabled:
             # self._logger.log("Scale play mode enabled.")
             self._update_play_mode_key_listeners()
             self.set_controls_enabled(enable_controls)
@@ -207,10 +206,13 @@ class ScaleModeController:
             self._pressed_keys.remove(key)
             if len(self._pressed_keys) == 0:
                 self._custom_matching_scales = self._find_scales(self._captured_notes, starting_root=self._current_root_note)
-                self._song.root_note = self._custom_matching_scales[0][0]
-                self._song.scale_name = self._custom_matching_scales[0][1]
-                note_names = [Note.NOTE_NAMES[note] for note in sorted(self._captured_notes)]
-                self._logger.show_message(f"Found {len(self._custom_matching_scales)} scales including notes {note_names}")
+                if len(self._custom_matching_scales) > 0:
+                    self._song.root_note = self._custom_matching_scales[0][0]
+                    self._song.scale_name = self._custom_matching_scales[0][1]
+                    note_names = [Note.NOTE_NAMES[note] for note in sorted(self._captured_notes)]
+                    self._logger.show_message(f"Found {len(self._custom_matching_scales)} scales including notes {note_names}")
+                else:
+                    self._logger.show_message(f"No scales found including notes {note_names}")
         # self._logger.log(f"Note: {key}, velocity: {value}")
         self._on_note_event(key, value)
 
@@ -225,7 +227,7 @@ class ScaleModeController:
                 transposed_intervals = {(root + interval) % 12 for interval in original_intervals}
                 # Check if all notes in the note_pitch_classes are in the transposed_intervals
                 if notes.issubset(transposed_intervals):
-                    self._logger.log(f"Match: {scale_name} in {root}")
+                    # self._logger.log(f"Match: {scale_name} in {root}")
                     matching_scales.append((root, scale_name))
         return matching_scales
 

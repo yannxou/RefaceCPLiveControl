@@ -66,12 +66,32 @@ reface_toggle_map = {
 class ToneParameter:
     # Reface CP Parameter IDs:
     REFACE_PARAM_TYPE = 0x02
+    REFACE_PARAM_DRIVE = 0x03
     REFACE_PARAM_TREMOLO_TOGGLE = 0x04
+    REFACE_PARAM_TREMOLO_DEPTH = 0x05
+    REFACE_PARAM_TREMOLO_RATE = 0x06
     REFACE_PARAM_CHORUS_TOGGLE = 0x07
+    REFACE_PARAM_CHORUS_DEPTH = 0x08
+    REFACE_PARAM_CHORUS_SPEED = 0x09
     REFACE_PARAM_DELAY_TOGGLE = 0x0A
+    REFACE_PARAM_DELAY_DEPTH = 0x0B
+    REFACE_PARAM_DELAY_TIME = 0x0C
+    REFACE_PARAM_REVERB_DEPTH = 0x0D
 
 class RefaceCP:
     IDENTITY_REPLY = (0xF0, 0x7E, 0x7F, 0x06, 0x02, 0x43, 0x00, 0x41, 0x52, 0x06, 0x00, 0x00, 0x00, 0x7F, 0xF7)
+
+    PLAIN_PIANO_PRESET = [
+        (ToneParameter.REFACE_PARAM_TYPE, 5),
+        (ToneParameter.REFACE_PARAM_DRIVE, 0),
+        (ToneParameter.REFACE_PARAM_TREMOLO_DEPTH, 0),
+        (ToneParameter.REFACE_PARAM_TREMOLO_RATE, 0),
+        (ToneParameter.REFACE_PARAM_CHORUS_DEPTH, 0),
+        (ToneParameter.REFACE_PARAM_CHORUS_SPEED, 0),
+        (ToneParameter.REFACE_PARAM_DELAY_DEPTH, 0),
+        (ToneParameter.REFACE_PARAM_DELAY_TIME, 0),
+        (ToneParameter.REFACE_PARAM_REVERB_DEPTH, 16)
+    ]
 
     def __init__(self, logger: Logger, send_midi,
                  on_device_identified = None,
@@ -144,6 +164,11 @@ class RefaceCP:
             return
         sys_ex_message = self._reface_sysex_header(0x10) + (0x30, 0x00, parameter, value, SYSEX_END)
         self._send_midi(sys_ex_message)
+
+    def set_preset(self, parameters):
+        """Send a tone preset to the reface CP from a list of tuples (ToneParameter, value)"""
+        for parameter in parameters:
+            self.set_tone_parameter(parameter[0], parameter[1])
 
     def handle_sysex(self, midi_bytes):
         # self._logger.log(f"handle_sysex: {midi_bytes}.")
