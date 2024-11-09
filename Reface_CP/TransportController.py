@@ -96,12 +96,15 @@ class TransportController:
             self._cancel_action_timeout()
 
         if value == 0:
-            self._pressed_keys.remove(key)
-            if len(self._pressed_keys) == 0:
-                if self._current_action_key == key and not self._current_action_skips_ending:
-                    self._end_action(key)
-                self._cancel_action_timeout()
-                self._current_action_key = None  # Reset after all keys are released
+            try:
+                self._pressed_keys.remove(key)
+                if len(self._pressed_keys) == 0:
+                    if self._current_action_key == key and not self._current_action_skips_ending:
+                        self._end_action(key)
+                    self._cancel_action_timeout()
+                    self._current_action_key = None  # Reset after all keys are released
+            except:
+                pass
 
     def _begin_action(self, action_key):
         action = action_key % 12
