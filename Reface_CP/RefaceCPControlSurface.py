@@ -21,10 +21,10 @@ from _Framework.EncoderElement import *
 from _Framework.ButtonElement import ButtonElement
 from _Framework.SliderElement import SliderElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE, MIDI_NOTE_ON_STATUS, MIDI_NOTE_OFF_STATUS, MIDI_CC_STATUS, MIDI_CC_TYPE
-from _Framework.DeviceComponent import DeviceComponent
 from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 from _Framework.ChannelStripComponent import ChannelStripComponent
 from .RotaryToggleElement import RotaryToggleElement
+from .DeviceController import DeviceController
 from .TransportController import TransportController
 from .NavigationController import NavigationController
 from .NoteRepeatController import NoteRepeatController
@@ -52,7 +52,6 @@ class RefaceCPControlSurface(ControlSurface):
 
             self._suppress_send_midi = True
             self._all_controls = []
-            self._locked_device = None
             self._selected_track = self.song().view.selected_track
             self._selected_parameter = self.song().view.selected_parameter
             self._channel = 0
@@ -85,6 +84,14 @@ class RefaceCPControlSurface(ControlSurface):
         self._setup_song_listeners()
         self._setup_channel_strip()
         self._setup_navigation_controller()
+
+        self._device_controller = DeviceController(
+            self._logger,
+            song=self.song(),
+            controls=[self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]
+        )
+        self.set_device_component(self._device_controller._device)
+
         self._transport_controller = TransportController(
             self._logger,
             self.song(),
@@ -105,7 +112,6 @@ class RefaceCPControlSurface(ControlSurface):
             on_edit_mode_changed=self._on_scale_edit_mode_changed,
             on_note_event = self._play_note
         )
-        self._setup_device_control()
         self._refaceCP.request_current_values()
 
     def _receive_tone_parameter(self, parameter: ToneParameter, value):
@@ -155,14 +161,6 @@ class RefaceCPControlSurface(ControlSurface):
         self._delay_toggle_button.add_value_listener(self._reface_delay_toggle_changed)
         self._all_controls.append(self._delay_toggle_button)
 
-    def _setup_device_control(self):
-        self._device_lock_button = ButtonElement(1, MIDI_CC_TYPE, 15, 100, name="DeviceLock")
-        self._device = DeviceComponent(device_selection_follows_track_selection=True)
-        self._device.name = 'Device_Component'
-        self._device.set_lock_button(self._device_lock_button)
-        self._on_device_changed.subject = self._device
-        self.set_device_component(self._device)
-
     def _setup_song_listeners(self):
         self.song().view.add_selected_parameter_listener(self._on_selected_parameter_changed)
 
@@ -189,14 +187,6 @@ class RefaceCPControlSurface(ControlSurface):
             device_navigation_button=self._tremolo_rate_knob
         )
         self._navigation_controller = navigation_controller
-
-    def _setup_device_control_channel(self, channel):
-        device_controls = []
-        for index in range(8):
-            control = EncoderElement(MIDI_CC_TYPE, channel, ENCODER_MSG_IDS[index], Live.MidiMap.MapMode.absolute)
-            control.name = 'Ctrl_' + str(index)
-            device_controls.append(control)
-        self._device.set_parameter_controls(device_controls)
 
     @property
     def _is_initialized(self):
@@ -245,16 +235,8 @@ class RefaceCPControlSurface(ControlSurface):
             control.set_channel(channel)
         self._transport_controller.set_channel(channel)
         self._scale_controller.set_channel(channel)
-        if self.is_device_lock_mode_enabled:
-            self._setup_device_control_channel(channel)
 
 # --- Listeners
-
-    @subject_slot('device')
-    def _on_device_changed(self):
-        # self._logger.log("on_device_changed")
-        if liveobj_valid(self._device):
-            self.set_device_to_selected()
 
     def _on_selected_parameter_changed(self):
         self._selected_parameter = self.song().view.selected_parameter
@@ -267,7 +249,6 @@ class RefaceCPControlSurface(ControlSurface):
             return # disable control while in scale edit mode
         self._logger.log(f"Type changed: {value} -> {channel}")
         self.set_channel(channel)
-        self._check_device_track_modes()
         self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, value))  # Update led in device since we disabled local control
 
     def _reface_tremolo_toggle_changed(self, value):
@@ -301,9 +282,7 @@ class RefaceCPControlSurface(ControlSurface):
         device_to_select = self.get_selected_device()
         if device_to_select is not None:
             self._logger.log(f"Select Device: {device_to_select.name}")
-            self._device.set_device(device_to_select)
-            self.song().appointed_device = device_to_select
-            self._device.update()
+            self._device_controller.set_device(device_to_select)
             self._transport_controller.set_locked_device(device_to_select)
         else:
             self._logger.log("No device to select.")
@@ -311,30 +290,13 @@ class RefaceCPControlSurface(ControlSurface):
     def _lock_to_device(self, device):
         if device is not None and self._is_initialized:
             self._logger.log(f"Locking to device {device.name}")
-            self._locked_device = device
-            self.song().appointed_device = device
-            self._device_lock_button.receive_value(127)
-            self._device.set_lock_to_device(True, device)
-            self._device.update()
+            self._device_controller.lock_to_device(device)
             self._transport_controller.set_locked_device(device)
 
     def _unlock_from_device(self):
-        device = self._locked_device
-        if device is not None and liveobj_valid(device) and self._is_initialized:
-            self._logger.log(f"Unlocking from device {device.name}")
-            self._device.set_lock_to_device(False, device)
-
-            # workaround to update device correctly when locked on another track. Probably doing something wrong here but this works.
-            current_selection = self.song().view.selected_track.view.selected_device
-            # self._logger.log(f"appointed device: {self.song().appointed_device.name}. current: {current_selection.name}")
-            self.song().view.select_device(device)
-            self._device_lock_button.receive_value(127)
-            self._device_lock_button.receive_value(0)
-            self._device.update()
-            if current_selection is not None:
-                self.song().view.select_device(current_selection)
-
-        self._locked_device = None
+        if self._is_initialized:
+            self._device_controller.unlock_from_device()
+            self._transport_controller.set_locked_device(None)
 
 # -- Modes
 
@@ -354,13 +316,15 @@ class RefaceCPControlSurface(ControlSurface):
             return
         if self.is_track_mode_enabled:
             self._enable_track_mode()
-        elif self.is_device_follow_mode_enabled:
-            self._enable_device_follow_mode()
-        elif self._locked_device is not None:
-            self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))
-            self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
-            self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
-            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
+        else:
+            self._device_controller.set_enabled(True)
+            if self.is_device_follow_mode_enabled:
+                self._enable_device_follow_mode()
+
+        self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))
+        self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
+        self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
+        self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
 
 # -- Track mode
 
@@ -378,8 +342,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._enable_device_lock_mode()
         elif value == REFACE_TOGGLE_DOWN:
             self._unlock_from_device()
-            self._device.set_parameter_controls(None)
-            self.set_device_component(None)
+            self._device_controller.set_enabled(False)
             self._enable_track_mode()
             self._logger.show_message("Track mode enabled.")
         else:
@@ -405,9 +368,8 @@ class RefaceCPControlSurface(ControlSurface):
         self._scale_controller.set_controls_enabled(False)
 
         self.disable_track_mode()
-        self._setup_device_control_channel(self._channel)
         self._unlock_from_device()
-        self.set_device_component(self._device)
+        self._device_controller.set_enabled(True)
         self.set_device_to_selected()
         self._logger.show_message("Following device selection.")
         # Update leds in device since we disabled local control
@@ -423,9 +385,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._note_repeat_controller.set_controls_enabled(False)
         self._scale_controller.disable_edit_mode()
         self._scale_controller.set_controls_enabled(False)
-
-        self._setup_device_control_channel(self._channel)
-        self.set_device_component(self._device)
+        self._device_controller.set_enabled(True)
         self._lock_to_device(selected_device)
         self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))  # Update led in device since we disabled local control
         self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
@@ -475,7 +435,7 @@ class RefaceCPControlSurface(ControlSurface):
         if value == REFACE_TOGGLE_UP:
             self._note_repeat_controller.set_controls_enabled(False)
             self.disable_track_mode()
-            self._device.set_parameter_controls(None)
+            self._device_controller.set_enabled(False)
             self._scale_controller.set_enabled(True)
             self._logger.show_message("Scale mode enabled.")
             # Update device leds
@@ -487,7 +447,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._logger.show_message("Scale mode disabled.")
             self._scale_controller.set_enabled(False)
             self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))  # Update led in device since we disabled local control
-            self._check_current_mode()
+            self._check_device_track_modes()
         
     def _on_scale_edit_mode_changed(self, enabled):
         if enabled:
@@ -522,9 +482,7 @@ class RefaceCPControlSurface(ControlSurface):
 
         if value == REFACE_TOGGLE_UP:
             self.disable_track_mode()
-            self._unlock_from_device()
-            self._device.set_parameter_controls(None)
-            self.set_device_component(None)
+            self._device_controller.set_enabled(False)
             self._transport_controller.set_enabled(False)
             self._navigation_controller.set_enabled(False)
             self._scale_controller.disable_edit_mode()
@@ -542,13 +500,13 @@ class RefaceCPControlSurface(ControlSurface):
             self._note_repeat_controller.set_enabled(False)
             self._transport_controller.set_enabled(False)
             self._navigation_controller.set_enabled(False)
-            self._check_current_mode()
+            self._check_device_track_modes()
         
     def _enable_navigation_mode(self):
         self._note_repeat_controller.set_enabled(False)
         self._scale_controller.set_enabled(False)
         self.disable_track_mode()
-        self._device.set_parameter_controls(None)
+        self._device_controller.set_enabled(False)
         self._transport_controller.set_enabled(True)
         self._navigation_controller.set_enabled(True)
         self._logger.show_message("Transport/Navigation mode enabled.")
@@ -577,6 +535,7 @@ class RefaceCPControlSurface(ControlSurface):
             self.song().view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
 
         self.disable_track_mode()
+        self._device_controller.disconnect()
         self._transport_controller.disconnect()
         self._navigation_controller.disconnect()
         self._note_repeat_controller.disconnect()
