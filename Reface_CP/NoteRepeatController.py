@@ -52,9 +52,8 @@ class NoteRepeatController:
 
     def set_controls_enabled(self, enabled):
         """Enables the buttons for controlling the note repeat parameters."""
-        if enabled:
-            if self._enabled:
-                self._setup_button_listeners()
+        if enabled and self._enabled:
+            self._setup_button_listeners()
         else:
             self._disable_button_listeners()
 

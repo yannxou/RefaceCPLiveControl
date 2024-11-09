@@ -73,7 +73,7 @@ class ScaleModeController:
             self.set_controls_enabled(enable_controls)
 
     def set_controls_enabled(self, enabled):
-        if enabled:
+        if enabled and self._enabled:
             self._setup_button_listeners()
         else:
             self._remove_button_listeners()

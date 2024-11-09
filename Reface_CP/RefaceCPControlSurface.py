@@ -245,6 +245,8 @@ class RefaceCPControlSurface(ControlSurface):
             control.set_channel(channel)
         self._transport_controller.set_channel(channel)
         self._scale_controller.set_channel(channel)
+        if self.is_device_lock_mode_enabled:
+            self._setup_device_control_channel(channel)
 
 # --- Listeners
 
@@ -262,7 +264,7 @@ class RefaceCPControlSurface(ControlSurface):
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
         if self._scale_controller._enabled and self._scale_controller._edit_mode_enabled:
-            return
+            return # disable control while in scale edit mode
         self._logger.log(f"Type changed: {value} -> {channel}")
         self.set_channel(channel)
         self._check_device_track_modes()
@@ -371,10 +373,6 @@ class RefaceCPControlSurface(ControlSurface):
         if self.is_navigation_mode_enabled: # Navigation mode prevails over other modes
             return
         
-        self._note_repeat_controller.set_controls_enabled(False)
-        self._scale_controller.disable_edit_mode()
-        self._scale_controller.set_controls_enabled(False)
-
         if value == REFACE_TOGGLE_UP:
             self.disable_track_mode()
             self._enable_device_lock_mode()
@@ -402,6 +400,10 @@ class RefaceCPControlSurface(ControlSurface):
         return self._tremolo_toggle_value == REFACE_TOGGLE_UP and not self.is_navigation_mode_enabled
 
     def _enable_device_follow_mode(self):
+        self._note_repeat_controller.set_controls_enabled(False)
+        self._scale_controller.disable_edit_mode()
+        self._scale_controller.set_controls_enabled(False)
+
         self.disable_track_mode()
         self._setup_device_control_channel(self._channel)
         self._unlock_from_device()
@@ -417,6 +419,11 @@ class RefaceCPControlSurface(ControlSurface):
     def _enable_device_lock_mode(self):
         selected_device = self.get_selected_device()
         self._logger.log(f"Device locked: {selected_device.name}")
+
+        self._note_repeat_controller.set_controls_enabled(False)
+        self._scale_controller.disable_edit_mode()
+        self._scale_controller.set_controls_enabled(False)
+
         self._setup_device_control_channel(self._channel)
         self.set_device_component(self._device)
         self._lock_to_device(selected_device)
@@ -425,6 +432,10 @@ class RefaceCPControlSurface(ControlSurface):
         self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
 
     def _enable_track_mode(self):
+        self._note_repeat_controller.set_controls_enabled(False)
+        self._scale_controller.disable_edit_mode()
+        self._scale_controller.set_controls_enabled(False)
+
         self.disable_track_mode()
         self._drive_knob.connect_to(self._selected_parameter)
         self._channel_strip.set_track(self._selected_track)
