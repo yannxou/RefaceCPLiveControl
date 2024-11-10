@@ -97,16 +97,8 @@ class RefaceCPControlSurface(ControlSurface):
         )
 
         self._setup_note_repeat()
+        self._setup_scale_controller()
 
-        self._scale_controller = ScaleModeController(
-            self._logger,
-            song=self.song(),
-            root_note_button=self._chorus_depth_knob,
-            scale_mode_button=self._chorus_speed_knob,
-            edit_mode_button=self._scale_edit_mode_button,
-            on_edit_mode_changed=self._on_scale_edit_mode_changed,
-            on_note_event = self._play_note
-        )
         self._refaceCP.request_current_values()
 
     def _receive_tone_parameter(self, parameter: ToneParameter, value):
@@ -155,9 +147,6 @@ class RefaceCPControlSurface(ControlSurface):
         self._delay_toggle_button = ButtonElement(1, MIDI_CC_TYPE, self._channel, DELAY_TOGGLE)
         self._delay_toggle_button.add_value_listener(self._reface_delay_toggle_changed)
         self._all_controls.append(self._delay_toggle_button)
-
-        self._scale_edit_mode_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB)
-        self._all_controls.append(self._scale_edit_mode_button)
 
     def _setup_navigation_controller(self):
         navigation_controller = NavigationController(
@@ -208,6 +197,23 @@ class RefaceCPControlSurface(ControlSurface):
             self._c_instance.note_repeat, 
             repeat_rate_button=repeat_rate_button,
             notes_per_bar_button=notes_per_bar_button
+        )
+
+    def _setup_scale_controller(self):
+        root_note_button = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(root_note_button)
+        scale_mode_button = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_SPEED_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(scale_mode_button)
+        scale_edit_mode_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB)
+        self._all_controls.append(scale_edit_mode_button)
+        self._scale_controller = ScaleModeController(
+            self._logger,
+            song=self.song(),
+            root_note_button=root_note_button,
+            scale_mode_button=scale_mode_button,
+            edit_mode_button=scale_edit_mode_button,
+            on_edit_mode_changed=self._on_scale_edit_mode_changed,
+            on_note_event = self._play_note
         )
 
     @property
