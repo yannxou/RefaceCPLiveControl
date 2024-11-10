@@ -95,12 +95,9 @@ class RefaceCPControlSurface(ControlSurface):
             self.song(),
             channel=self._channel
         )
-        self._note_repeat_controller = NoteRepeatController(
-            self._logger, 
-            self._c_instance.note_repeat, 
-            repeat_rate_button=self._delay_time_knob,
-            notes_per_bar_button=self._delay_depth_knob
-        )
+
+        self._setup_note_repeat()
+
         self._scale_controller = ScaleModeController(
             self._logger,
             song=self.song(),
@@ -162,7 +159,6 @@ class RefaceCPControlSurface(ControlSurface):
         self._scale_edit_mode_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB)
         self._all_controls.append(self._scale_edit_mode_button)
 
-
     def _setup_navigation_controller(self):
         navigation_controller = NavigationController(
             self._logger,
@@ -200,6 +196,18 @@ class RefaceCPControlSurface(ControlSurface):
             solo_control=self._solo_button,
             arm_control=self._arm_button,
             on_track_arm_changed=self._on_track_arm_changed
+        )
+
+    def _setup_note_repeat(self):
+        repeat_rate_button = EncoderElement(MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(repeat_rate_button)
+        notes_per_bar_button = EncoderElement(MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(notes_per_bar_button)
+        self._note_repeat_controller = NoteRepeatController(
+            self._logger, 
+            self._c_instance.note_repeat, 
+            repeat_rate_button=repeat_rate_button,
+            notes_per_bar_button=notes_per_bar_button
         )
 
     @property

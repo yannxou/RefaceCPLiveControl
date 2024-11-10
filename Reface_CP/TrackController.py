@@ -59,6 +59,7 @@ class TrackController:
             if not self._song.view.selected_parameter_has_listener(self._on_selected_parameter_changed):
                 self._song.view.add_selected_parameter_listener(self._on_selected_parameter_changed)
             self._add_track_listeners(self._channel_strip.track)
+            self._on_arm_changed()
         else:
             if self._song.view.selected_parameter_has_listener(self._on_selected_parameter_changed):
                 self._song.view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
@@ -88,7 +89,6 @@ class TrackController:
             self._selected_parameter_control.connect_to(self._selected_parameter)        
 
     def _on_arm_changed(self):
-        self._logger.log(f"arm changed")
         if not self._on_track_arm_changed:
             return
         if self._channel_strip.track.can_be_armed:
