@@ -73,7 +73,6 @@ class DeviceController:
         self._device = DeviceComponent(device_selection_follows_track_selection=True)
         self._device.name = 'Device_Component'
         self._device.set_lock_button(self._device_lock_button)
-        # self._on_device_changed.subject = self._device  # TODO: Use device listener
         self._device.set_parameter_controls(controls)
 
     def disconnect(self):
