@@ -68,20 +68,26 @@ class TrackController:
         self._channel_strip.set_enabled(enabled)
 
     def set_track(self, track):
-        self._remove_track_listeners(self._channel_strip.track)
+        self._remove_track_listeners(self._channel_strip.track)        
         self._channel_strip.set_track(track)
         self._add_track_listeners(track)
         self._on_arm_changed()
 
     def _add_track_listeners(self, track):
-        if self._on_track_arm_changed is not None:
-            if not track.arm_has_listener(self._on_arm_changed):
-                track.add_arm_listener(self._on_arm_changed)
+        try:
+            if track is not None and self._on_track_arm_changed is not None:
+                if not track.arm_has_listener(self._on_arm_changed):
+                    track.add_arm_listener(self._on_arm_changed)
+        except:
+            pass
 
     def _remove_track_listeners(self, track):
-        if track is not None and self._on_track_arm_changed is not None:
-            if track.arm_has_listener(self._on_arm_changed):
-                track.remove_arm_listener(self._on_arm_changed)
+        try:
+            if track is not None and self._on_track_arm_changed is not None:
+                if track.arm_has_listener(self._on_arm_changed):
+                    track.remove_arm_listener(self._on_arm_changed)
+        except:
+            pass
         
     def _on_selected_parameter_changed(self):
         self._selected_parameter = self._song.view.selected_parameter
