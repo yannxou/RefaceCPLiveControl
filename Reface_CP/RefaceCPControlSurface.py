@@ -29,6 +29,7 @@ from .TransportController import TransportController
 from .NavigationController import NavigationController
 from .NoteRepeatController import NoteRepeatController
 from .ScaleModeController import ScaleModeController
+from .AudioTrackMonitoringListener import AudioTrackMonitoringListener
 
 # Live Routing Category values
 ROUTING_CATEGORY_NONE = 6
@@ -61,6 +62,13 @@ class RefaceCPControlSurface(ControlSurface):
             self._suggested_input_port = MODEL_NAME
             self._suggested_output_port = MODEL_NAME
 
+            self._audioTrackMonitoringListener = AudioTrackMonitoringListener(
+                self._logger,
+                song=self.song(),
+                track_name_pattern=r"(" + "|".join(["Reface CP", "RefaceCP", "Reface_CP"]) + r")",
+                on_monitoring_changed=self._on_reface_track_monitoring_changed
+            )
+
             self._waiting_for_first_response = True
             self.schedule_message(10, self._continue_init) # delay call otherwise it silently fails during init stage
 
@@ -74,31 +82,23 @@ class RefaceCPControlSurface(ControlSurface):
 
     def _on_device_identified(self):
         self._logger.log("RefaceCP Identification Succeeded.")
-        self._refaceCP.set_midi_control(True)
-        self._refaceCP.set_receive_channel(0x0F)
-        self._refaceCP.set_local_control(False)
-        self._refaceCP.set_speaker_output(False)
+        self._enable_reface_script_mode()
         self._setup_buttons()
         self._setup_navigation_controller()
-
         self._device_controller = DeviceController(
             self._logger,
             song=self.song(),
             controls=[self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]
         )
         self.set_device_component(self._device_controller._device)
-
         self._setup_track_controller()
-
         self._transport_controller = TransportController(
             self._logger,
             self.song(),
             channel=self._channel
         )
-
         self._setup_note_repeat()
         self._setup_scale_controller()
-
         self._refaceCP.request_current_values()
 
     def _receive_tone_parameter(self, parameter: ToneParameter, value):
@@ -219,6 +219,21 @@ class RefaceCPControlSurface(ControlSurface):
     @property
     def _is_initialized(self):
         return self._tremolo_toggle_value >= 0 and self._chorus_toggle_value >= 0 and self._delay_toggle_value >= 0
+    
+# --- Reface
+
+    def _enable_reface_script_mode(self):
+        self._refaceCP.set_midi_control(True)
+        self._refaceCP.set_receive_channel(0x0F)
+        self._refaceCP.set_local_control(False)
+        self._refaceCP.set_speaker_output(False)
+        self._refaceCP.set_transmit_channel(self._channel)
+
+    def _restore_reface_state(self, speaker_on=True):
+        self._refaceCP.set_local_control(True)
+        self._refaceCP.set_transmit_channel(0)
+        self._refaceCP.set_receive_channel(0x10)
+        self._refaceCP.set_speaker_output(speaker_on)
 
 # --- 
 
@@ -265,6 +280,10 @@ class RefaceCPControlSurface(ControlSurface):
         self._scale_controller.set_channel(channel)
 
 # --- Listeners
+
+    def _on_reface_track_monitoring_changed(self, bypass):
+        self._logger.log(f"_on_reface_track_monitoring_changed: bypass {bypass}")
+        self.set_enabled(not bypass)
 
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
@@ -529,6 +548,27 @@ class RefaceCPControlSurface(ControlSurface):
 
 # --- Live (ControlSurface Inherited)
 
+    def set_enabled(self, enable):
+        """Enables/Disables the script"""
+        for control in self._all_controls:
+            control.suppress_script_forwarding = not enable
+        if enable:
+            self._enable_reface_script_mode()
+            self._refaceCP.request_current_values()
+        else:
+            self._note_repeat_controller.set_enabled(False)
+            self._scale_controller.set_enabled(False)
+            self._track_controller.set_enabled(False)
+            self._device_controller.set_enabled(False)
+            self._transport_controller.set_enabled(False)
+            self._navigation_controller.set_enabled(False)
+            self._tremolo_toggle_value = -1
+            self._chorus_toggle_value = -1
+            self._delay_toggle_value = -1
+            # TODO: Allow passing (speaker:on / speaker:off) to track name. pass track name in callback
+            self._restore_reface_state(speaker_on=False)  
+        return super().set_enabled(enable)
+
     def _on_selected_track_changed(self):
         # self._logger.log("_on_selected_track_changed")
         super()._on_selected_track_changed()
@@ -540,6 +580,7 @@ class RefaceCPControlSurface(ControlSurface):
     def disconnect(self):
         self._logger.log("RefaceCP Disconnected")
 
+        self._audioTrackMonitoringListener.disconnect()
         self._track_controller.disconnect()
         self._device_controller.disconnect()
         self._transport_controller.disconnect()
@@ -555,10 +596,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._all_controls = []
 
         # Restore defaults
-        self._refaceCP.set_local_control(True)
-        self._refaceCP.set_transmit_channel(0)
-        self._refaceCP.set_receive_channel(0x10)
-        self._refaceCP.set_speaker_output(True)
+        self._restore_reface_state()
 
         self._refaceCP.disconnect()
 
