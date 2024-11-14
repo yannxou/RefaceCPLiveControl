@@ -95,7 +95,7 @@ class TrackController:
             self._selected_parameter_control.connect_to(self._selected_parameter)        
 
     def _on_arm_changed(self):
-        if not self._on_track_arm_changed:
+        if not self._enabled or not self._on_track_arm_changed:
             return
         if self._channel_strip.track.can_be_armed:
             self._on_track_arm_changed(self._channel_strip.track.arm)
