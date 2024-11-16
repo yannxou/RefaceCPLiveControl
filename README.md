@@ -22,10 +22,11 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
 		7. [A  (*Device actions*)](#a--device-actions)
 		8. [A# (*Edit actions*)](#a--edit-actions)
 		9. [B  (*Loop actions*)](#b--loop-actions)
-3. [Constraints](#constraints)
-4. [Troubleshooting](#troubleshooting)
-5. [Support](#support)
-6. [Links](#links)
+4. [Tips & Tricks](#tips--tricks)
+5. [Constraints](#constraints)
+6. [Troubleshooting](#troubleshooting)
+7. [Support](#support)
+8. [Links](#links)
 
 ## Installation
 
@@ -34,9 +35,11 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
    - **Windows:** `\Users\[username]\Documents\Ableton\User Library`
    - **Mac:** `Macintosh HD/Users/[username]/Music/Ableton/User Library`
    
-2. Place the remote script folder called `RefaceCP` (the folder you found this README.md in) into the `Remote Scripts` from previous step.
+2. Place the remote script folder called `RefaceCP` (the folder you found this README.md in) into the `Remote Scripts` from previous step. 
 
-This can also be done automatically with the `make install` command.
+This can also be done automatically with the provided `make install` command.
+
+3. Select the `Reface CP` control surface script in Live's `Link, Tempo & MIDI` settings.
 
 For more help, see [Installing third-party remote scripts](https://help.ableton.com/hc/en-us/articles/209072009-Installing-third-party-remote-scripts) from Ableton.
 
@@ -210,6 +213,12 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + G# to increase the loop length.
 * Press and hold + A# to set the loop between the nearest cue points.
 * Press and hold + use the white keys to change the loop start position according to the distance between the first key (B) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
+
+## Tips & Tricks
+
+### Enabling/Disabling Reface CP audio output
+
+While using this script the Reface CP output signal is disabled. In case you want to record or hear the Reface CP while Ableton Live is still running you can either disable the `Reface CP` control surface script manually from Live's `Link, Tempo & MIDI` settings or more conveniently, create an audio track named `Reface CP`. When a track including the `Reface CP` in its name is armed or its monitoring changes so the signal goes through, the script will be automatically disabled and the output of the Reface CP will be enabled so it can be played or recorded. When the track is unarmed the script is enabled again automatically.
 
 ## Constraints
 
