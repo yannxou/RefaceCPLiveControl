@@ -220,6 +220,9 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 
 While using this script the Reface CP output signal is disabled. In case you want to record or hear the Reface CP while Ableton Live is still running you can either disable the `Reface CP` control surface script manually from Live's `Link, Tempo & MIDI` settings or more conveniently, create an audio track named `Reface CP`. When a track including the `Reface CP` in its name is armed or its monitoring changes so the signal goes through, the script will be automatically disabled and the output of the Reface CP will be enabled so it can be played or recorded. When the track is unarmed the script is enabled again automatically.
 
+Additional properties can be added to the track name that will be effective when the RefaceCP track becomes active:
+* speaker:[on/off] - Allows specifying whether the internal speaker is enabled or not when the script is disabled.
+
 ## Constraints
 
 Sadly, the Reface CP does not send any MIDI CC for the Volume and Octave faders. It's also a pity that the Type knob is not an endless encoder. This limits the possibilities of what could be achieved when used as a controller but I hope this still brings a new dimension to your great Reface CP. 
