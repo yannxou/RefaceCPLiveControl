@@ -165,15 +165,16 @@ class AudioTrackMonitoringListener:
                 self._remove_track_monitoring_listener(track)
     
     def _check_matching_tracks(self):
-        bypass = next((t for t in self._song.tracks if re.search(self._track_name_pattern, t.name, re.IGNORECASE) and self._is_track_monitoring_enabled(t)), None)
+        track = next((t for t in self._song.tracks if re.search(self._track_name_pattern, t.name, re.IGNORECASE) and self._is_track_monitoring_enabled(t)), None)
+        bypass = (track is not None and self._last_sent_value == False) or (track is None and self._last_sent_value == True)
         if self._on_monitoring_changed and bypass != self._last_sent_value:
-            self._on_monitoring_changed(bypass)
+            self._on_monitoring_changed(track, bypass)
             self._last_sent_value = bypass
 
     def _check_track_monitoring_bypass(self, track: Live.Track.Track):
-        bypass = True if self._is_track_monitoring_enabled(track) else False
+        bypass = self._is_track_monitoring_enabled(track)
         if self._on_monitoring_changed and bypass != self._last_sent_value:
-            self._on_monitoring_changed(bypass)
+            self._on_monitoring_changed(track, bypass)
             self._last_sent_value = bypass
 
     def _is_track_monitoring_enabled(self, track: Live.Track.Track):

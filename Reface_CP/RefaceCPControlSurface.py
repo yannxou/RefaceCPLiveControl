@@ -10,7 +10,9 @@
 # Distributed under the MIT License, see LICENSE
 
 from __future__ import absolute_import, print_function, unicode_literals
+import re
 import Live
+import Live.Track
 from .RefaceCP import *
 from .Logger import Logger
 from _Framework.ControlSurface import ControlSurface
@@ -281,9 +283,14 @@ class RefaceCPControlSurface(ControlSurface):
 
 # --- Listeners
 
-    def _on_reface_track_monitoring_changed(self, bypass):
+    def _on_reface_track_monitoring_changed(self, track: Live.Track.Track, bypass: bool):
+        if not self._is_initialized:
+            return
         self._logger.log(f"_on_reface_track_monitoring_changed: bypass {bypass}")
-        self.set_enabled(not bypass)
+        # Find all prpoerty/values with the format "property1:value1 property2:value2"
+        matches = re.findall(r"(\w+):(\w+)", track.name)
+        properties = {key: value for key, value in matches}
+        self.set_enabled(not bypass, properties)
 
     def _reface_type_select_changed(self, value):
         channel = reface_type_map.get(value, 0)
@@ -548,11 +555,14 @@ class RefaceCPControlSurface(ControlSurface):
 
 # --- Live (ControlSurface Inherited)
 
-    def set_enabled(self, enable):
+    def set_enabled(self, enable, properties: dict = {}):
         """Enables/Disables the script"""
         for control in self._all_controls:
             control.suppress_script_forwarding = not enable
         if enable:
+            self._tremolo_toggle_value = -1
+            self._chorus_toggle_value = -1
+            self._delay_toggle_value = -1
             self._enable_reface_script_mode()
             self._refaceCP.request_current_values()
         else:
@@ -562,11 +572,8 @@ class RefaceCPControlSurface(ControlSurface):
             self._device_controller.set_enabled(False)
             self._transport_controller.set_enabled(False)
             self._navigation_controller.set_enabled(False)
-            self._tremolo_toggle_value = -1
-            self._chorus_toggle_value = -1
-            self._delay_toggle_value = -1
-            # TODO: Allow passing (speaker:on / speaker:off) to track name. pass track name in callback
-            self._restore_reface_state(speaker_on=False)  
+            speaker_on = properties.get('speaker', '').lower() == "on"
+            self._restore_reface_state(speaker_on=speaker_on)  
         return super().set_enabled(enable)
 
     def _on_selected_track_changed(self):
