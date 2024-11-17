@@ -396,7 +396,6 @@ class RefaceCPControlSurface(ControlSurface):
             self._unlock_from_device()
             self._device_controller.set_enabled(False)
             self._enable_track_mode()
-            self._logger.show_message("Track mode enabled.")
         else:
             self._enable_device_follow_mode()
 
@@ -450,6 +449,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._scale_controller.set_controls_enabled(False)
         self._device_controller.set_enabled(False)
         self._track_controller.set_enabled(True)
+        self._logger.show_message("Track mode enabled.")
 
         # Update leds in device since we disabled local control
         self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 127))
@@ -481,7 +481,6 @@ class RefaceCPControlSurface(ControlSurface):
             self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
             self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
         else:
-            self._logger.show_message("Scale mode disabled.")
             self._scale_controller.set_enabled(False)
             self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))  # Update led in device since we disabled local control
             self._check_device_track_modes()
