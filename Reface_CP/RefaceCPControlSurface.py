@@ -114,6 +114,9 @@ class RefaceCPControlSurface(ControlSurface):
             self._delay_toggle_value = value
 
         if self._is_initialized:
+            if self._waiting_for_first_response:
+                self._waiting_for_first_response = False
+                self._suppress_send_midi = False
             self._check_current_mode()
 
     def _setup_buttons(self):
@@ -268,12 +271,6 @@ class RefaceCPControlSurface(ControlSurface):
         return channel_tracks, other_channel_tracks
 
     def set_channel(self, channel):
-        if self._waiting_for_first_response:
-            self._waiting_for_first_response = False
-            self._suppress_send_midi = False
-        else:
-            self._arm_tracks_for_channel(channel, select=True)
-
         self._channel = channel
         self._refaceCP.set_transmit_channel(channel)
         for control in self._all_controls:
@@ -298,6 +295,7 @@ class RefaceCPControlSurface(ControlSurface):
             return # disable control while in scale edit mode
         self._logger.log(f"Type changed: {value} -> {channel}")
         self.set_channel(channel)
+        self._arm_tracks_for_channel(channel, select=True)
         self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, value))  # Update led in device since we disabled local control
 
     def _reface_tremolo_toggle_changed(self, value):
