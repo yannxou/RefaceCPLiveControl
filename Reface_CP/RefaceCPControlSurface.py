@@ -228,12 +228,15 @@ class RefaceCPControlSurface(ControlSurface):
         self._all_controls.append(horizontal_offset_button)
         vertical_offset_button = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_RATE_KNOB, Live.MidiMap.MapMode.absolute)
         self._all_controls.append(vertical_offset_button)
+        note_layout_button = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(note_layout_button)
         self._clip_launcher_controller = ClipLauncherController(
             logger=self._logger, 
             c_instance=self._c_instance, 
             channel=self._channel,
             horizontal_offset_button=horizontal_offset_button,
-            vertical_offset_button=vertical_offset_button
+            vertical_offset_button=vertical_offset_button,
+            note_layout_button=note_layout_button
         )
 
     @property
@@ -506,7 +509,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._device_controller.set_enabled(False)
             self._scale_controller.set_enabled(False)
             self._clip_launcher_controller.set_enabled(True)
-            self._logger.show_message("Clip mode enabled.")
+            self._logger.show_message("Clip trigger mode enabled.")
              # Update device leds
             self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))
             self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))
