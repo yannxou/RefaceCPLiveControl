@@ -31,6 +31,7 @@ from .TransportController import TransportController
 from .NavigationController import NavigationController
 from .NoteRepeatController import NoteRepeatController
 from .ScaleModeController import ScaleModeController
+from .ClipLauncherController import ClipLauncherController
 from .AudioTrackMonitoringListener import AudioTrackMonitoringListener
 
 # Live Routing Category values
@@ -101,6 +102,7 @@ class RefaceCPControlSurface(ControlSurface):
         )
         self._setup_note_repeat()
         self._setup_scale_controller()
+        self._setup_clip_launcher()
         self._refaceCP.request_current_values()
 
     def _receive_tone_parameter(self, parameter: ToneParameter, value):
@@ -221,6 +223,19 @@ class RefaceCPControlSurface(ControlSurface):
             on_note_event = self._play_note
         )
 
+    def _setup_clip_launcher(self):
+        horizontal_offset_button = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(horizontal_offset_button)
+        vertical_offset_button = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_RATE_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(vertical_offset_button)
+        self._clip_launcher_controller = ClipLauncherController(
+            logger=self._logger, 
+            c_instance=self._c_instance, 
+            channel=self._channel,
+            horizontal_offset_button=horizontal_offset_button,
+            vertical_offset_button=vertical_offset_button
+        )
+
     @property
     def _is_initialized(self):
         return self._tremolo_toggle_value >= 0 and self._chorus_toggle_value >= 0 and self._delay_toggle_value >= 0
@@ -277,6 +292,7 @@ class RefaceCPControlSurface(ControlSurface):
             control.set_channel(channel)
         self._transport_controller.set_channel(channel)
         self._scale_controller.set_channel(channel)
+        self._clip_launcher_controller.set_channel(channel)
 
 # --- Listeners
 
@@ -359,6 +375,8 @@ class RefaceCPControlSurface(ControlSurface):
                 self._note_repeat_controller.set_controls_enabled(False)
             if self.is_scale_mode_enabled:
                 self._scale_controller.set_enabled(True, enable_controls=False)
+            if self.is_clip_mode_enabled:
+                self._clip_launcher_controller.set_enabled(True)
             self._check_device_track_modes()
             
     def _check_device_track_modes(self):
@@ -415,6 +433,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._note_repeat_controller.set_controls_enabled(False)
         self._scale_controller.disable_edit_mode()
         self._scale_controller.set_controls_enabled(False)
+        self._clip_launcher_controller.set_controls_enabled(False)
 
         self._track_controller.set_enabled(False)
         self._unlock_from_device()
@@ -434,6 +453,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._note_repeat_controller.set_controls_enabled(False)
         self._scale_controller.disable_edit_mode()
         self._scale_controller.set_controls_enabled(False)
+        self._clip_launcher_controller.set_controls_enabled(False)
         self._track_controller.set_enabled(False)
         self._device_controller.set_enabled(True)
         self._lock_to_device(selected_device)
@@ -445,6 +465,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._note_repeat_controller.set_controls_enabled(False)
         self._scale_controller.disable_edit_mode()
         self._scale_controller.set_controls_enabled(False)
+        self._clip_launcher_controller.set_controls_enabled(False)
         self._device_controller.set_enabled(False)
         self._track_controller.set_enabled(True)
         self._logger.show_message("Track mode enabled.")
@@ -471,6 +492,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._note_repeat_controller.set_controls_enabled(False)
             self._track_controller.set_enabled(False)
             self._device_controller.set_enabled(False)
+            self._clip_launcher_controller.set_enabled(False)
             self._scale_controller.set_enabled(True)
             self._logger.show_message("Scale mode enabled.")
             # Update device leds
@@ -478,8 +500,21 @@ class RefaceCPControlSurface(ControlSurface):
             self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))
             self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
             self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
+        elif value == REFACE_TOGGLE_DOWN:
+            self._note_repeat_controller.set_controls_enabled(False)
+            self._track_controller.set_enabled(False)
+            self._device_controller.set_enabled(False)
+            self._scale_controller.set_enabled(False)
+            self._clip_launcher_controller.set_enabled(True)
+            self._logger.show_message("Clip mode enabled.")
+             # Update device leds
+            self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 64))
+            self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 0))
+            self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 0))
+            self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
         else:
             self._scale_controller.set_enabled(False)
+            self._clip_launcher_controller.set_enabled(False)
             self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))  # Update led in device since we disabled local control
             self._check_device_track_modes()
         
@@ -497,6 +532,12 @@ class RefaceCPControlSurface(ControlSurface):
 
     def _play_note(self, note, velocity):
         self._send_midi((0x90 | self._rx_channel, note, velocity))
+
+# -- Clip Mode
+
+    @property
+    def is_clip_mode_enabled(self):
+        return self._chorus_toggle_value == REFACE_TOGGLE_DOWN
 
 # -- Navigation/Transport Mode
 
@@ -521,6 +562,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._navigation_controller.set_enabled(False)
             self._scale_controller.disable_edit_mode()
             self._scale_controller.set_controls_enabled(False)
+            self._clip_launcher_controller.set_enabled(False)
             self._note_repeat_controller.set_enabled(True)
             self._logger.show_message("Note repeat enabled.")
             self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 64))  # Update led in device since we disabled local control
@@ -539,6 +581,7 @@ class RefaceCPControlSurface(ControlSurface):
     def _enable_navigation_mode(self):
         self._note_repeat_controller.set_enabled(False)
         self._scale_controller.set_enabled(False)
+        self._clip_launcher_controller.set_enabled(False)
         self._track_controller.set_enabled(False)
         self._device_controller.set_enabled(False)
         self._transport_controller.set_enabled(True)
@@ -565,6 +608,7 @@ class RefaceCPControlSurface(ControlSurface):
         else:
             self._note_repeat_controller.set_enabled(False)
             self._scale_controller.set_enabled(False)
+            self._clip_launcher_controller.set_enabled(False)
             self._track_controller.set_enabled(False)
             self._device_controller.set_enabled(False)
             self._transport_controller.set_enabled(False)
@@ -591,6 +635,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._navigation_controller.disconnect()
         self._note_repeat_controller.disconnect()
         self._scale_controller.disconnect()
+        self._clip_launcher_controller.disconnect()
 
         self._type_select_button.remove_value_listener(self._reface_type_select_changed)
         self._tremolo_toggle_button.remove_value_listener(self._reface_tremolo_toggle_changed)
