@@ -125,32 +125,39 @@ class ClipLauncherController:
         if layout == 0:
             self._width = 7
             self._height = 12
+            self._logger.show_message("Clip trigger layout: 1 octave/track")
         elif layout == 1:
             self._width = 3
             self._height = 24
+            self._logger.show_message("Clip trigger layout: 2 octaves/track")
         elif layout == 2:
             self._width = 2
             self._height = 36
+            self._logger.show_message("Clip trigger layout: 3 octaves/track")
         elif layout == 3:
             self._width = 1
             self._height = 85 # all note keys in the reface: 7 octaves + highest C
+            self._logger.show_message("Clip trigger layout: single track")
         elif layout == 4:
             self._width = 85 # all note keys in the reface: 7 octaves + highest C
             self._height = 1
+            self._logger.show_message("Clip trigger layout: single scene")
         elif layout == 5:
             self._width = 36
             self._height = 2
+            self._logger.show_message("Clip trigger layout: 3 octaves/scene")
         elif layout == 6:
             self._width = 24
             self._height = 3
+            self._logger.show_message("Clip trigger layout: 2 octaves/scene")
         elif layout == 7:
             self._width = 12
             self._height = 7
+            self._logger.show_message("Clip trigger layout: 1 octave/scene")
         else:
             pass
         self._current_layout = layout
         # self._logger.log(f"width: {self._width} height: {self._height}")
-        # TODO: Update offsets!?!
         self._update_highlight()
 
     def _on_note_key(self, velocity, sender):
