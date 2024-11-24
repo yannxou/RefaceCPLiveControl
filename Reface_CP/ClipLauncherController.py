@@ -48,9 +48,11 @@ class ClipLauncherController:
         self._enabled = enabled
         self.set_controls_enabled(enabled)
         if enabled:
+            self._add_song_listeners()
             self._add_note_key_listeners()
             self._update_highlight()
         else:
+            self._remove_song_listeners()
             self._remove_note_key_listeners()
             self._hide_highlight()
 
@@ -68,6 +70,18 @@ class ClipLauncherController:
 
     def song(self):
         return self._c_instance.song()
+
+    def _add_song_listeners(self):
+        if not self.song().tracks_has_listener(self._on_tracks_changed):
+            self.song().add_tracks_listener(self._on_tracks_changed)
+        if not self.song().scenes_has_listener(self._on_scenes_changed):
+            self.song().add_scenes_listener(self._on_scenes_changed)
+
+    def _remove_song_listeners(self):
+        if self.song().tracks_has_listener(self._on_tracks_changed):
+            self.song().remove_tracks_listener(self._on_tracks_changed)
+        if self.song().scenes_has_listener(self._on_scenes_changed):
+            self.song().remove_scenes_listener(self._on_scenes_changed)
 
     def _add_note_key_listeners(self):
         """Updates the note key listeners so all notes are captured"""
@@ -105,6 +119,18 @@ class ClipLauncherController:
             self._c_instance.set_session_highlight(track_offset=0, scene_offset=0, width=0, height=0, include_return_tracks=False)
         except:
             pass
+
+    def _on_tracks_changed(self):
+        total_tracks = len(self.song().visible_tracks)
+        if self._horizontal_offset >= total_tracks:
+            self._horizontal_offset = total_tracks - 1
+            self._update_highlight()
+
+    def _on_scenes_changed(self):
+        total_scenes = len(self.song().scenes)
+        if self._vertical_offset >= total_scenes:
+            self._vertical_offset = total_scenes - 1
+            self._update_highlight()
 
     def _on_horizontal_offset_button_changed(self, value):
         total_tracks = len(self.song().visible_tracks)
@@ -182,6 +208,7 @@ class ClipLauncherController:
                 clip_slot.fire()
 
     def disconnect(self):
+        self._remove_song_listeners()
         self._remove_button_listeners()
         self._remove_note_key_listeners()
         self._note_key_buttons = []
