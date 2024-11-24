@@ -224,6 +224,8 @@ class RefaceCPControlSurface(ControlSurface):
         )
 
     def _setup_clip_launcher(self):
+        trigger_quantization_button = EncoderElement(MIDI_CC_TYPE, self._channel, DRIVE_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(trigger_quantization_button)
         horizontal_offset_button = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
         self._all_controls.append(horizontal_offset_button)
         vertical_offset_button = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_RATE_KNOB, Live.MidiMap.MapMode.absolute)
@@ -236,6 +238,7 @@ class RefaceCPControlSurface(ControlSurface):
             logger=self._logger, 
             c_instance=self._c_instance, 
             channel=self._channel,
+            trigger_quantization_button=trigger_quantization_button,
             horizontal_offset_button=horizontal_offset_button,
             vertical_offset_button=vertical_offset_button,
             note_layout_button=note_layout_button,

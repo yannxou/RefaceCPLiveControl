@@ -10,15 +10,34 @@
 # Distributed under the MIT License, see LICENSE
 
 from .Logger import Logger
+from Live.Song import Song, Quantization
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 
 class ClipLauncherController:
     
+    quantization_all = [
+        Quantization.q_no_q,
+        Quantization.q_8_bars,
+        Quantization.q_4_bars,
+        Quantization.q_2_bars,
+        Quantization.q_bar,
+        Quantization.q_half,
+        Quantization.q_half_triplet,
+        Quantization.q_quarter,
+        Quantization.q_quarter_triplet,
+        Quantization.q_eight,
+        Quantization.q_eight_triplet,
+        Quantization.q_sixtenth,
+        Quantization.q_sixtenth_triplet,
+        Quantization.q_thirtytwoth
+    ]    
+
     def __init__(self,
                  logger: Logger,
                  c_instance,
                  channel = 0,
+                 trigger_quantization_button = None,
                  horizontal_offset_button = None,
                  vertical_offset_button = None,
                  note_layout_button = None,
@@ -28,6 +47,7 @@ class ClipLauncherController:
         self._enabled = False
         self._c_instance = c_instance
         self._channel = channel
+        self._trigger_quantization_button = trigger_quantization_button
         self._horizontal_offset_button = horizontal_offset_button
         self._vertical_offset_button = vertical_offset_button
         self._note_layout_button = note_layout_button
@@ -99,6 +119,8 @@ class ClipLauncherController:
                 button.remove_value_listener(self._on_note_key)
 
     def _add_button_listeners(self):
+        if self._trigger_quantization_button and not self._trigger_quantization_button.value_has_listener(self._on_trigger_quantization_button_changed):
+            self._trigger_quantization_button.add_value_listener(self._on_trigger_quantization_button_changed)
         if self._horizontal_offset_button and not self._horizontal_offset_button.value_has_listener(self._on_horizontal_offset_button_changed):
             self._horizontal_offset_button.add_value_listener(self._on_horizontal_offset_button_changed)
         if self._vertical_offset_button and not self._vertical_offset_button.value_has_listener(self._on_vertical_offset_button_changed):
@@ -109,6 +131,8 @@ class ClipLauncherController:
             self._clip_scene_target_button.add_value_listener(self._on_clip_scene_target_button_changed)
 
     def _remove_button_listeners(self):
+        if self._trigger_quantization_button and self._trigger_quantization_button.value_has_listener(self._on_trigger_quantization_button_changed):
+            self._trigger_quantization_button.remove_value_listener(self._on_trigger_quantization_button_changed)
         if self._horizontal_offset_button and self._horizontal_offset_button.value_has_listener(self._on_horizontal_offset_button_changed):
             self._horizontal_offset_button.remove_value_listener(self._on_horizontal_offset_button_changed)
         if self._vertical_offset_button and self._vertical_offset_button.value_has_listener(self._on_vertical_offset_button_changed):
@@ -142,6 +166,10 @@ class ClipLauncherController:
         if self._vertical_offset >= total_scenes:
             self._vertical_offset = total_scenes - 1
             self._update_highlight()
+
+    def _on_trigger_quantization_button_changed(self, value):
+        quantization = int((value / 127.0) * len(self.quantization_all))
+        self.song().clip_trigger_quantization = quantization
 
     def _on_horizontal_offset_button_changed(self, value):
         total_tracks = len(self.song().visible_tracks)
