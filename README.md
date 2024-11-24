@@ -11,8 +11,9 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
 	3. [Chorus toggle (Scale mode)](#chorus-toggle)
 		1. [Scale Play Mode](#scale-play-mode)
 		2. [Scale Edit Mode](#scale-edit-mode)
-	4. [D.Delay toggle (Note repeat)](#ddelay-toggle)
-	5. [A.Delay toggle (Navigation/Transport mode)](#adelay-toggle)
+	4. [Phaser toggle (Clip trigger mode)](#phaser-toggle)
+	5. [D.Delay toggle (Note repeat)](#ddelay-toggle)
+	6. [A.Delay toggle (Navigation/Transport mode)](#adelay-toggle)
 		1. [C  (*Stop actions*)](#c--stop-actions)
 		2. [C# (*Recording actions*)](#c--recording-actions)
 		3. [D  (*Play actions*)](#d--play-actions)
@@ -104,6 +105,32 @@ Once all keys are released a list of all the possible scales that include all th
 
 <p align="center">
 	<img src="Images/scale_edit_mode.jpg" alt="Scale Edit Mode" width="50%" />
+</p>
+
+### Phaser toggle:
+
+Enables the **Clip trigger mode**. This allows clip/scene triggering using the MIDI note keys. The following controls apply in this mode:
+
+* **Drive**: Global clip trigger quantization.
+
+* **Tremolo Depth**: Horizontal grid offset. Use this knob to move the clip grid highlight horizontally.
+
+* **Tremolo Rate**: Vertical grid offset. Use this knob to move the clip grid highlight vertically.
+
+* **Chorus Depth**: Note Key Layout. There are multiple keyboard layouts available for triggering clips. Move this knob to switch between these:
+	* 1 octave per track (allow triggering up to 12 clips per track)
+	* 2 octaves per track (allow triggering up to 24 clips per track)
+	* 3 octaves per track (allow triggering up to 36 clips per track)
+	* 7 octaves per track (use all note keys to target clips across a single track)
+	* 7 octaves per scene (use all note keys to target clips across a single scene)
+	* 3 octaves per scene (allow triggering clips from same scene across 36 tracks)
+	* 2 octaves per scene (allow triggering clips from same scene across 24 tracks)
+	* 1 octave per scene (allow triggering clips from same scene across 12 tracks)
+
+* **Chorus Speed**: Clip/Scene triggering. Move this knob to the left to target clips for triggering. Move it to the right to target scenes.
+
+<p align="center">
+	<img src="Images/clip_trigger_mode.jpg" alt="Clip Trigger Mode" width="50%" />
 </p>
 
 ### D.Delay toggle:
