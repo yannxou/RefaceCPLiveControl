@@ -21,7 +21,8 @@ class ClipLauncherController:
                  channel = 0,
                  horizontal_offset_button = None,
                  vertical_offset_button = None,
-                 note_layout_button = None
+                 note_layout_button = None,
+                 clip_scene_target_button = None
                  ):
         self._logger = logger
         self._enabled = False
@@ -30,6 +31,7 @@ class ClipLauncherController:
         self._horizontal_offset_button = horizontal_offset_button
         self._vertical_offset_button = vertical_offset_button
         self._note_layout_button = note_layout_button
+        self._clip_scene_target_button = clip_scene_target_button
         self._width = 7
         self._height = 12
         self._horizontal_offset = 0
@@ -37,6 +39,7 @@ class ClipLauncherController:
         self._tracks_per_octave = 1
         self._current_layout = 0
         self._note_key_buttons = []
+        self._is_scene_focused = False
         for index in range(128):
             button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
             self._note_key_buttons.append(button)
@@ -102,6 +105,8 @@ class ClipLauncherController:
             self._vertical_offset_button.add_value_listener(self._on_vertical_offset_button_changed)
         if self._note_layout_button and not self._note_layout_button.value_has_listener(self._on_note_layout_button_changed):
             self._note_layout_button.add_value_listener(self._on_note_layout_button_changed)
+        if self._clip_scene_target_button and not self._clip_scene_target_button.value_has_listener(self._on_clip_scene_target_button_changed):
+            self._clip_scene_target_button.add_value_listener(self._on_clip_scene_target_button_changed)
 
     def _remove_button_listeners(self):
         if self._horizontal_offset_button and self._horizontal_offset_button.value_has_listener(self._on_horizontal_offset_button_changed):
@@ -110,9 +115,15 @@ class ClipLauncherController:
             self._vertical_offset_button.remove_value_listener(self._on_vertical_offset_button_changed)
         if self._note_layout_button and self._note_layout_button.value_has_listener(self._on_note_layout_button_changed):
             self._note_layout_button.remove_value_listener(self._on_note_layout_button_changed)
+        if self._clip_scene_target_button and self._clip_scene_target_button.value_has_listener(self._on_clip_scene_target_button_changed):
+            self._clip_scene_target_button.remove_value_listener(self._on_clip_scene_target_button_changed)
 
     def _update_highlight(self):
-        self._c_instance.set_session_highlight(track_offset=self._horizontal_offset, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
+        if self._is_scene_focused:
+            total_tracks = len(self.song().visible_tracks)
+            self._c_instance.set_session_highlight(track_offset=total_tracks, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
+        else:
+            self._c_instance.set_session_highlight(track_offset=self._horizontal_offset, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
 
     def _hide_highlight(self):
         try:
@@ -186,26 +197,44 @@ class ClipLauncherController:
         # self._logger.log(f"width: {self._width} height: {self._height}")
         self._update_highlight()
 
+    def _on_clip_scene_target_button_changed(self, value):
+        is_scene_focused = value > 0
+        if self._is_scene_focused == is_scene_focused:
+            return
+        self._is_scene_focused = is_scene_focused
+        self._update_highlight()
+        if is_scene_focused:
+            self._logger.show_message("Scene trigger layout")
+        else:
+            self._logger.show_message("Clip trigger layout")
+
     def _on_note_key(self, velocity, sender):
         key = sender._msg_identifier
         # self._logger.log(f"Key {key}, value {velocity}")
         if velocity == 0:  # Note Off
             return
         note = key - 24 # lowest C
-        # Map octave to track
-        track_index = self._horizontal_offset + (note // self._height if self._height > self._width else note % self._width)
-        if track_index < 0 or track_index >= len(self.song().visible_tracks) or track_index > (self._horizontal_offset + self._width - 1):
-            return
-        track = self.song().visible_tracks[track_index]
-        if track.is_foldable or not track.can_be_armed:
-            return  # Skip non-audio/MIDI tracks
-        # Map note to clip slot
-        clip_slot_index = self._vertical_offset + (note % self._height if self._height > self._width else note // self._width)
-        # Fire the clip in the determined track and clip slot
-        if clip_slot_index < len(track.clip_slots) and clip_slot_index < (self._vertical_offset + self._height):
-            clip_slot = track.clip_slots[clip_slot_index]
-            if clip_slot.has_clip or clip_slot.has_stop_button:
-                clip_slot.fire()
+        if self._is_scene_focused:
+            scene_index = self._vertical_offset + (note % self._height if self._height > self._width else note // self._width)
+            # Fire the scene in the determined index
+            if scene_index < len(self.song().scenes) and scene_index < (self._vertical_offset + self._height):
+                scene = self.song().scenes[scene_index]
+                scene.fire()
+        else:
+            # Map octave to track
+            track_index = self._horizontal_offset + (note // self._height if self._height > self._width else note % self._width)
+            if track_index < 0 or track_index >= len(self.song().visible_tracks) or track_index > (self._horizontal_offset + self._width - 1):
+                return
+            track = self.song().visible_tracks[track_index]
+            if track.is_foldable or not track.can_be_armed:
+                return  # Skip non-audio/MIDI tracks
+            # Map note to clip slot
+            clip_slot_index = self._vertical_offset + (note % self._height if self._height > self._width else note // self._width)
+            # Fire the clip in the determined track and clip slot
+            if clip_slot_index < len(track.clip_slots) and clip_slot_index < (self._vertical_offset + self._height):
+                clip_slot = track.clip_slots[clip_slot_index]
+                if clip_slot.has_clip or clip_slot.has_stop_button:
+                    clip_slot.fire()
 
     def disconnect(self):
         self._remove_song_listeners()

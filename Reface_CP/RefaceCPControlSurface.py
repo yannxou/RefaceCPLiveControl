@@ -230,13 +230,16 @@ class RefaceCPControlSurface(ControlSurface):
         self._all_controls.append(vertical_offset_button)
         note_layout_button = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
         self._all_controls.append(note_layout_button)
+        clip_scene_target_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, CHORUS_SPEED_KNOB)
+        self._all_controls.append(clip_scene_target_button)
         self._clip_launcher_controller = ClipLauncherController(
             logger=self._logger, 
             c_instance=self._c_instance, 
             channel=self._channel,
             horizontal_offset_button=horizontal_offset_button,
             vertical_offset_button=vertical_offset_button,
-            note_layout_button=note_layout_button
+            note_layout_button=note_layout_button,
+            clip_scene_target_button=clip_scene_target_button
         )
 
     @property
