@@ -19,10 +19,11 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
 		3. [D  (*Play actions*)](#d--play-actions)
 		4. [E  (*Tempo actions*)](#e--tempo-actions)
 		5. [F  (*Track actions*)](#f--track-actions)
-		6. [G  (*Clip actions*)](#g--clip-actions)
-		7. [A  (*Device actions*)](#a--device-actions)
-		8. [A# (*Edit actions*)](#a--edit-actions)
-		9. [B  (*Loop actions*)](#b--loop-actions)
+		6. [F# (*Quick-recording actions*)](#f--quick-recording-actions)
+		7. [G  (*Clip actions*)](#g--clip-actions)
+		8. [A  (*Device actions*)](#a--device-actions)
+		9. [A# (*Edit actions*)](#a--edit-actions)
+		10. [B  (*Loop actions*)](#b--loop-actions)
 4. [Tips & Tricks](#tips--tricks)
 5. [Constraints](#constraints)
 6. [Troubleshooting](#troubleshooting)
@@ -209,6 +210,10 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + E to select to the previous track.
 * Press and hold + G to select to the next track.
 * Press and hold + A to select the current track's instrument.
+
+#### F# ⏐ *Quick-recording actions*
+
+* Press and release the key to start recording on the next free scene of all armed tracks.
 
 #### G ⏐ *Clip actions*
 
