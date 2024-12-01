@@ -9,6 +9,7 @@
 #
 # Distributed under the MIT License, see LICENSE
 
+import Live
 from Live.Device import Device
 from Live.Track import Track
 from Live.Song import Song, Quantization
@@ -75,7 +76,58 @@ class SongUtil:
             if next_clip_slot.has_clip:
                 song.view.highlighted_clip_slot = next_clip_slot
                 return
+            
+    @staticmethod
+    def find_first_free_scene_index(tracks):
+        """
+        Find the first free scene index in Ableton Live where all given tracks
+        have empty clip slots, starting from the last scene.
+        
+        Args:
+            tracks: The list of tracks.
+        
+        Returns:
+            int: The index of the first free scene, or -1 if none found.
+        """
+        song = Live.Application.get_application().get_document()
+        scenes = song.scenes
+        free_scene_index = -1
+        for scene_index in reversed(range(len(scenes))):
+            all_slots_empty = all(
+                track.clip_slots[scene_index].has_clip == False and track.clip_slots[scene_index].has_stop_button == True
+                for track in tracks
+            )
+            if all_slots_empty:
+                free_scene_index = scene_index
+            else:
+                return free_scene_index
 
+        return free_scene_index
+
+    @staticmethod
+    def start_quick_recording():
+        """
+        Starts recording clips on the next free scene of all armed tracks, creating a new scene if necessary. 
+        If no track is armed the current track will be armed automatically if possible.
+        """
+        song = Live.Application.get_application().get_document()
+        armed_tracks = [track for track in song.tracks if track.can_be_armed and track.arm]
+        if not armed_tracks:
+            # Try auto-arm selected track
+            track = song.view.selected_track
+            if track.can_be_armed:
+                track.arm = True
+                if track.arm:
+                    armed_tracks = [track]
+            else:
+                return
+        scene_index = SongUtil.find_first_free_scene_index(armed_tracks)
+        if scene_index < 0:
+            song.create_scene(-1)
+            scene_index = len(song.scenes) - 1
+        for track in armed_tracks:
+            clip_slot = track.clip_slots[scene_index]
+            clip_slot.fire()
 
     # - Device helpers
 

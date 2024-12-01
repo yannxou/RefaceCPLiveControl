@@ -121,6 +121,8 @@ class TransportController:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. |←|→| Hold+E/G: Prev/Next track. 🎹 Hold+A: Select instrument.")
             else:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. |←|→| Hold+E/G: Prev/Next track.")
+        elif action == Note.f_sharp:
+            self._logger.show_message("● Release to start quick-recording.")
         elif action == Note.g:
             self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip. [▶..] Hold+E: Fire scene. [←|→] Hold+F/A: Prev/Next clip slot.")
         elif action == Note.a:
@@ -158,6 +160,9 @@ class TransportController:
             else:
                 view.show_view("Detail/Clip")
                 self._logger.show_message("Toggle Clip View")
+
+        elif action == Note.f_sharp:
+            SongUtil.start_quick_recording()
 
         elif action == Note.g:
             Live.Application.get_application().view.show_view("Detail/Clip")
