@@ -213,7 +213,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 
 #### F# ⏐ *Quick-recording actions*
 
-* Press and release the key to start recording on the next free scene of all armed tracks.
+* Press and release the key to start a quick clip recording. This starts recording on the next free scene of all armed tracks, creating a new scene if necessary. If no track is armed the current track will be armed automatically if possible.
 
 #### G ⏐ *Clip actions*
 

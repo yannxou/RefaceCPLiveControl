@@ -162,18 +162,7 @@ class TransportController:
                 self._logger.show_message("Toggle Clip View")
 
         elif action == Note.f_sharp:
-            armed_tracks = [track for track in self._song.tracks if track.can_be_armed and track.arm]
-            if not armed_tracks:
-                # TODO: Auto-arm selected track option?
-                self._logger.show_message("No tracks armed for quick recording.")
-                return
-            scene_index = SongUtil.find_first_free_scene_index(armed_tracks)
-            if scene_index < 0:
-                self._song.create_scene(-1)
-                scene_index = len(self._song.scenes) - 1
-            for track in armed_tracks:
-                clip_slot = track.clip_slots[scene_index]
-                clip_slot.fire()
+            SongUtil.start_quick_recording()
 
         elif action == Note.g:
             Live.Application.get_application().view.show_view("Detail/Clip")

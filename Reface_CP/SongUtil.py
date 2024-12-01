@@ -104,6 +104,30 @@ class SongUtil:
 
         return free_scene_index
 
+    @staticmethod
+    def start_quick_recording():
+        """
+        Starts recording clips on the next free scene of all armed tracks, creating a new scene if necessary. 
+        If no track is armed the current track will be armed automatically if possible.
+        """
+        song = Live.Application.get_application().get_document()
+        armed_tracks = [track for track in song.tracks if track.can_be_armed and track.arm]
+        if not armed_tracks:
+            # Try auto-arm selected track
+            track = song.view.selected_track
+            if track.can_be_armed:
+                track.arm = True
+                if track.arm:
+                    armed_tracks = [track]
+            else:
+                return
+        scene_index = SongUtil.find_first_free_scene_index(armed_tracks)
+        if scene_index < 0:
+            song.create_scene(-1)
+            scene_index = len(song.scenes) - 1
+        for track in armed_tracks:
+            clip_slot = track.clip_slots[scene_index]
+            clip_slot.fire()
 
     # - Device helpers
 
