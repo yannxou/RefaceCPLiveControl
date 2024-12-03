@@ -293,8 +293,8 @@ class TransportController:
         # Quick-recording actions
         elif action == Note.f_sharp:
             if subaction == Note.g_sharp and is_same_octave:
-                SongUtil.start_quick_resampling()
-                            
+                SongUtil.start_quick_resampling(select_first=True)
+
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
         # Clip actions
