@@ -122,7 +122,7 @@ class TransportController:
             else:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. |←|→| Hold+E/G: Prev/Next track.")
         elif action == Note.f_sharp:
-            self._logger.show_message("● Release to start quick-recording.")
+            self._logger.show_message("[●] Release to start quick-recording. [●←] Hold+G#: Quick-resampling.")
         elif action == Note.g:
             self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip. [▶..] Hold+E: Fire scene. [←|→] Hold+F/A: Prev/Next clip slot.")
         elif action == Note.a:
@@ -288,6 +288,14 @@ class TransportController:
                 Live.Application.get_application().view.show_view("Detail/DeviceChain")
                 selected_track.view.select_instrument()
             
+            self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
+
+        # Quick-recording actions
+        elif action == Note.f_sharp:
+            if subaction == Note.g_sharp and is_same_octave:
+                SongUtil.start_quick_resampling(select_first=True)
+                self._logger.show_message("Quick-resampling.")
+
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
 
         # Clip actions

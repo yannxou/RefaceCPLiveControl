@@ -11,7 +11,7 @@
 
 import Live
 from Live.Device import Device
-from Live.Track import Track
+from Live.Track import Track, RoutingTypeCategory
 from Live.Song import Song, Quantization
 from Live.DeviceParameter import ParameterState
 
@@ -128,6 +128,56 @@ class SongUtil:
         for track in armed_tracks:
             clip_slot = track.clip_slots[scene_index]
             clip_slot.fire()
+
+    @staticmethod
+    def find_first_resampling_track():
+        """
+        Find the first track in the Ableton Live set that is set to "Resampling" as its input source.
+        
+        Returns:
+            Live.Track.Track or None: The first track with "Resampling" input, or None if not found.
+        """
+        song = Live.Application.get_application().get_document()
+        for track in song.tracks:
+            if track.has_audio_input:
+                if track.input_routing_type.category == RoutingTypeCategory.resampling:
+                    return track
+        return None
+    
+    @staticmethod
+    def start_quick_resampling(select_first: bool = False):
+        """
+        Starts recording a clip on the next free slot of the first track with "Resampling" input, creating a new scene if necessary. 
+        If no track exists with the "Resampling" input routing a new one is created.
+
+        Args:
+            select_first: When True, if a resampling clip is already being recorded and is not selected it will be selected first.
+        """
+        song = Live.Application.get_application().get_document()
+        resampling_track = SongUtil.find_first_resampling_track()
+        if resampling_track is None:
+            resampling_track = song.create_audio_track(-1)
+            for routing_type in resampling_track.available_input_routing_types:
+                if routing_type.category == RoutingTypeCategory.resampling:
+                    resampling_track.input_routing_type = routing_type
+                    break
+        else:
+            recording_clip_slot = next((slot for slot in resampling_track.clip_slots if slot.has_clip and slot.clip.is_recording), None)
+            if recording_clip_slot is not None:
+                if recording_clip_slot != song.view.highlighted_clip_slot and select_first:
+                    song.view.highlighted_clip_slot = recording_clip_slot
+                    Live.Application.get_application().view.show_view("Detail/Clip")
+                    return
+        scene_index = SongUtil.find_first_free_scene_index([resampling_track])
+        if scene_index < 0:
+            song.create_scene(-1)
+            scene_index = len(song.scenes) - 1
+        if not resampling_track.arm:
+            resampling_track.arm = True
+        resampling_track.clip_slots[scene_index].fire()
+        # Focus new clip
+        song.view.highlighted_clip_slot = resampling_track.clip_slots[scene_index]
+        Live.Application.get_application().view.show_view("Detail/Clip")
 
     # - Device helpers
 
