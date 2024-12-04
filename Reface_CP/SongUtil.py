@@ -17,6 +17,18 @@ from Live.DeviceParameter import ParameterState
 
 class SongUtil:
 
+    # - Track helpers
+
+    @staticmethod
+    def find_armed_tracks() -> list[Track]:
+        song = Live.Application.get_application().get_document()
+        return [track for track in song.tracks if track.can_be_armed and track.arm]
+
+    @staticmethod
+    def find_selected_tracks() -> list[Track]:
+        song = Live.Application.get_application().get_document()
+        return [track for track in song.tracks if track.is_part_of_selection]
+
     # - Clip navigation
 
     @staticmethod
@@ -78,7 +90,7 @@ class SongUtil:
                 return
             
     @staticmethod
-    def find_first_free_scene_index(tracks):
+    def find_first_free_scene_index(tracks: list[Track]) -> int:
         """
         Find the first free scene index in Ableton Live where all given tracks
         have empty clip slots, starting from the last scene.
@@ -104,23 +116,26 @@ class SongUtil:
 
         return free_scene_index
 
+    # - Quick recording actions
+
     @staticmethod
-    def start_quick_recording():
+    def start_quick_recording(tracks: list[Track], autoarm: bool = False):
         """
-        Starts recording clips on the next free scene of all armed tracks, creating a new scene if necessary. 
-        If no track is armed the current track will be armed automatically if possible.
+        Starts recording clips on the next free scene of all given tracks, creating a new scene if necessary. 
+
+        Args:
+            tracks: The list of tracks to start the quick recording to.
+            autoarm: If true, tracks that are not armed will be armed automatically if possible.
         """
         song = Live.Application.get_application().get_document()
-        armed_tracks = [track for track in song.tracks if track.can_be_armed and track.arm]
-        if not armed_tracks:
-            # Try auto-arm selected track
-            track = song.view.selected_track
-            if track.can_be_armed:
+        armed_tracks = []
+        for track in tracks:
+            if autoarm and track.can_be_armed and not track.arm:
                 track.arm = True
-                if track.arm:
-                    armed_tracks = [track]
-            else:
-                return
+            if track.arm:
+                armed_tracks.append(track)
+        if len(armed_tracks) == 0:
+            return
         scene_index = SongUtil.find_first_free_scene_index(armed_tracks)
         if scene_index < 0:
             song.create_scene(-1)
@@ -130,7 +145,7 @@ class SongUtil:
             clip_slot.fire()
 
     @staticmethod
-    def find_first_resampling_track():
+    def find_first_resampling_track() -> Track | None:
         """
         Find the first track in the Ableton Live set that is set to "Resampling" as its input source.
         
