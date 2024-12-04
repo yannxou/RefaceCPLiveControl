@@ -162,7 +162,8 @@ class TransportController:
                 self._logger.show_message("Toggle Clip View")
 
         elif action == Note.f_sharp:
-            SongUtil.start_quick_recording()
+            selected_tracks = SongUtil.find_selected_tracks()
+            SongUtil.start_quick_recording(tracks=selected_tracks, autoarm=True)
 
         elif action == Note.g:
             Live.Application.get_application().view.show_view("Detail/Clip")
@@ -292,7 +293,10 @@ class TransportController:
 
         # Quick-recording actions
         elif action == Note.f_sharp:
-            if subaction == Note.g_sharp and is_same_octave:
+            if subaction == Note.c_sharp and is_same_octave:
+                armed_tracks = SongUtil.find_armed_tracks()
+                SongUtil.start_quick_recording(tracks=armed_tracks)
+            elif subaction == Note.g_sharp and is_same_octave:
                 SongUtil.start_quick_resampling(select_first=True)
                 self._logger.show_message("Quick-resampling.")
 
