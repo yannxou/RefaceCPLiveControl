@@ -629,7 +629,8 @@ class RefaceCPControlSurface(ControlSurface):
     def _on_selected_track_changed(self):
         # self._logger.log("_on_selected_track_changed")
         super()._on_selected_track_changed()
-        self._track_controller.set_track(self.song().view.selected_track)
+        if self._is_initialized:
+            self._track_controller.set_track(self.song().view.selected_track)
 
     def handle_sysex(self, midi_bytes):
         self._refaceCP.handle_sysex(midi_bytes)
