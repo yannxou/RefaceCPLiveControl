@@ -300,12 +300,15 @@ class TransportController:
             if subaction == Note.c_sharp and is_same_octave:
                 armed_tracks = SongUtil.find_armed_tracks()
                 SongUtil.start_quick_recording(tracks=armed_tracks)
+                self._logger.show_message("Quick-recording.")
 
             elif subaction == Note.f and is_same_octave:
-                SongUtil.start_track_audio_resampling(self._song.view.selected_track)                
+                SongUtil.start_track_audio_resampling(self._song.view.selected_track)     
+                self._logger.show_message("Audio track resampling.")           
 
             elif subaction == Note.g and is_same_octave:
-                SongUtil.start_track_midi_resampling(self._song.view.selected_track)  
+                SongUtil.start_track_midi_resampling(self._song.view.selected_track)
+                self._logger.show_message("MIDI track resampling.")
 
             elif subaction == Note.g_sharp and is_same_octave:
                 SongUtil.start_quick_resampling(select_first=True)
