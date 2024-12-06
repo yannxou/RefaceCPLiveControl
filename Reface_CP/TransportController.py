@@ -113,7 +113,7 @@ class TransportController:
         elif action == Note.c_sharp:
             self._logger.show_message("● Release to toggle record. ▶= Hold+C: Back to Arranger. ✚ Hold+D: Arrangement overdub. ○ Hold+D#: Session record •-• Hold+E: Automation arm. ◀︎- Hold+F: Reenable automation.")
         elif action == Note.d:
-            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. ▶│◀︎ Hold+C#/D#: Jump to prev/next cue. [●]▶ Hold+F#: Play recording clips. │▶ Hold+G#: Continue playback. ")
+            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. ▶│◀︎ Hold+C#/D#: Jump to prev/next cue. [●]▶ Hold+F#: Play recording clips. │▶ Hold+G#: Continue playback. [▶…] Hold+A#: Play scene.")
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization. [TAP] Hold+A.")
         elif action == Note.f:
@@ -254,6 +254,9 @@ class TransportController:
                     self._logger.show_message("Play from selection.")
                     self._song.continue_playing()   # Continue playing the song from the current position
                     self._current_action_key = None # Consume action (force to press again first note to redo action)
+                elif subaction == Note.a_sharp and is_same_octave:
+                    self._logger.show_message("Play selected scene.")
+                    self._song.view.selected_scene.fire()
 
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
                 

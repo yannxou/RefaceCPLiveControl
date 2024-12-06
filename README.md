@@ -193,8 +193,9 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + use the white keys to change the song position (jump) according to the distance between the first key (D) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 * Press and hold + C# to jump to the previous cue marker.
 * Press and hold + D# to jump to the next cue marker.
-* Press and hold + F# to continue playback from the current position.
-* Press and hold + G# to play all recording clips.
+* Press and hold + F# to play all recording clips.
+* Press and hold + G# to continue playback from the current position.
+* Press and hold + A# to play the selected scene.
 
 #### E ⏐ *Tempo actions*
 
