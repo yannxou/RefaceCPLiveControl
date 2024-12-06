@@ -109,7 +109,7 @@ class TransportController:
     def _begin_action(self, action_key):
         action = action_key % 12
         if action == Note.c:
-            self._logger.show_message("◼︎ Release to stop playing. │◼︎│ Hold+D: Stop track clips. │◼︎◼︎◼︎│ Hold+E: Stop all clips. │◼●│ Hold+F#: Stop armed tracks.")
+            self._logger.show_message("◼︎ Release to stop playing. [◼●] Hold+C#: Stop recording clips. │◼︎│ Hold+D: Stop track clips. │◼︎◼︎◼︎│ Hold+E: Stop all clips. │◼●│ Hold+F#: Stop armed tracks.")
         elif action == Note.c_sharp:
             self._logger.show_message("● Release to toggle record. ▶= Hold+C: Back to Arranger. ✚ Hold+D: Arrangement overdub. ○ Hold+D#: Session record •-• Hold+E: Automation arm. ◀︎- Hold+F: Reenable automation.")
         elif action == Note.d:
@@ -193,7 +193,10 @@ class TransportController:
 
         # Stop actions
         if action == Note.c:
-            if subaction == Note.e and is_same_octave:
+            if subaction == Note.c_sharp and is_same_octave:
+                self._logger.show_message("Stop recording clips.")
+                SongUtil.stop_all_recording_clips()
+            elif subaction == Note.e and is_same_octave:
                 self._logger.show_message("Stop all clips.")
                 self._song.stop_all_clips()
             elif subaction == Note.f and is_same_octave:
