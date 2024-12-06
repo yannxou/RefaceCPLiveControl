@@ -29,6 +29,17 @@ class SongUtil:
         song = Live.Application.get_application().get_document()
         return [track for track in song.tracks if track.is_part_of_selection]
 
+    @staticmethod
+    def find_track_index(track) -> int:
+        """
+        Get the index of a track in song.tracks. Returns -1 if track is not found.
+        """
+        song = Live.Application.get_application().get_document()
+        for idx, t in enumerate(song.tracks):
+            if t == track:
+                return idx
+        return -1
+
     # - Clip navigation
 
     @staticmethod
@@ -183,6 +194,10 @@ class SongUtil:
                     song.view.highlighted_clip_slot = recording_clip_slot
                     Live.Application.get_application().view.show_view("Detail/Clip")
                     return
+
+        # Ensure target track monitoring is set to OFF to avoid feedback
+        resampling_track.current_monitoring_state = Track.monitoring_states.OFF
+
         scene_index = SongUtil.find_first_free_scene_index([resampling_track])
         if scene_index < 0:
             song.create_scene(-1)
@@ -193,6 +208,51 @@ class SongUtil:
         # Focus new clip
         song.view.highlighted_clip_slot = resampling_track.clip_slots[scene_index]
         Live.Application.get_application().view.show_view("Detail/Clip")
+
+    @staticmethod
+    def start_track_audio_resampling(source_track: Track):
+        """
+        Start recording a new clip into a track that takes audio from the given track's output, creating a new track if none is found.
+        """
+        if not source_track.has_audio_output: 
+            return
+        
+        song = Live.Application.get_application().get_document()
+        target_track = next((t for t in song.tracks if t.has_audio_input and t.input_routing_type.attached_object == source_track), None)
+        if target_track is None:
+            # Create track for resampling 
+            target_track_index = SongUtil.find_track_index(source_track)
+            if target_track_index < 0:
+                # Check if it's a send/main track
+                if source_track in song.return_tracks or source_track == song.master_track:
+                    target_track_index = -1
+                else:
+                    return
+            else:
+                target_track_index = target_track_index + 1
+            target_track = song.create_audio_track(target_track_index)
+            source_routing = next((routing for routing in target_track.available_input_routing_types if routing.attached_object == source_track), None)
+            if source_routing is None:
+                return
+            target_track.input_routing_type = source_routing
+            # It seems that trying to set the input_routing_channel right after creating a track may lead to crash.
+            # The available_input_routing_channels is empty just after the track creation and maybe this should be delayed somehow.
+            # target_track.input_routing_channel = target_track.available_input_routing_channels[2]
+        else:
+            song.view.selected_track = target_track
+
+        if target_track.can_be_armed and not target_track.arm:
+            target_track.arm = True
+        
+        # Ensure target track monitoring is set to OFF to avoid feedback
+        target_track.current_monitoring_state = Track.monitoring_states.OFF
+
+        scene_index = SongUtil.find_first_free_scene_index([target_track])
+        if scene_index < 0:
+            song.create_scene(-1)
+            scene_index = len(song.scenes) - 1
+        clip_slot = target_track.clip_slots[scene_index]
+        clip_slot.fire()
 
     # - Device helpers
 
