@@ -122,7 +122,7 @@ class TransportController:
             else:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. |←|→| Hold+E/G: Prev/Next track.")
         elif action == Note.f_sharp:
-            self._logger.show_message("[●] Release to start quick-recording. [●|←] Hold+F: Audio track resample. │●…←│ Hold+G#: Quick-resampling.")
+            self._logger.show_message("[●] Release to start quick-recording. [●|←] Hold+F: Audio track resample. [●|←♪] Hold+G: MIDI track resample. │●…←│ Hold+G#: Quick-resampling.")
         elif action == Note.g:
             self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip. [▶..] Hold+E: Fire scene. [←|→] Hold+F/A: Prev/Next clip slot.")
         elif action == Note.a:
@@ -299,6 +299,9 @@ class TransportController:
 
             elif subaction == Note.f and is_same_octave:
                 SongUtil.start_track_audio_resampling(self._song.view.selected_track)                
+
+            elif subaction == Note.g and is_same_octave:
+                SongUtil.start_track_midi_resampling(self._song.view.selected_track)  
 
             elif subaction == Note.g_sharp and is_same_octave:
                 SongUtil.start_quick_resampling(select_first=True)
