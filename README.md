@@ -194,6 +194,7 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + C# to jump to the previous cue marker.
 * Press and hold + D# to jump to the next cue marker.
 * Press and hold + F# to continue playback from the current position.
+* Press and hold + G# to play all recording clips.
 
 #### E ⏐ *Tempo actions*
 

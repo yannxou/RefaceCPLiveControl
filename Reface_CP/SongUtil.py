@@ -41,6 +41,16 @@ class SongUtil:
         return -1
     
     @staticmethod
+    def play_all_recording_clips():
+        """
+        Play all the currently recording clips
+        """
+        for track in SongUtil.find_armed_tracks():
+            recording_clip_slot = next((slot for slot in track.clip_slots if slot.has_clip and slot.clip.is_recording), None)
+            if recording_clip_slot:
+                recording_clip_slot.fire()
+
+    @staticmethod
     def stop_all_recording_clips():
         """
         Stop all the currently recording clips
