@@ -109,7 +109,7 @@ class TransportController:
     def _begin_action(self, action_key):
         action = action_key % 12
         if action == Note.c:
-            self._logger.show_message("◼︎ Release to stop playing. │◼︎│ Hold+D: Stop track clips. │◼︎◼︎◼︎│ Hold+E: Stop all clips.")
+            self._logger.show_message("◼︎ Release to stop playing. │◼︎│ Hold+D: Stop track clips. │◼︎◼︎◼︎│ Hold+E: Stop all clips. │◼●│ Hold+F#: Stop armed tracks.")
         elif action == Note.c_sharp:
             self._logger.show_message("● Release to toggle record. ▶= Hold+C: Back to Arranger. ✚ Hold+D: Arrangement overdub. ○ Hold+D#: Session record •-• Hold+E: Automation arm. ◀︎- Hold+F: Reenable automation.")
         elif action == Note.d:
@@ -199,6 +199,10 @@ class TransportController:
             elif subaction == Note.f and is_same_octave:
                 self._logger.show_message("Stop current track clip.")
                 self._song.view.selected_track.stop_all_clips()
+            elif subaction == Note.f_sharp and is_same_octave:
+                self._logger.show_message("Stop clips from armed tracks.")
+                for track in SongUtil.find_armed_tracks():
+                    track.stop_all_clips()
             else:
                 self._logger.show_message("")
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
