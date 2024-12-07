@@ -109,11 +109,11 @@ class TransportController:
     def _begin_action(self, action_key):
         action = action_key % 12
         if action == Note.c:
-            self._logger.show_message("◼︎ Release to stop playing. │◼︎│ Hold+D: Stop track clips. │◼︎◼︎◼︎│ Hold+E: Stop all clips.")
+            self._logger.show_message("◼︎ Release to stop playing. │◼●│ Hold+C#: Stop armed tracks. │◼︎│ Hold+D: Stop track clips. │◼︎◼︎◼︎│ Hold+E: Stop all clips. [◼●] Hold+F#: Stop recording clips.")
         elif action == Note.c_sharp:
             self._logger.show_message("● Release to toggle record. ▶= Hold+C: Back to Arranger. ✚ Hold+D: Arrangement overdub. ○ Hold+D#: Session record •-• Hold+E: Automation arm. ◀︎- Hold+F: Reenable automation.")
         elif action == Note.d:
-            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. ▶│◀︎ Hold+C#/D#: Jump to prev/next cue. │▶ Hold+F#: Continue playback.")
+            self._logger.show_message("▶ Release to start playing. ◀︎┼▶︎ Hold+white keys to jump. ▶│◀︎ Hold+C#/D#: Jump to prev/next cue. [●]▶ Hold+F#: Play recording clips. │▶ Hold+G#: Continue playback. [▶…] Hold+A#: Play scene.")
         elif action == Note.e:
             self._logger.show_message("[○ ●] Release to toggle metronome. [↓▶] Hold+F/G: Inc/Dec Trigger Quantization. [1Bar] Hold+F#: Reset Quantization. [TAP] Hold+A.")
         elif action == Note.f:
@@ -122,7 +122,7 @@ class TransportController:
             else:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. |←|→| Hold+E/G: Prev/Next track.")
         elif action == Note.f_sharp:
-            self._logger.show_message("[●] Release to start quick-recording. [●|←] Hold+F: Audio track resample. [●|←♪] Hold+G: MIDI track resample. │●…←│ Hold+G#: Quick-resampling.")
+            self._logger.show_message("[●] Release for quick-recording. [◼●] Hold+C: Stop recording clips. │●│ Hold+C#: Quick-record armed tracks. [●]▶ Hold+D: Play recording clips. [●|←] Hold+F: Audio track resample. [●|←♪] Hold+G: MIDI track resample. │●…←│ Hold+G#: Quick-resampling.")
         elif action == Note.g:
             self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip. [▶..] Hold+E: Fire scene. [←|→] Hold+F/A: Prev/Next clip slot.")
         elif action == Note.a:
@@ -193,12 +193,19 @@ class TransportController:
 
         # Stop actions
         if action == Note.c:
-            if subaction == Note.e and is_same_octave:
+            if subaction == Note.c_sharp and is_same_octave:
+                self._logger.show_message("Stop clips from armed tracks.")
+                for track in SongUtil.find_armed_tracks():
+                    track.stop_all_clips()
+            elif subaction == Note.e and is_same_octave:
                 self._logger.show_message("Stop all clips.")
                 self._song.stop_all_clips()
             elif subaction == Note.f and is_same_octave:
                 self._logger.show_message("Stop current track clip.")
                 self._song.view.selected_track.stop_all_clips()
+            elif subaction == Note.f_sharp and is_same_octave:
+                self._logger.show_message("Stop recording clips.")
+                SongUtil.stop_all_recording_clips()
             else:
                 self._logger.show_message("")
             self._current_action_key = None  # Consume action (force to press again first note to redo action)
@@ -241,9 +248,16 @@ class TransportController:
                     self._song.jump_to_next_cue()
                     self._logger.show_message("Jump to next cue.")
                 elif subaction == Note.f_sharp and is_same_octave:
+                    self._logger.show_message("Play all recording clips.")
+                    SongUtil.play_all_recording_clips()
+                elif subaction == Note.g_sharp and is_same_octave:
                     self._logger.show_message("Play from selection.")
                     self._song.continue_playing()   # Continue playing the song from the current position
                     self._current_action_key = None # Consume action (force to press again first note to redo action)
+                elif subaction == Note.a_sharp and is_same_octave:
+                    self._logger.show_message("Play selected scene.")
+                    self._song.view.selected_scene.fire()
+
             self._current_action_skips_ending = True  # Avoid sending main action on note off but allow sending more subactions.
                 
         # Tempo actions
@@ -293,15 +307,26 @@ class TransportController:
 
         # Quick-recording actions
         elif action == Note.f_sharp:
-            if subaction == Note.c_sharp and is_same_octave:
+            if subaction == Note.c and is_same_octave:
+                self._logger.show_message("Stop recording clips.")
+                SongUtil.stop_all_recording_clips()
+            
+            elif subaction == Note.c_sharp and is_same_octave:
                 armed_tracks = SongUtil.find_armed_tracks()
                 SongUtil.start_quick_recording(tracks=armed_tracks)
+                self._logger.show_message("Quick-recording.")
+
+            elif subaction == Note.d and is_same_octave:
+                self._logger.show_message("Play all recording clips.")
+                SongUtil.play_all_recording_clips()
 
             elif subaction == Note.f and is_same_octave:
-                SongUtil.start_track_audio_resampling(self._song.view.selected_track)                
+                SongUtil.start_track_audio_resampling(self._song.view.selected_track)     
+                self._logger.show_message("Audio track resampling.")           
 
             elif subaction == Note.g and is_same_octave:
-                SongUtil.start_track_midi_resampling(self._song.view.selected_track)  
+                SongUtil.start_track_midi_resampling(self._song.view.selected_track)
+                self._logger.show_message("MIDI track resampling.")
 
             elif subaction == Note.g_sharp and is_same_octave:
                 SongUtil.start_quick_resampling(select_first=True)

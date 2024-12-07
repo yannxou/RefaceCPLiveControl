@@ -173,8 +173,10 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 #### C ⏐ *Stop actions*
 
 * Press and release the key to stop playing.
+* Press and hold + C# to stop playing clips from all armed tracks.
 * Press and hold + E to stop all clips from all tracks. 
 * Press and hold + F to stop the current track clip (if any).
+* Press and hold + F# to stop all recording clips.
 
 #### C# ⏐ *Recording actions*
 
@@ -191,7 +193,9 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + use the white keys to change the song position (jump) according to the distance between the first key (D) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 * Press and hold + C# to jump to the previous cue marker.
 * Press and hold + D# to jump to the next cue marker.
-* Press and hold + F# to continue playback from the current position.
+* Press and hold + F# to play all recording clips.
+* Press and hold + G# to continue playback from the current position.
+* Press and hold + A# to play the selected scene.
 
 #### E ⏐ *Tempo actions*
 
@@ -214,7 +218,9 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 #### F# ⏐ *Quick-recording actions*
 
 * Press and release the key to start a quick clip recording on all selected tracks. This starts recording on the next free scene of all selected tracks, creating a new scene if necessary. If a track is not armed it will be armed automatically if possible.
+* Press and hold + C to stop all recording clips.
 * Press and hold + C# to start a quick recording on all armed tracks. This starts recording clips on the next free scene of all armed tracks, creating a new scene if necessary.
+* Press and hold + D to play all recording clips.
 * Press and hold + F to start an Audio track resampling. This starts recording a new Audio clip into a track that takes the audio signal from the selected track's output, creating a new track if none is found.
 * Press and hold + G to start a MIDI track resampling. This starts recording a new MIDI clip into a track that takes the MIDI signal from the selected track's output, creating a new track if none is found.
 * Press and hold + G# to start a quick resampling. This starts recording a new clip in the next free scene of a track with a resampling input. If no resampling track is found a new one is created.
