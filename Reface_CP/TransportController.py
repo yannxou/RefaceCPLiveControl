@@ -122,7 +122,7 @@ class TransportController:
             else:
                 self._logger.show_message("⚙︎ Release to toggle device/clip view. [M] Hold+C: Mute. [●] Hold+C#: Arm. [S] Hold+D: Solo. |←|→| Hold+E/G: Prev/Next track.")
         elif action == Note.f_sharp:
-            self._logger.show_message("[●] Release for quick-recording. [◼●] Hold+C: Stop recording clips. │●│ Hold+C#: Quick-record armed tracks. [●|←] Hold+F: Audio track resample. [●|←♪] Hold+G: MIDI track resample. │●…←│ Hold+G#: Quick-resampling.")
+            self._logger.show_message("[●] Release for quick-recording. [◼●] Hold+C: Stop recording clips. │●│ Hold+C#: Quick-record armed tracks. [●]▶ Hold+D: Play recording clips. [●|←] Hold+F: Audio track resample. [●|←♪] Hold+G: MIDI track resample. │●…←│ Hold+G#: Quick-resampling.")
         elif action == Note.g:
             self._logger.show_message("[◼︎] Hold+C: Stop clip. [x] Hold+C#: Delete clip. [▶] Hold+D: Fire clip. [▶..] Hold+E: Fire scene. [←|→] Hold+F/A: Prev/Next clip slot.")
         elif action == Note.a:
@@ -315,6 +315,10 @@ class TransportController:
                 armed_tracks = SongUtil.find_armed_tracks()
                 SongUtil.start_quick_recording(tracks=armed_tracks)
                 self._logger.show_message("Quick-recording.")
+
+            elif subaction == Note.d and is_same_octave:
+                self._logger.show_message("Play all recording clips.")
+                SongUtil.play_all_recording_clips()
 
             elif subaction == Note.f and is_same_octave:
                 SongUtil.start_track_audio_resampling(self._song.view.selected_track)     
