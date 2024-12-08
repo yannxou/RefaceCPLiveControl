@@ -12,7 +12,7 @@
 import re
 from .Logger import Logger
 from Live.Song import Song, Quantization
-from Live import ClipSlot
+from Live import ClipSlot, Scene
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 from .Note import Note
@@ -250,9 +250,8 @@ class ClipLauncherController:
             return
         note = key - 24 # lowest C
         if self._is_scene_focused:
-            scene_index = self._vertical_offset + (note % self._height if self._height > self._width else note // self._width)
-            if scene_index < len(self.song().scenes) and scene_index < (self._vertical_offset + self._height):
-                scene = self.song().scenes[scene_index]
+            scene = self._get_scene(note)
+            if scene:
                 scene.fire()
         else:
             clip_slot = self._get_clip_slot(note)
@@ -277,10 +276,27 @@ class ClipLauncherController:
                 return None
         else:
             return None
+        
+    def _get_scene(self, note: int) -> Scene:
+        scene_index = self._vertical_offset + (note % self._height if self._height > self._width else note // self._width)
+        if scene_index < len(self.song().scenes) and scene_index < (self._vertical_offset + self._height):
+            return self.song().scenes[scene_index]
+        else:
+            return None
 
     def _add_name_prefixes(self):
         if self._is_scene_focused:
-            pass 
+            for note in range(0, 128):
+                scene = self._get_scene(note)
+                # Add additional spaces before separator if is white key so prefixes are aligned in Live
+                prefix = Note.midi_note_to_string(note) + ("  " if Note.is_white_key(note) else "") + "│"
+                if scene.name.startswith(prefix):
+                    break
+                # Remove previous prefix if it exists
+                if re.match(self._clip_prefix_pattern, scene.name):
+                    scene.name = prefix + re.sub(self._clip_prefix_pattern, "", scene.name)
+                else:
+                    scene.name = prefix + scene.name
 
         else:
             for note in range(0, 128):
@@ -298,6 +314,10 @@ class ClipLauncherController:
                         clip.name = prefix + clip.name
 
     def _remove_name_prefixes(self):
+        # Remove prefixes from scene names
+        for scene in self.song().scenes:
+            if re.match(self._clip_prefix_pattern, scene.name):
+                scene.name = re.sub(self._clip_prefix_pattern, "", scene.name)
 
         # Remove prefixes from clip names:
         for track in self.song().tracks:
