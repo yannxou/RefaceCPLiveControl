@@ -254,8 +254,8 @@ class ClipLauncherController:
             if track_index < 0 or track_index >= len(self.song().visible_tracks) or track_index > (self._horizontal_offset + self._width - 1):
                 return
             track = self.song().visible_tracks[track_index]
-            if track.is_foldable or not track.can_be_armed:
-                return  # Skip non-audio/MIDI tracks
+            if track in self.song().return_tracks:
+                return
             # Map note to clip slot
             clip_slot_index = self._vertical_offset + (note % self._height if self._height > self._width else note // self._width)
             # Fire the clip in the determined track and clip slot
