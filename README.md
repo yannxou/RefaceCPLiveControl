@@ -286,6 +286,8 @@ If you'd like to receive support, please send your feedback in the form of sugge
 If you’d like to send support for this project or other hundreds of ideas you can bring the drinks using the button below.
 I will happily implement something similar for other synths if I receive enough feedback or someone gifts me a unit.
 
+You can also just star this project if you find it useful. This might serve as a quick feedback and encourage me to add more features.
+
 <a href="https://www.buymeacoffee.com/yannxou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
 ## Links
