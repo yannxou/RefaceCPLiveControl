@@ -179,6 +179,8 @@ class ClipLauncherController:
         self.song().clip_trigger_quantization = quantization
 
     def _on_horizontal_offset_button_changed(self, value):
+        if self._is_scene_focused:
+            return
         total_tracks = len(self.song().visible_tracks)
         max_offset = total_tracks - self._width if total_tracks > self._width else 0
         self._horizontal_offset = int((value / 127.0) * max_offset)
@@ -191,9 +193,14 @@ class ClipLauncherController:
         self._update_highlight()
 
     def _on_note_layout_button_changed(self, value):
+        if self._is_scene_focused:
+            return
         layout = int((value / 127.0) * (8 - 1))
         if self._current_layout == layout:
             return
+        self._set_layout(layout)
+    
+    def _set_layout(self, layout):
         if layout == 0:
             self._width = 7
             self._height = 12
@@ -237,10 +244,13 @@ class ClipLauncherController:
         if self._is_scene_focused == is_scene_focused:
             return
         self._is_scene_focused = is_scene_focused
-        self._update_highlight()
         if is_scene_focused:
+            self._width = 1
+            self._height = min(85, len(self.song().scenes)) # max all note keys in the reface: 7 octaves + highest C
+            self._update_highlight()
             self._logger.show_message("Scene trigger layout")
         else:
+            self._set_layout(self._current_layout)
             self._logger.show_message("Clip trigger layout")
 
     def _on_note_key(self, velocity, sender):
@@ -278,25 +288,26 @@ class ClipLauncherController:
             return None
         
     def _get_scene(self, note: int) -> Scene:
-        scene_index = self._vertical_offset + (note % self._height if self._height > self._width else note // self._width)
-        if scene_index < len(self.song().scenes) and scene_index < (self._vertical_offset + self._height):
+        scene_index = self._vertical_offset + note
+        if scene_index < len(self.song().scenes):
             return self.song().scenes[scene_index]
         else:
             return None
 
     def _add_name_prefixes(self):
         if self._is_scene_focused:
-            for note in range(0, 128):
+            for note in range(self._vertical_offset, min(self._vertical_offset + 85, self._vertical_offset + len(self.song().scenes))):
                 scene = self._get_scene(note)
-                # Add additional spaces before separator if is white key so prefixes are aligned in Live
-                prefix = Note.midi_note_to_string(note) + ("  " if Note.is_white_key(note) else "") + "│"
-                if scene.name.startswith(prefix):
-                    break
-                # Remove previous prefix if it exists
-                if re.match(self._clip_prefix_pattern, scene.name):
-                    scene.name = prefix + re.sub(self._clip_prefix_pattern, "", scene.name)
-                else:
-                    scene.name = prefix + scene.name
+                if scene:
+                    # Add additional spaces before separator if is white key so prefixes are aligned in Live
+                    prefix = Note.midi_note_to_string(note) + ("  " if Note.is_white_key(note) else "") + "│"
+                    if scene.name.startswith(prefix):
+                        break
+                    # Remove previous prefix if it exists
+                    if re.match(self._clip_prefix_pattern, scene.name):
+                        scene.name = prefix + re.sub(self._clip_prefix_pattern, "", scene.name)
+                    else:
+                        scene.name = prefix + scene.name
 
         else:
             for note in range(0, 128):
