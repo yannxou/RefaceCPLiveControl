@@ -64,6 +64,8 @@ class ClipLauncherController:
         self._note_key_buttons = []
         self._is_scene_focused = False
         self._clip_prefix_pattern = r"^.*?\│"
+        self._max_keys = 85 # Total number of keys in the device (in the refaceCP: 7 octaves + highest C)
+        self._lowest_note = 24 # Device lowest note (in refaceCP: 24 (C1))
         for index in range(128):
             button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
             self._note_key_buttons.append(button)
@@ -215,10 +217,10 @@ class ClipLauncherController:
             self._logger.show_message("Clip trigger layout: 3 octaves/track")
         elif layout == 3:
             self._width = 1
-            self._height = 85 # all note keys in the reface: 7 octaves + highest C
+            self._height = self._max_keys
             self._logger.show_message("Clip trigger layout: single track")
         elif layout == 4:
-            self._width = 85 # all note keys in the reface: 7 octaves + highest C
+            self._width = self._max_keys
             self._height = 1
             self._logger.show_message("Clip trigger layout: single scene")
         elif layout == 5:
@@ -246,7 +248,7 @@ class ClipLauncherController:
         self._is_scene_focused = is_scene_focused
         if is_scene_focused:
             self._width = 1
-            self._height = min(85, len(self.song().scenes)) # max all note keys in the reface: 7 octaves + highest C
+            self._height = min(self._max_keys, len(self.song().scenes)) # max all note keys in the reface: 7 octaves + highest C
             self._update_highlight()
             self._logger.show_message("Scene trigger layout")
         else:
@@ -258,7 +260,7 @@ class ClipLauncherController:
         # self._logger.log(f"Key {key}, value {velocity}")
         if velocity == 0:  # Note Off
             return
-        note = key - 24 # lowest C
+        note = key - self._lowest_note
         if self._is_scene_focused:
             scene = self._get_scene(note)
             if scene:
@@ -296,7 +298,7 @@ class ClipLauncherController:
 
     def _add_name_prefixes(self):
         if self._is_scene_focused:
-            for note in range(self._vertical_offset, min(self._vertical_offset + 85, self._vertical_offset + len(self.song().scenes))):
+            for note in range(self._vertical_offset, min(self._vertical_offset + self._max_keys, self._vertical_offset + len(self.song().scenes))):
                 scene = self._get_scene(note)
                 if scene:
                     # Add additional spaces before separator if is white key so prefixes are aligned in Live
