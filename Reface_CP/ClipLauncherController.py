@@ -189,14 +189,20 @@ class ClipLauncherController:
             return
         total_tracks = len(self.song().visible_tracks)
         max_offset = total_tracks - self._width if total_tracks > self._width else 0
-        self._horizontal_offset = int((value / 127.0) * max_offset)
-        self._update_highlight()
+        new_offset = int((value / 127.0) * max_offset)
+        # compare to prevent adding multiple undo steps (each 'update_highlight' call creates one)
+        if new_offset != self._horizontal_offset:
+            self._horizontal_offset = new_offset
+            self._update_highlight()
 
     def _on_vertical_offset_button_changed(self, value):
         total_scenes = len(self.song().scenes)
         max_offset = total_scenes - self._height if total_scenes > self._height else 0
-        self._vertical_offset = int((value / 127.0) * max_offset)
-        self._update_highlight()
+        new_offset = int((value / 127.0) * max_offset)
+        # compare to prevent adding multiple undo steps (each 'update_highlight' call creates one)
+        if new_offset != self._vertical_offset:
+            self._vertical_offset = new_offset
+            self._update_highlight()
 
     def _on_note_layout_button_changed(self, value):
         if self._is_scene_focused:
