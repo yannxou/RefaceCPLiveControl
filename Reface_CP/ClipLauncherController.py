@@ -16,6 +16,7 @@ from Live import ClipSlot, Scene
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 from .Note import Note
+from .Settings import CLIP_TRIGGER_NAME_PREFIXES_ENABLED
 
 class ClipLauncherController:
     
@@ -154,11 +155,14 @@ class ClipLauncherController:
             self._c_instance.set_session_highlight(track_offset=total_tracks, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
         else:
             self._c_instance.set_session_highlight(track_offset=self._horizontal_offset, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
-        self._remove_name_prefixes()
-        self._add_name_prefixes()
+
+        if CLIP_TRIGGER_NAME_PREFIXES_ENABLED:
+            self._remove_name_prefixes()
+            self._add_name_prefixes()
 
     def _hide_highlight(self):
-        self._remove_name_prefixes()
+        if CLIP_TRIGGER_NAME_PREFIXES_ENABLED:
+            self._remove_name_prefixes()
         try:
             self._c_instance.set_session_highlight(track_offset=0, scene_offset=0, width=0, height=0, include_return_tracks=False)
         except:
