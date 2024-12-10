@@ -302,7 +302,7 @@ class ClipLauncherController:
 
     def _add_name_prefixes(self):
         if self._is_scene_focused:
-            for note in range(self._vertical_offset, min(self._vertical_offset + self._max_keys, self._vertical_offset + len(self.song().scenes))):
+            for note in range(0, min(self._max_keys, len(self.song().scenes))):
                 scene = self._get_scene(note)
                 if scene:
                     # Add additional spaces before separator if is white key so prefixes are aligned in Live
