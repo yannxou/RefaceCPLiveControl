@@ -104,14 +104,14 @@ class ClipLauncherController:
         return self._parent.song()
 
     def _add_song_listeners(self):
-        if not self.song().tracks_has_listener(self._on_tracks_changed):
-            self.song().add_tracks_listener(self._on_tracks_changed)
+        if not self.song().visible_tracks_has_listener(self._on_tracks_changed):
+            self.song().add_visible_tracks_listener(self._on_tracks_changed)
         if not self.song().scenes_has_listener(self._on_scenes_changed):
             self.song().add_scenes_listener(self._on_scenes_changed)
 
     def _remove_song_listeners(self):
-        if self.song().tracks_has_listener(self._on_tracks_changed):
-            self.song().remove_tracks_listener(self._on_tracks_changed)
+        if self.song().visible_tracks_has_listener(self._on_tracks_changed):
+            self.song().remove_visible_tracks_listener(self._on_tracks_changed)
         if self.song().scenes_has_listener(self._on_scenes_changed):
             self.song().remove_scenes_listener(self._on_scenes_changed)
 
