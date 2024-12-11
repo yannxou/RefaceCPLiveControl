@@ -17,6 +17,7 @@ from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 from .Note import Note
 from .Settings import CLIP_TRIGGER_NAME_PREFIXES_ENABLED
+import _Framework.Task as Task
 
 class ClipLauncherController:
     
@@ -39,7 +40,7 @@ class ClipLauncherController:
 
     def __init__(self,
                  logger: Logger,
-                 c_instance,
+                 parent,
                  channel = 0,
                  trigger_quantization_button = None,
                  horizontal_offset_button = None,
@@ -49,7 +50,7 @@ class ClipLauncherController:
                  ):
         self._logger = logger
         self._enabled = False
-        self._c_instance = c_instance
+        self._parent = parent
         self._channel = channel
         self._trigger_quantization_button = trigger_quantization_button
         self._horizontal_offset_button = horizontal_offset_button
@@ -70,6 +71,7 @@ class ClipLauncherController:
         for index in range(128):
             button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
             self._note_key_buttons.append(button)
+        self._clip_rename_task = Task.Task()
        
     def set_enabled(self, enabled):
         """Enables/Disables the clip launcher functionality."""
@@ -80,7 +82,7 @@ class ClipLauncherController:
         if enabled:
             self._add_song_listeners()
             self._add_note_key_listeners()
-            self._update_highlight()
+            self._update_highlight(delayed=False)
         else:
             self._remove_song_listeners()
             self._remove_note_key_listeners()
@@ -99,7 +101,7 @@ class ClipLauncherController:
             button.set_channel(channel)
 
     def song(self):
-        return self._c_instance.song()
+        return self._parent.song()
 
     def _add_song_listeners(self):
         if not self.song().tracks_has_listener(self._on_tracks_changed):
@@ -149,36 +151,45 @@ class ClipLauncherController:
         if self._clip_scene_target_button and self._clip_scene_target_button.value_has_listener(self._on_clip_scene_target_button_changed):
             self._clip_scene_target_button.remove_value_listener(self._on_clip_scene_target_button_changed)
 
-    def _update_highlight(self):
+    def _update_highlight(self, delayed=True):
         if self._is_scene_focused:
             total_tracks = len(self.song().visible_tracks)
-            self._c_instance.set_session_highlight(track_offset=total_tracks, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
+            self._parent._c_instance.set_session_highlight(track_offset=total_tracks, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
         else:
-            self._c_instance.set_session_highlight(track_offset=self._horizontal_offset, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
+            self._parent._c_instance.set_session_highlight(track_offset=self._horizontal_offset, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
 
         if CLIP_TRIGGER_NAME_PREFIXES_ENABLED:
-            self._remove_name_prefixes()
-            self._add_name_prefixes()
+            if delayed:
+                self._clip_rename_task.kill()
+                self._clip_rename_task = self._parent._tasks.add(Task.sequence(Task.delay(1), self._update_clip_names))
+            else:
+                self._update_clip_names()
 
     def _hide_highlight(self):
         if CLIP_TRIGGER_NAME_PREFIXES_ENABLED:
+            self._clip_rename_task.kill()
             self._remove_name_prefixes()
         try:
-            self._c_instance.set_session_highlight(track_offset=0, scene_offset=0, width=0, height=0, include_return_tracks=False)
+            self._parent._c_instance.set_session_highlight(track_offset=0, scene_offset=0, width=0, height=0, include_return_tracks=False)
         except:
             pass
+
+    def _update_clip_names(self, args=None):
+        if self._enabled:
+            self._remove_name_prefixes()
+            self._add_name_prefixes()
 
     def _on_tracks_changed(self):
         total_tracks = len(self.song().visible_tracks)
         if self._horizontal_offset >= total_tracks:
             self._horizontal_offset = total_tracks - 1
-            self._update_highlight()
+        self._update_highlight()
 
     def _on_scenes_changed(self):
         total_scenes = len(self.song().scenes)
         if self._vertical_offset >= total_scenes:
             self._vertical_offset = total_scenes - 1
-            self._update_highlight()
+        self._update_highlight()
 
     def _on_trigger_quantization_button_changed(self, value):
         quantization = int((value / 127.0) * (len(self.quantization_all) - 1))
@@ -211,6 +222,7 @@ class ClipLauncherController:
         if self._current_layout == layout:
             return
         self._set_layout(layout)
+        self._update_highlight()
     
     def _set_layout(self, layout):
         if layout == 0:
@@ -249,7 +261,6 @@ class ClipLauncherController:
             pass
         self._current_layout = layout
         # self._logger.log(f"width: {self._width} height: {self._height}")
-        self._update_highlight()
 
     def _on_clip_scene_target_button_changed(self, value):
         is_scene_focused = value > 0
@@ -259,11 +270,11 @@ class ClipLauncherController:
         if is_scene_focused:
             self._width = 1
             self._height = min(self._max_keys, len(self.song().scenes)) # max all note keys in the reface: 7 octaves + highest C
-            self._update_highlight()
             self._logger.show_message("Scene trigger layout")
         else:
             self._set_layout(self._current_layout)
             self._logger.show_message("Clip trigger layout")
+        self._update_highlight(delayed=False)
 
     def _on_note_key(self, velocity, sender):
         key = sender._msg_identifier
