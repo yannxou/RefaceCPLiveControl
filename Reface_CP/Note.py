@@ -35,14 +35,23 @@ class Note:
     }
 
     NOTE_NAMES = {0: "C", 1: "C#", 2: "D", 3: "D#", 4: "E", 5: "F", 6: "F#", 7: "G", 8: "G#", 9: "A", 10: "A#", 11: "B"}
+    NOTE_ARRAY = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+    def midi_note_to_string(midi_note) -> str:
+        if not (0 <= midi_note <= 127):
+            raise ValueError("MIDI note number must be between 0 and 127.")
+        
+        note_name = Note.NOTE_ARRAY[midi_note % 12]
+        octave = (midi_note // 12) - 1
+        return f"{note_name}{octave + 1}"
 
     @staticmethod
-    def is_black_key(note):
+    def is_black_key(note) -> bool:
         # Notes corresponding to black keys in an octave
         return note % 12 not in Note.white_key_mapping
     
     @staticmethod
-    def is_white_key(note):
+    def is_white_key(note) -> bool:
         # Notes corresponding to white keys in an octave
         return note % 12 in Note.white_key_mapping
 
