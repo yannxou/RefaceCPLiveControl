@@ -71,7 +71,7 @@ class ClipLauncherController:
         for index in range(128):
             button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
             self._note_key_buttons.append(button)
-        self._clip_rename_task = Task.Task()
+        self._clip_rename_task = self._parent._tasks.add(Task.sequence(Task.delay(1), self._update_clip_names)).kill()
        
     def set_enabled(self, enabled):
         """Enables/Disables the clip launcher functionality."""
@@ -161,7 +161,7 @@ class ClipLauncherController:
         if CLIP_TRIGGER_NAME_PREFIXES_ENABLED:
             if delayed:
                 self._clip_rename_task.kill()
-                self._clip_rename_task = self._parent._tasks.add(Task.sequence(Task.delay(1), self._update_clip_names))
+                self._clip_rename_task.restart()
             else:
                 self._update_clip_names()
 
