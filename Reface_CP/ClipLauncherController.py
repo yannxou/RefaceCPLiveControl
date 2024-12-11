@@ -181,7 +181,7 @@ class ClipLauncherController:
             self._update_highlight()
 
     def _on_trigger_quantization_button_changed(self, value):
-        quantization = int((value / 127.0) * len(self.quantization_all))
+        quantization = int((value / 127.0) * (len(self.quantization_all) - 1))
         self.song().clip_trigger_quantization = quantization
 
     def _on_horizontal_offset_button_changed(self, value):
