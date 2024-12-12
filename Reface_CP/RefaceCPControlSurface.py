@@ -236,7 +236,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._all_controls.append(clip_scene_target_button)
         self._clip_launcher_controller = ClipLauncherController(
             logger=self._logger, 
-            c_instance=self._c_instance, 
+            parent=self, 
             channel=self._channel,
             trigger_quantization_button=trigger_quantization_button,
             horizontal_offset_button=horizontal_offset_button,

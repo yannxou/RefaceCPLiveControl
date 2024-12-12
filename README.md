@@ -24,11 +24,12 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
 		8. [A  (*Device actions*)](#a--device-actions)
 		9. [A# (*Edit actions*)](#a--edit-actions)
 		10. [B  (*Loop actions*)](#b--loop-actions)
-4. [Tips & Tricks](#tips--tricks)
-5. [Constraints](#constraints)
-6. [Troubleshooting](#troubleshooting)
-7. [Support](#support)
-8. [Links](#links)
+4. [User Settings](#user-settings)
+5. [Tips & Tricks](#tips--tricks)
+6. [Constraints](#constraints)
+7. [Troubleshooting](#troubleshooting)
+8. [Support](#support)
+9. [Links](#links)
 
 ## Installation
 
@@ -129,6 +130,8 @@ Enables the **Clip trigger mode**. This allows clip/scene triggering using the M
 	* 1 octave per scene (allow triggering clips from same scene across 12 tracks)
 
 * **Chorus Speed**: Clip/Scene triggering. Move this knob to the left to target clips for triggering. Move it to the right to target scenes.
+
+By default, when enabling the Clip trigger mode, the clip names are renamed to show the MIDI key that can be used to fire each clip. This behaviour can be disabled by changing the `CLIP_TRIGGER_NAME_PREFIXES_ENABLED` setting to `False`.
 
 <p align="center">
 	<img src="Images/clip_trigger_mode.jpg" alt="Clip Trigger Mode" width="50%" />
@@ -256,6 +259,15 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 * Press and hold + A# to set the loop between the nearest cue points.
 * Press and hold + use the white keys to change the loop start position according to the distance between the first key (B) and the second. This means the position can jump forwards by pressing a second higher white note or backwards by pressing a second lower white note.
 
+## User Settings
+
+There are some script settings that can be user-defined. To modify a default setting, first create a MySettings.py file in the script folder. This file is not included in the project to prevent overwriting it when updating. Edit that file to include any of the following settings:
+
+```python
+# Add prefixes to clip names to indicate the corresponding MIDI note key in the Clip Trigger mode. Default: `True`.
+CLIP_TRIGGER_NAME_PREFIXES_ENABLED = True
+```
+
 ## Tips & Tricks
 
 ### Enabling/Disabling Reface CP audio output
@@ -285,6 +297,8 @@ If you'd like to receive support, please send your feedback in the form of sugge
 
 If you’d like to send support for this project or other hundreds of ideas you can bring the drinks using the button below.
 I will happily implement something similar for other synths if I receive enough feedback or someone gifts me a unit.
+
+You can also just star this project if you find it useful. This might serve as a quick feedback and encourage me to add more features.
 
 <a href="https://www.buymeacoffee.com/yannxou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
