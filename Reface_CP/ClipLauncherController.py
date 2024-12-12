@@ -36,7 +36,10 @@ class ClipLauncherController:
         Quantization.q_sixtenth,
         Quantization.q_sixtenth_triplet,
         Quantization.q_thirtytwoth
-    ]    
+    ]
+
+    # note keys used for triggering clips per octave (C-B except C#,D#)
+    notes_per_octave = 10
 
     def __init__(self,
                  logger: Logger,
@@ -58,7 +61,7 @@ class ClipLauncherController:
         self._note_layout_button = note_layout_button
         self._clip_scene_target_button = clip_scene_target_button
         self._width = 7
-        self._height = 12
+        self._height = self.notes_per_octave
         self._horizontal_offset = 0
         self._vertical_offset = 0
         self._tracks_per_octave = 1
@@ -67,7 +70,6 @@ class ClipLauncherController:
         self._is_scene_focused = False
         self._clip_prefix_pattern = r"^.*?\│"
         self._max_keys = 85 # Total number of keys in the device (in the refaceCP: 7 octaves + highest C)
-        self._lowest_note = 24 # Device lowest note (in refaceCP: 24 (C1))
         for index in range(128):
             button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
             self._note_key_buttons.append(button)
@@ -227,15 +229,15 @@ class ClipLauncherController:
     def _set_layout(self, layout):
         if layout == 0:
             self._width = 7
-            self._height = 12
+            self._height = self.notes_per_octave
             self._logger.show_message("Clip trigger layout: 1 octave/track")
         elif layout == 1:
             self._width = 3
-            self._height = 24
+            self._height = 2 * self.notes_per_octave
             self._logger.show_message("Clip trigger layout: 2 octaves/track")
         elif layout == 2:
             self._width = 2
-            self._height = 36
+            self._height = 3 * self.notes_per_octave
             self._logger.show_message("Clip trigger layout: 3 octaves/track")
         elif layout == 3:
             self._width = 1
@@ -246,15 +248,15 @@ class ClipLauncherController:
             self._height = 1
             self._logger.show_message("Clip trigger layout: single scene")
         elif layout == 5:
-            self._width = 36
+            self._width = 3 * self.notes_per_octave
             self._height = 2
             self._logger.show_message("Clip trigger layout: 3 octaves/scene")
         elif layout == 6:
-            self._width = 24
+            self._width = 2 * self.notes_per_octave
             self._height = 3
             self._logger.show_message("Clip trigger layout: 2 octaves/scene")
         elif layout == 7:
-            self._width = 12
+            self._width = self.notes_per_octave
             self._height = 7
             self._logger.show_message("Clip trigger layout: 1 octave/scene")
         else:
@@ -277,11 +279,12 @@ class ClipLauncherController:
         self._update_highlight(delayed=False)
 
     def _on_note_key(self, velocity, sender):
-        key = sender._msg_identifier
-        # self._logger.log(f"Key {key}, value {velocity}")
+        note = sender._msg_identifier
         if velocity == 0:  # Note Off
             return
-        note = key - self._lowest_note
+        pitch_class = note % 12
+        if pitch_class in [1, 3]: # C#, D#
+            return
         if self._is_scene_focused:
             scene = self._get_scene(note)
             if scene:
@@ -291,16 +294,46 @@ class ClipLauncherController:
             if clip_slot:
                 clip_slot.fire()
 
+    def _get_index_from_note(self, note):
+        """
+        Maps MIDI notes to item indices, skipping C# and D#.
+
+        Args:
+            note (int): MIDI note number (e.g., C1 = 24, D1 = 26, etc.).
+
+        Returns:
+            int: Item index corresponding to the note, or None if the note is invalid.
+        """
+        # Notes per octave, skipping C# and D# (C, D, E, F, F#, G, G#, A, A#, B)
+        valid_notes = [0, 2, 4, 5, 6, 7, 8, 9, 10, 11]  # Relative to C in the octave
+        
+        # Calculate the pitch class (0-11, relative to C) and octave
+        pitch_class = note % 12
+        octave = (note // 12) - 2  # MIDI note 0 corresponds to C-1
+
+        if pitch_class in valid_notes:
+            # Find position of pitch class in valid notes
+            index_in_octave = valid_notes.index(pitch_class)
+            # Add to the octave's base index
+            index = index_in_octave + len(valid_notes) * octave
+            return index
+        else:
+            # Note is skipped (C# or D#)
+            return None
+
     def _get_clip_slot(self, note: int) -> ClipSlot:
+        index = self._get_index_from_note(note)
+        if index is None:
+            return
         # Map octave to track
-        track_index = self._horizontal_offset + (note // self._height if self._height > self._width else note % self._width)
+        track_index = self._horizontal_offset + (index // self._height if self._height > self._width else index % self._width)
         if track_index < 0 or track_index >= len(self.song().visible_tracks) or track_index > (self._horizontal_offset + self._width - 1):
             return None
         track = self.song().visible_tracks[track_index]
         if track in self.song().return_tracks:
             return None
         # Map note to clip slot
-        clip_slot_index = self._vertical_offset + (note % self._height if self._height > self._width else note // self._width)
+        clip_slot_index = self._vertical_offset + (index % self._height if self._height > self._width else index // self._width)
         if clip_slot_index < len(track.clip_slots) and clip_slot_index < (self._vertical_offset + self._height):
             clip_slot = track.clip_slots[clip_slot_index]
             if clip_slot.has_clip or clip_slot.has_stop_button:
@@ -311,7 +344,10 @@ class ClipLauncherController:
             return None
         
     def _get_scene(self, note: int) -> Scene:
-        scene_index = self._vertical_offset + note
+        index = self._get_index_from_note(note)
+        if index is None:
+            return
+        scene_index = self._vertical_offset + index
         if scene_index < len(self.song().scenes):
             return self.song().scenes[scene_index]
         else:

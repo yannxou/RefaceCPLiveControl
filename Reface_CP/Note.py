@@ -42,8 +42,8 @@ class Note:
             raise ValueError("MIDI note number must be between 0 and 127.")
         
         note_name = Note.NOTE_ARRAY[midi_note % 12]
-        octave = (midi_note // 12) - 1
-        return f"{note_name}{octave + 1}"
+        octave = (midi_note // 12) - 2
+        return f"{note_name}{octave}"
 
     @staticmethod
     def is_black_key(note) -> bool:
