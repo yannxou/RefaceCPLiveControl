@@ -296,12 +296,11 @@ class ClipLauncherController:
                     self._play_scene_from_note(key)
                 else:
                     if pitch_class == Note.c_sharp:
-                        for note in self._pressed_keys:
-                            pass # TODO: self._stop_clip_from_note(note)
+                        self._stop_all_track_clips_from_notes(self._pressed_keys)
                     elif pitch_class == Note.d_sharp:
                         pass # TODO: Play scene of the corresponding clip
                     else:
-                        pass # TODO: Play new clip in legato mode
+                        pass # TODO: Play new clip in legato mode if there's another one playing from the same track already.
 
             else:
                 if pitch_class == Note.c_sharp:
@@ -441,6 +440,17 @@ class ClipLauncherController:
             track = clip_slot.canonical_parent
             if isinstance(track, Track.Track):
                 track.stop_all_clips(Quantized=quantized)
+
+    def _stop_all_track_clips_from_notes(self, notes, quantized=True):
+        unique_tracks = set()
+        for note in [index for index in notes if index not in [Note.c_sharp, Note.d_sharp]]:
+            clip_slot = self._get_clip_slot(note)
+            if clip_slot and clip_slot.has_clip:
+                track = clip_slot.canonical_parent
+                if isinstance(track, Track.Track):
+                    unique_tracks.add(track)
+        for track in unique_tracks:
+            track.stop_all_clips(Quantized=quantized)
 
     def _play_scene_from_note(self, note, quantized=True):
         """Plays the scene from the clip corresponding to the given note key"""
