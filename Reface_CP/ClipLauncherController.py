@@ -12,7 +12,7 @@
 import re
 from .Logger import Logger
 from Live.Song import Song, Quantization
-from Live import ClipSlot, Scene
+from Live import ClipSlot, Scene, Track
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 from .Note import Note
@@ -67,6 +67,7 @@ class ClipLauncherController:
         self._tracks_per_octave = 1
         self._current_layout = 0
         self._note_key_buttons = []
+        self._pressed_keys = []
         self._is_scene_focused = False
         self._clip_prefix_pattern = r"^.*?\│"
         self._max_keys = 85 # Total number of keys in the device (in the refaceCP: 7 octaves + highest C)
@@ -89,6 +90,7 @@ class ClipLauncherController:
             self._remove_song_listeners()
             self._remove_note_key_listeners()
             self._hide_highlight()
+            self._pressed_keys = []
 
     def set_controls_enabled(self, enabled):
         """Enables the buttons for controlling the clip launch mode parameters."""
@@ -279,20 +281,49 @@ class ClipLauncherController:
         self._update_highlight(delayed=False)
 
     def _on_note_key(self, velocity, sender):
-        note = sender._msg_identifier
-        if velocity == 0:  # Note Off
-            return
-        pitch_class = note % 12
-        if pitch_class in [1, 3]: # C#, D#
-            return
-        if self._is_scene_focused:
-            scene = self._get_scene(note)
-            if scene:
-                scene.fire()
+        key = sender._msg_identifier
+        if velocity > 0:
+            pitch_class = key % 12            
+
+            if len(self._pressed_keys) > 0:
+                base_pitch_class = self._pressed_keys[0] % 12
+                if base_pitch_class == Note.c_sharp:
+                    if pitch_class == Note.c_sharp:
+                        self._stop_all_clips() # stop all playing or triggered clips
+                    elif pitch_class not in [Note.c_sharp, Note.d_sharp]:
+                        self._stop_track_clips_from_note(key)
+                elif base_pitch_class == Note.d_sharp:
+                    self._play_scene_from_note(key)
+                else:
+                    if pitch_class == Note.c_sharp:
+                        for note in self._pressed_keys:
+                            pass # TODO: self._stop_clip_from_note(note)
+                    elif pitch_class == Note.d_sharp:
+                        pass # TODO: Play scene of the corresponding clip
+                    else:
+                        pass # TODO: Play new clip in legato mode
+
+            else:
+                if pitch_class == Note.c_sharp:
+                    self._logger.show_message("│◼︎│ Hold+note to stop the clip. │◼︎◼︎◼︎│ Hold+upper/lower C# to stop all clips.")
+                elif pitch_class == Note.d_sharp:
+                    self._logger.show_message("[▶…] Hold+note note to play the clip's scene.")
+                if pitch_class not in [Note.c_sharp, Note.d_sharp]:
+                    if self._is_scene_focused:
+                        scene = self._get_scene(key)
+                        if scene:
+                            scene.fire()
+                    else:
+                        clip_slot = self._get_clip_slot(key)
+                        if clip_slot:
+                            clip_slot.fire()
+
+            self._pressed_keys.append(key)
         else:
-            clip_slot = self._get_clip_slot(note)
-            if clip_slot:
-                clip_slot.fire()
+            try:
+                self._pressed_keys.remove(key)
+            except:
+                pass
 
     def _get_index_from_note(self, note):
         """
@@ -321,7 +352,7 @@ class ClipLauncherController:
             # Note is skipped (C# or D#)
             return None
 
-    def _get_clip_slot(self, note: int) -> ClipSlot:
+    def _get_clip_slot(self, note: int) -> ClipSlot.ClipSlot:
         index = self._get_index_from_note(note)
         if index is None:
             return
@@ -343,7 +374,7 @@ class ClipLauncherController:
         else:
             return None
         
-    def _get_scene(self, note: int) -> Scene:
+    def _get_scene(self, note: int) -> Scene.Scene:
         index = self._get_index_from_note(note)
         if index is None:
             return
@@ -398,6 +429,29 @@ class ClipLauncherController:
                     clip = clip_slot.clip
                     if re.match(self._clip_prefix_pattern, clip.name):
                         clip.name = re.sub(self._clip_prefix_pattern, "", clip.name)
+
+    def _stop_all_clips(self, quantized=True):
+        """Stop all playing or triggered clips."""
+        self.song().stop_all_clips(Quantized=quantized)
+
+    def _stop_track_clips_from_note(self, note, quantized=True):
+        """Stop running and triggered clip and slots on the track from the clip of the corresponding given note"""
+        clip_slot = self._get_clip_slot(note)
+        if clip_slot and clip_slot.has_clip:
+            track = clip_slot.canonical_parent
+            if isinstance(track, Track.Track):
+                track.stop_all_clips(Quantized=quantized)
+
+    def _play_scene_from_note(self, note, quantized=True):
+        """Plays the scene from the clip corresponding to the given note key"""
+        index = self._get_index_from_note(note)
+        if index is None:
+            return
+        scene_index = self._vertical_offset + (index % self._height if self._height > self._width else index // self._width)
+        if scene_index < len(self.song().scenes):
+            scene: Scene.Scene = self.song().scenes[scene_index]
+            scene.fire(force_legato=False, can_select_scene_on_launch=True)
+
 
     def disconnect(self):
         self._remove_song_listeners()
