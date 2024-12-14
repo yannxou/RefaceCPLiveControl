@@ -298,9 +298,18 @@ class ClipLauncherController:
                     if pitch_class == Note.c_sharp:
                         self._stop_all_track_clips_from_notes(self._pressed_keys)
                     elif pitch_class == Note.d_sharp:
-                        pass # TODO: Play scene of the corresponding clip
+                        pass # Ignore Higher/Lower D# for now
                     else:
-                        pass # TODO: Play new clip in legato mode if there's another one playing from the same track already.
+                        # Play new clip in legato mode if there's another one playing from the same track already.
+                        clip_slot = self._get_clip_slot(key)
+                        if clip_slot:
+                            if clip_slot.has_clip:
+                                if self._track_has_playing_clip(clip_slot.canonical_parent):
+                                    clip_slot.fire(force_legato=True)
+                                else:
+                                    clip_slot.fire()
+                            elif clip_slot.has_stop_button:
+                                clip_slot.fire()
 
             else:
                 if pitch_class == Note.c_sharp:
@@ -318,11 +327,30 @@ class ClipLauncherController:
                             clip_slot.fire()
 
             self._pressed_keys.append(key)
-        else:
+
+        else: # note is released (velocity == 0)
             try:
                 self._pressed_keys.remove(key)
             except:
                 pass
+            if len(self._pressed_keys) > 0:
+                previous_note = self._pressed_keys[len(self._pressed_keys) - 1]
+                if self._is_scene_focused:
+                    # Play scene in legato mode
+                    previous_scene = self._get_scene(previous_note)
+                    if previous_scene:
+                        previous_scene.fire()
+                else:
+                    previous_clip_slot = self._get_clip_slot(previous_note)
+                    if previous_clip_slot and previous_clip_slot.has_clip:
+                        # replay previous_clip if stop action key is being released
+                        if key % 12 == Note.c_sharp:
+                            previous_clip_slot.fire()
+                        else:
+                            # Play clip in legato mode only if leaving clip belongs to same track
+                            leaving_clip_slot = self._get_clip_slot(key)
+                            if leaving_clip_slot and leaving_clip_slot.canonical_parent == previous_clip_slot.canonical_parent:
+                                previous_clip_slot.fire(force_legato=True)
 
     def _get_index_from_note(self, note):
         """
@@ -462,6 +490,8 @@ class ClipLauncherController:
             scene: Scene.Scene = self.song().scenes[scene_index]
             scene.fire(force_legato=False, can_select_scene_on_launch=True)
 
+    def _track_has_playing_clip(self, track: Track.Track) -> bool:
+        return any(clip_slot.has_clip and clip_slot.clip.is_playing for clip_slot in track.clip_slots)
 
     def disconnect(self):
         self._remove_song_listeners()
