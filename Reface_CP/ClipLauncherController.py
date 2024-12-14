@@ -220,6 +220,8 @@ class ClipLauncherController:
             self._update_highlight()
 
     def _on_note_layout_button_changed(self, value):
+        if len(self._pressed_keys) > 0: # Prevent changing layout while notes are pressed
+            return
         if self._is_scene_focused:
             return
         layout = int((value / 127.0) * (8 - 1))
@@ -267,6 +269,8 @@ class ClipLauncherController:
         # self._logger.log(f"width: {self._width} height: {self._height}")
 
     def _on_clip_scene_target_button_changed(self, value):
+        if len(self._pressed_keys) > 0: # Prevent changing layout while notes are pressed
+            return
         is_scene_focused = value > 0
         if self._is_scene_focused == is_scene_focused:
             return
