@@ -70,6 +70,7 @@ class ClipLauncherController:
         self._pressed_keys = []
         self._is_scene_focused = False
         self._clip_prefix_pattern = r"^.*?\│"
+        self._lowest_key = 24 # Lowest key in the device
         self._max_keys = 85 # Total number of keys in the device (in the refaceCP: 7 octaves + highest C)
         for index in range(128):
             button = ButtonElement(1, MIDI_NOTE_TYPE, self._channel, index)
@@ -407,7 +408,7 @@ class ClipLauncherController:
         
     def _get_scene(self, note: int) -> Scene.Scene:
         index = self._get_index_from_note(note)
-        if index is None:
+        if index is None or index < 0:
             return
         scene_index = self._vertical_offset + index
         if scene_index < len(self.song().scenes):
@@ -417,7 +418,7 @@ class ClipLauncherController:
 
     def _add_name_prefixes(self):
         if self._is_scene_focused:
-            for note in range(0, min(self._max_keys, len(self.song().scenes))):
+            for note in range(self._lowest_key, self._lowest_key + min(self._max_keys, len(self.song().scenes))):
                 scene = self._get_scene(note)
                 if scene:
                     # Add additional spaces before separator if is white key so prefixes are aligned in Live
@@ -431,7 +432,7 @@ class ClipLauncherController:
                         scene.name = prefix + scene.name
 
         else:
-            for note in range(0, 128):
+            for note in range(self._lowest_key, 128):
                 clip_slot = self._get_clip_slot(note)
                 if clip_slot and clip_slot.has_clip:
                     clip = clip_slot.clip
