@@ -298,7 +298,12 @@ class ClipLauncherController:
                     elif pitch_class not in [Note.c_sharp, Note.d_sharp]:
                         self._stop_track_clips_from_note(key)
                 elif base_pitch_class == Note.d_sharp:
-                    self._play_scene_from_note(key)
+                    if self._is_scene_focused:
+                        scene = self._get_scene(key)
+                        if scene:
+                            scene.fire()
+                    else:
+                        self._play_scene_from_note(key)
                 else:
                     if pitch_class == Note.c_sharp:
                         self._stop_all_track_clips_from_notes(self._pressed_keys)
