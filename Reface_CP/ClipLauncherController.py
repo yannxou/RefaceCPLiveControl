@@ -343,13 +343,13 @@ class ClipLauncherController:
                     # Play scene in legato mode
                     previous_scene = self._get_scene(previous_note)
                     if previous_scene:
-                        previous_scene.fire()
+                        previous_scene.fire(force_legato=True)
                 else:
                     previous_clip_slot = self._get_clip_slot(previous_note)
                     if previous_clip_slot and previous_clip_slot.has_clip:
                         # replay previous_clip if stop action key is being released
                         if key % 12 == Note.c_sharp:
-                            previous_clip_slot.fire()
+                            previous_clip_slot.fire(force_legato=True)
                         else:
                             # Play clip in legato mode only if leaving clip belongs to same track
                             leaving_clip_slot = self._get_clip_slot(key)
