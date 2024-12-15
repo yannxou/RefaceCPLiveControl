@@ -111,7 +111,15 @@ Once all keys are released a list of all the possible scales that include all th
 
 ### Phaser toggle:
 
-Enables the **Clip trigger mode**. This allows clip/scene triggering using the MIDI note keys. The following controls apply in this mode:
+Enables the **Clip trigger mode**. This allows clip/scene triggering using all MIDI note keys except keys C# and D# which are reserved for special functions:
+
+* Press and hold C# + clip note key to stop the clip.
+* Press and hold C# + upper/lower C# to stop all clips.
+* Press and hold D# + clip note key to play the clip's scene.
+
+Pressing a new key while another one is being held down allows playing the different clips from the same track in legato mode. This also works with the stop key (C#) so it can be used as some sort of temporal mute when triggering clips.
+
+The following controls apply in this mode:
 
 * **Drive**: Global clip trigger quantization.
 
