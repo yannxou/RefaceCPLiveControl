@@ -128,14 +128,14 @@ The following controls apply in this mode:
 * **Tremolo Rate**: Vertical grid offset. Use this knob to move the clip grid highlight vertically.
 
 * **Chorus Depth**: Note Key Layout. There are multiple keyboard layouts available for triggering clips. Move this knob to switch between these:
-	* 1 octave per track (allow triggering up to 12 clips per track)
-	* 2 octaves per track (allow triggering up to 24 clips per track)
-	* 3 octaves per track (allow triggering up to 36 clips per track)
+	* 1 octave per track (allow triggering up to 10 clips per track)
+	* 2 octaves per track (allow triggering up to 20 clips per track)
+	* 3 octaves per track (allow triggering up to 30 clips per track)
 	* 7 octaves per track (use all note keys to target clips across a single track)
 	* 7 octaves per scene (use all note keys to target clips across a single scene)
-	* 3 octaves per scene (allow triggering clips from same scene across 36 tracks)
-	* 2 octaves per scene (allow triggering clips from same scene across 24 tracks)
-	* 1 octave per scene (allow triggering clips from same scene across 12 tracks)
+	* 3 octaves per scene (allow triggering clips from same scene across 30 tracks)
+	* 2 octaves per scene (allow triggering clips from same scene across 20 tracks)
+	* 1 octave per scene (allow triggering clips from same scene across 10 tracks)
 
 * **Chorus Speed**: Clip/Scene triggering. Move this knob to the left to target clips for triggering. Move it to the right to target scenes.
 
