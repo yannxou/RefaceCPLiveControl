@@ -16,7 +16,7 @@ from Live import ClipSlot, Scene, Track
 from _Framework.ButtonElement import ButtonElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE
 from .Note import Note
-from .Settings import CLIP_TRIGGER_NAME_PREFIXES_ENABLED
+from .Settings import CLIP_TRIGGER_NAME_PREFIXES_ENABLED, CLIP_TRIGGER_DEFAULT_LEGATO_ENABLED
 import _Framework.Task as Task
 
 class ClipLauncherController:
@@ -66,6 +66,7 @@ class ClipLauncherController:
         self._vertical_offset = 0
         self._tracks_per_octave = 1
         self._current_layout = 0
+        self._is_legato_enabled = CLIP_TRIGGER_DEFAULT_LEGATO_ENABLED
         self._note_key_buttons = []
         self._pressed_keys = []
         self._is_scene_focused = False
@@ -291,7 +292,7 @@ class ClipLauncherController:
         if velocity > 0:
             pitch_class = key % 12            
 
-            if len(self._pressed_keys) > 0:
+            if self._is_legato_enabled and len(self._pressed_keys) > 0:
                 current_key = self._pressed_keys[0]
                 current_action = current_key % 12
                 if not self._ongoing_keys and current_action == Note.c_sharp:
@@ -354,7 +355,7 @@ class ClipLauncherController:
             self._pressed_keys.append(key)
 
         else: # note is released (velocity == 0)   
-            if len(self._pressed_keys) > 1:
+            if self._is_legato_enabled and len(self._pressed_keys) > 1:
                 previous_note = self._pressed_keys[len(self._pressed_keys) - 2]
                 if key % 12 == Note.c_sharp:
                     previous_clip_slot = self._get_clip_slot(previous_note)

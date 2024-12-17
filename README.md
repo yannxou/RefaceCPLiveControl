@@ -117,7 +117,7 @@ Enables the **Clip trigger mode**. This allows clip/scene triggering using all M
 * Press and hold C# + upper/lower C# to stop all clips.
 * Press and hold D# + clip note key to play the clip's scene.
 
-Pressing a new key while another one is being held down allows playing the different clips from the same track in legato mode. This also works with the stop key (C#) so it can be used as some sort of temporal mute when triggering clips.
+Pressing a new key while another one is being held down allows playing the different clips from the same track in legato mode. This also works with the stop key (C#) so it can be used as some sort of temporal mute when triggering clips. This feature can be enabled/disabled with the `CLIP_TRIGGER_DEFAULT_LEGATO_ENABLED` setting.
 
 The following controls apply in this mode:
 
@@ -272,8 +272,13 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 There are some script settings that can be user-defined. To modify a default setting, first create a MySettings.py file in the script folder. This file is not included in the project to prevent overwriting it when updating. Edit that file to include any of the following settings:
 
 ```python
-# Add prefixes to clip names to indicate the corresponding MIDI note key in the Clip Trigger mode. Default: `True`.
+# Add prefixes to clip names to indicate the corresponding MIDI note key in the Clip Trigger mode.
 CLIP_TRIGGER_NAME_PREFIXES_ENABLED = True
+```
+
+```python
+# Enable/Disable legato clip launching by default.
+CLIP_TRIGGER_DEFAULT_LEGATO_ENABLED = True
 ```
 
 ## Tips & Tricks
