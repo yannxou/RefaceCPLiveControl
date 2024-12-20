@@ -161,7 +161,8 @@ class ClipLauncherController:
     def _update_highlight(self, delayed=True):
         if self._is_scene_focused:
             total_tracks = len(self.song().visible_tracks)
-            self._parent._c_instance.set_session_highlight(track_offset=total_tracks, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
+            height = min(self._max_keys, len(self.song().scenes))
+            self._parent._c_instance.set_session_highlight(track_offset=total_tracks, scene_offset=self._vertical_offset, width=self._width, height=height, include_return_tracks=False)
         else:
             self._parent._c_instance.set_session_highlight(track_offset=self._horizontal_offset, scene_offset=self._vertical_offset, width=self._width, height=self._height, include_return_tracks=False)
 
