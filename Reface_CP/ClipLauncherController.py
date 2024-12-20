@@ -509,7 +509,8 @@ class ClipLauncherController:
         if clip_slot and clip_slot.has_clip:
             track = clip_slot.canonical_parent
             if isinstance(track, Track.Track):
-                track.stop_all_clips(Quantized=quantized)
+                if track.playing_slot_index >= 0 or track.fired_slot_index >= 0:
+                    track.stop_all_clips(Quantized=quantized)
 
     def _stop_scene_clips_from_note(self, note, quantized=True):
         """Stop all playing or triggered clips from the scene of the corresponding given note"""
@@ -519,7 +520,8 @@ class ClipLauncherController:
                 if clip_slot and clip_slot.has_clip:
                     track = clip_slot.canonical_parent
                     if isinstance(track, Track.Track):
-                        track.stop_all_clips(Quantized=quantized)
+                        if track.playing_slot_index >= 0 or track.fired_slot_index >= 0:
+                            track.stop_all_clips(Quantized=quantized)
 
     def _stop_all_track_clips_from_notes(self, notes, quantized=True):
         """Stop all the tracks form clips corresponding to the given notes"""
