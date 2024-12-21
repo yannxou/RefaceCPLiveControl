@@ -367,7 +367,6 @@ class ClipLauncherController:
                         if previous_clip_slot and previous_clip_slot.has_clip:
                             previous_clip_slot.fire(force_legato=True)
                 elif previous_note % 12 == Note.c_sharp and key == most_recent_key and key not in [Note.c_sharp, Note.d_sharp]:
-                    self._logger.log(f"Stop from key {key}")
                     self._stop_from_note(key)
                 elif previous_note % 12 == Note.d_sharp and key == most_recent_key:
                     pass
