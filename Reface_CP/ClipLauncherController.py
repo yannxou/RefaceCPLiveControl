@@ -357,16 +357,21 @@ class ClipLauncherController:
 
         else: # note is released (velocity == 0)   
             if self._is_legato_enabled and len(self._pressed_keys) > 1:
+                most_recent_key = self._pressed_keys[len(self._pressed_keys) - 1]
                 previous_note = self._pressed_keys[len(self._pressed_keys) - 2]
-                if key % 12 == Note.c_sharp:
-                    previous_clip_slot = self._get_clip_slot(previous_note)
-                    if previous_clip_slot and previous_clip_slot.has_clip:
-                        previous_clip_slot.fire(force_legato=True)
-                elif previous_note % 12 == Note.c_sharp and key not in [Note.c_sharp, Note.d_sharp]:
+                if key % 12 == Note.c_sharp and key == most_recent_key:
+                    if self._is_scene_focused:
+                        self._fire_scene_from_note(previous_note, fire_only_if_needed=True, force_legato=True)
+                    else:
+                        previous_clip_slot = self._get_clip_slot(previous_note)
+                        if previous_clip_slot and previous_clip_slot.has_clip:
+                            previous_clip_slot.fire(force_legato=True)
+                elif previous_note % 12 == Note.c_sharp and key == most_recent_key and key not in [Note.c_sharp, Note.d_sharp]:
+                    self._logger.log(f"Stop from key {key}")
                     self._stop_from_note(key)
-                elif previous_note % 12 == Note.d_sharp:
+                elif previous_note % 12 == Note.d_sharp and key == most_recent_key:
                     pass
-                elif self._is_scene_focused:
+                elif self._is_scene_focused and key == most_recent_key:
                     previous_scene_key = next(k for k in reversed(self._pressed_keys) if k != key)
                     self._fire_scene_from_note(previous_scene_key, fire_only_if_needed=True, force_legato=True)
                 elif self._is_most_recent_key_from_track(key): # The released key corresponds to the most recent key press for a track
