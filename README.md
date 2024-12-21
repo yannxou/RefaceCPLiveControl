@@ -111,7 +111,15 @@ Once all keys are released a list of all the possible scales that include all th
 
 ### Phaser toggle:
 
-Enables the **Clip trigger mode**. This allows clip/scene triggering using the MIDI note keys. The following controls apply in this mode:
+Enables the **Clip trigger mode**. This allows clip/scene triggering using all MIDI note keys except keys C# and D# which are reserved for special functions:
+
+* Press and hold C# + clip note key to stop the clip.
+* Press and hold C# + upper/lower C# to stop all clips.
+* Press and hold D# + clip note key to play the clip's scene.
+
+Pressing a new key while another one is being held down allows playing the different clips from the same track in legato mode. This also works with the stop key (C#) so it can be used as some sort of temporal mute when triggering clips. This feature can be enabled/disabled with the `CLIP_TRIGGER_DEFAULT_LEGATO_ENABLED` setting.
+
+The following controls apply in this mode:
 
 * **Drive**: Global clip trigger quantization.
 
@@ -120,14 +128,14 @@ Enables the **Clip trigger mode**. This allows clip/scene triggering using the M
 * **Tremolo Rate**: Vertical grid offset. Use this knob to move the clip grid highlight vertically.
 
 * **Chorus Depth**: Note Key Layout. There are multiple keyboard layouts available for triggering clips. Move this knob to switch between these:
-	* 1 octave per track (allow triggering up to 12 clips per track)
-	* 2 octaves per track (allow triggering up to 24 clips per track)
-	* 3 octaves per track (allow triggering up to 36 clips per track)
+	* 1 octave per track (allow triggering up to 10 clips per track)
+	* 2 octaves per track (allow triggering up to 20 clips per track)
+	* 3 octaves per track (allow triggering up to 30 clips per track)
 	* 7 octaves per track (use all note keys to target clips across a single track)
 	* 7 octaves per scene (use all note keys to target clips across a single scene)
-	* 3 octaves per scene (allow triggering clips from same scene across 36 tracks)
-	* 2 octaves per scene (allow triggering clips from same scene across 24 tracks)
-	* 1 octave per scene (allow triggering clips from same scene across 12 tracks)
+	* 3 octaves per scene (allow triggering clips from same scene across 30 tracks)
+	* 2 octaves per scene (allow triggering clips from same scene across 20 tracks)
+	* 1 octave per scene (allow triggering clips from same scene across 10 tracks)
 
 * **Chorus Speed**: Clip/Scene triggering. Move this knob to the left to target clips for triggering. Move it to the right to target scenes.
 
@@ -264,8 +272,13 @@ Here are all the actions that can be triggered from the MIDI keyboard:
 There are some script settings that can be user-defined. To modify a default setting, first create a MySettings.py file in the script folder. This file is not included in the project to prevent overwriting it when updating. Edit that file to include any of the following settings:
 
 ```python
-# Add prefixes to clip names to indicate the corresponding MIDI note key in the Clip Trigger mode. Default: `True`.
+# Add prefixes to clip names to indicate the corresponding MIDI note key in the Clip Trigger mode.
 CLIP_TRIGGER_NAME_PREFIXES_ENABLED = True
+```
+
+```python
+# Enable/Disable legato clip launching by default.
+CLIP_TRIGGER_DEFAULT_LEGATO_ENABLED = True
 ```
 
 ## Tips & Tricks
