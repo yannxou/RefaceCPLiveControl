@@ -367,7 +367,8 @@ class ClipLauncherController:
                 elif previous_note % 12 == Note.d_sharp:
                     pass
                 elif self._is_scene_focused:
-                    self._fire_scene_from_note(previous_note, force_legato=True)
+                    previous_scene_key = next(k for k in reversed(self._pressed_keys) if k != key)
+                    self._fire_scene_from_note(previous_scene_key, fire_only_if_needed=True, force_legato=True)
                 elif self._is_most_recent_key_from_track(key): # The released key corresponds to the most recent key press for a track
                     # Since legato only applies to clips within the same track we find here the previous pressed clip on a track basis.
                     released_clip_slot = self._get_clip_slot(key)
@@ -546,10 +547,18 @@ class ClipLauncherController:
             scene: Scene.Scene = self.song().scenes[scene_index]
             scene.fire(force_legato=False, can_select_scene_on_launch=True)
 
-    def _fire_scene_from_note(self, note, force_legato: bool = False):
+    def _fire_scene_from_note(self, note, fire_only_if_needed: bool = False, force_legato: bool = False):
+        """
+        Plays the scene corresponding to the given note while in scene mode.
+        If fire_only_if_needed is True the scene will only be fired if one of the scene's clips is stopped.
+        """
         scene = self._get_scene(note)
         if scene:
-            scene.fire(force_legato=force_legato)
+            if fire_only_if_needed:
+                if any(clip_slot.has_clip and not clip_slot.clip.is_playing for clip_slot in scene.clip_slots):
+                    scene.fire(force_legato=force_legato)
+            else:        
+                scene.fire(force_legato=force_legato)
 
     def _track_has_playing_clip(self, track: Track.Track) -> bool:
         return any(clip_slot.has_clip and clip_slot.clip.is_playing for clip_slot in track.clip_slots)
