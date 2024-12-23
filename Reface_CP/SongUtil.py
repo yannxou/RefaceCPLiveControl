@@ -230,14 +230,15 @@ class SongUtil:
         Live.Application.get_application().view.show_view("Detail/Clip")
 
     @staticmethod
-    def start_track_audio_resampling(source_track: Track):
+    def start_track_audio_resampling(source_track: Track, auto_select_recording_track: bool = False):
         """
         Start recording a new clip into a track that takes audio from the given track's output, creating a new track if none is found.
         """
         if not source_track.has_audio_output: 
             return
-        
+    
         song = Live.Application.get_application().get_document()
+        current_track = song.view.selected_track
         target_track = next((t for t in song.tracks if t.has_audio_input and t.input_routing_type.attached_object == source_track), None)
         if target_track is None:
             # Create track for resampling 
@@ -258,8 +259,13 @@ class SongUtil:
             # It seems that trying to set the input_routing_channel right after creating a track may lead to crash.
             # The available_input_routing_channels is empty just after the track creation and maybe this should be delayed somehow.
             # target_track.input_routing_channel = target_track.available_input_routing_channels[2]
+
+            # Restore track selection (Live automatically selects newly created tracks)
+            if not auto_select_recording_track:
+                song.view.selected_track = current_track
         else:
-            song.view.selected_track = target_track
+            if auto_select_recording_track:
+                song.view.selected_track = target_track
 
         if target_track.can_be_armed and not target_track.arm:
             target_track.arm = True
@@ -275,14 +281,15 @@ class SongUtil:
         clip_slot.fire()
 
     @staticmethod
-    def start_track_midi_resampling(source_track: Track):
+    def start_track_midi_resampling(source_track: Track, auto_select_recording_track: bool = False):
         """
         Start recording a new MIDI clip into a track that takes the MIDI signal from the given track's output, creating a new track if none is found.
         """
         if not source_track.has_midi_input: 
             return
-        
+    
         song = Live.Application.get_application().get_document()
+        current_track = song.view.selected_track
         target_track = next((t for t in song.tracks if t.has_midi_input and t.input_routing_type.attached_object == source_track), None)
         if target_track is None:
             # Create track for resampling 
@@ -296,8 +303,12 @@ class SongUtil:
             if source_routing is None:
                 return
             target_track.input_routing_type = source_routing
+            # Restore track selection (Live automatically selects newly created tracks)
+            if not auto_select_recording_track:
+                song.view.selected_track = current_track
         else:
-            song.view.selected_track = target_track
+            if auto_select_recording_track:
+                song.view.selected_track = target_track
 
         if target_track.can_be_armed and not target_track.arm:
             target_track.arm = True
