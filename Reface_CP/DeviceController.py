@@ -72,8 +72,22 @@ class DeviceController:
         self._device_lock_button = ButtonElement(1, MIDI_CC_TYPE, 15, 100, name="DeviceLock")
         self._device = DeviceComponent(device_selection_follows_track_selection=True)
         self._device.name = 'Device_Component'
+        self._device._is_banking_enabled = self.device_is_banking_enabled(self._device)  # workaround to allow DeviceComponent banking when no banking controls are assigned
         self._device.set_lock_button(self._device_lock_button)
         self._device.set_parameter_controls(controls)
+	
+
+    def set_bank_index(self, index) -> int:
+        """Sets the device bank index. Returns the real assigned index in case the given index is out of bounds."""
+        bank_index = max(0, min(index, self._device._number_of_parameter_banks() - 1))
+        self._device._on_device_bank_changed(self._device._device, bank_index)
+        return bank_index
+
+    """a closure fix to allow custom banking"""
+    def device_is_banking_enabled(self, device):
+        def _is_banking_enabled():
+            return True
+        return _is_banking_enabled
 
     def disconnect(self):
         self.set_enabled(False)
