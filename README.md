@@ -71,6 +71,8 @@ This also provides a lot more of flexibility to the custom MIDI mappings since e
 	<img src="Images/locked_device_mode.jpg" alt="Locked Device Mode" width="50%" />
 </p>
 
+While the device is locked, the **Wave type knob** can be used to select the device parameter bank. 
+
 * **Wah On**: Enables the **Track mode**. This allows changing the selected track's volume, panning, sends A and B as well as the Mute, Solo and Arm buttons. In this mode the `Drive` knob is connected to the currently selected parameter in Live which can be very handy for quick automations.
 
 <p align="center">
