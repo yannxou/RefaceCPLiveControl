@@ -315,12 +315,19 @@ class RefaceCPControlSurface(ControlSurface):
         self.set_enabled(not bypass, properties)
 
     def _reface_type_select_changed(self, value):
-        channel = reface_type_map.get(value, 0)
+        index = reface_type_map.get(value, 0)
+        self._logger.log(f"Type changed: {value} -> {index}")
+
         if self._scale_controller._enabled and self._scale_controller._edit_mode_enabled:
             return # disable control while in scale edit mode
-        self._logger.log(f"Type changed: {value} -> {channel}")
-        self.set_channel(channel)
-        self._arm_tracks_for_channel(channel, select=True)
+        
+        if self.is_device_lock_mode_enabled:
+            new_index = self._device_controller.set_bank_index(index)
+            self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == new_index)))
+            return
+
+        self.set_channel(index)
+        self._arm_tracks_for_channel(index, select=True)
         self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, value))  # Update led in device since we disabled local control
 
     def _reface_tremolo_toggle_changed(self, value):
@@ -366,11 +373,15 @@ class RefaceCPControlSurface(ControlSurface):
         if device is not None and self._is_initialized:
             self._logger.log(f"Locking to device {device.name}")
             self._device_controller.lock_to_device(device)
+            self._device_controller.set_bank_index(0)
+            self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == 0)))
             self._transport_controller.set_locked_device(device)
 
     def _unlock_from_device(self):
         if self._is_initialized:
             self._device_controller.unlock_from_device()
+            self._device_controller.set_bank_index(0)
+            self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == self._channel)))
             self._transport_controller.set_locked_device(None)
 
 # -- Modes
@@ -397,6 +408,9 @@ class RefaceCPControlSurface(ControlSurface):
             self._device_controller.set_enabled(True)
             if self.is_device_follow_mode_enabled:
                 self._enable_device_follow_mode()
+            elif self.is_device_lock_mode_enabled:
+                current_bank = self._device_controller._device._bank_index
+                self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == current_bank)))
 
         self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))
         self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
