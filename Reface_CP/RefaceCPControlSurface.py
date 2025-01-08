@@ -408,6 +408,9 @@ class RefaceCPControlSurface(ControlSurface):
             self._device_controller.set_enabled(True)
             if self.is_device_follow_mode_enabled:
                 self._enable_device_follow_mode()
+            elif self.is_device_lock_mode_enabled:
+                current_bank = self._device_controller._device._bank_index
+                self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == current_bank)))
 
         self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))
         self._send_midi((0xB0 | self._rx_channel, CHORUS_PHASER_TOGGLE, 0))
