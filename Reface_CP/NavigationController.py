@@ -22,7 +22,7 @@ from _Framework.InputControlElement import MIDI_CC_TYPE
 class NavigationController:
     
     def __init__(self, logger: Logger, 
-                 song: Live.Song.Song, channel = 0,
+                 song: Live.Song.Song,
                  track_navigation_button = None,
                  clip_navigation_button = None,
                  device_navigation_button = None
@@ -44,19 +44,19 @@ class NavigationController:
         self._enabled = enabled
 
     def _setup_button_listeners(self):
-        if self._track_navigation_button:
+        if self._track_navigation_button and not self._track_navigation_button.value_has_listener(self._on_track_navigation_button_changed):
             self._track_navigation_button.add_value_listener(self._on_track_navigation_button_changed)
-        if self._clip_navigation_button:
+        if self._clip_navigation_button and not self._clip_navigation_button.value_has_listener(self._on_clip_navigation_button_changed):
             self._clip_navigation_button.add_value_listener(self._on_clip_navigation_button_changed)
-        if self._device_navigation_button:
+        if self._device_navigation_button and not self._device_navigation_button.value_has_listener(self._on_device_navigation_button_changed):
             self._device_navigation_button.add_value_listener(self._on_device_navigation_button_changed)
 
     def _disable_button_listeners(self):
-        if self._track_navigation_button:
+        if self._track_navigation_button and self._track_navigation_button.value_has_listener(self._on_track_navigation_button_changed):
             self._track_navigation_button.remove_value_listener(self._on_track_navigation_button_changed)
-        if self._clip_navigation_button:
+        if self._clip_navigation_button and self._clip_navigation_button.value_has_listener(self._on_clip_navigation_button_changed):
             self._clip_navigation_button.remove_value_listener(self._on_clip_navigation_button_changed)
-        if self._device_navigation_button:
+        if self._device_navigation_button and self._device_navigation_button.value_has_listener(self._on_device_navigation_button_changed):
             self._device_navigation_button.remove_value_listener(self._on_device_navigation_button_changed)
 
     def _on_track_navigation_button_changed(self, value):

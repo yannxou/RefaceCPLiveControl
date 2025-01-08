@@ -35,17 +35,16 @@ class TrackController:
         self._enabled = False
         self._selected_parameter = None
         self._selected_parameter_control = selected_parameter_control
+        self._volume_control = volume_control
+        self._pan_control = pan_control
+        self._send_controls = send_controls
+        self._mute_control = mute_control
+        self._solo_control = solo_control
+        self._arm_control = arm_control
         self._on_track_arm_changed = on_track_arm_changed
         self._channel_strip = ChannelStripComponent()
         self._channel_strip.set_enabled(False)
         self._channel_strip.set_invert_mute_feedback(True)
-        self._channel_strip.set_volume_control(volume_control)
-        self._channel_strip.set_pan_control(pan_control)
-        self._channel_strip.set_send_controls(send_controls)
-        self._channel_strip.set_mute_button(mute_control)
-        self._channel_strip.set_solo_button(solo_control)
-        self._channel_strip.set_arm_button(arm_control)
-        self.set_track(self._song.view.selected_track)
 
     @property
     def track(self):
@@ -58,9 +57,20 @@ class TrackController:
             self._selected_parameter_control.connect_to(self._selected_parameter)
             if not self._song.view.selected_parameter_has_listener(self._on_selected_parameter_changed):
                 self._song.view.add_selected_parameter_listener(self._on_selected_parameter_changed)
-            self._add_track_listeners(self._channel_strip.track)
-            self._on_arm_changed()
+            self._channel_strip.set_volume_control(self._volume_control)
+            self._channel_strip.set_pan_control(self._pan_control)
+            self._channel_strip.set_send_controls(self._send_controls)
+            self._channel_strip.set_mute_button(self._mute_control)
+            self._channel_strip.set_solo_button(self._solo_control)
+            self._channel_strip.set_arm_button(self._arm_control)
+            self.set_track(self._song.view.selected_track)
         else:
+            self._channel_strip.set_volume_control(None)
+            self._channel_strip.set_pan_control(None)
+            self._channel_strip.set_send_controls(None)
+            self._channel_strip.set_mute_button(None)
+            self._channel_strip.set_solo_button(None)
+            self._channel_strip.set_arm_button(None)
             if self._song.view.selected_parameter_has_listener(self._on_selected_parameter_changed):
                 self._song.view.remove_selected_parameter_listener(self._on_selected_parameter_changed)
             self._selected_parameter_control.connect_to(None)
@@ -68,10 +78,11 @@ class TrackController:
         self._channel_strip.set_enabled(enabled)
 
     def set_track(self, track):
-        self._remove_track_listeners(self._channel_strip.track)        
-        self._channel_strip.set_track(track)
-        self._add_track_listeners(track)
-        self._on_arm_changed()
+        if self._enabled:
+            self._remove_track_listeners(self._channel_strip.track)        
+            self._channel_strip.set_track(track)
+            self._add_track_listeners(track)
+            self._on_arm_changed()
 
     def _add_track_listeners(self, track):
         try:
@@ -110,4 +121,12 @@ class TrackController:
         self._logger = None
         self._song = None
         self._channel_strip = None
+        self._selected_parameter_control = None
+        self._volume_control = None
+        self._pan_control = None
+        self._send_controls = None
+        self._mute_control = None
+        self._solo_control = None
+        self._arm_control = None
+        self._on_track_arm_changed = None
         

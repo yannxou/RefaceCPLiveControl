@@ -87,13 +87,13 @@ class RefaceCPControlSurface(ControlSurface):
         self._logger.log("RefaceCP Identification Succeeded.")
         self._enable_reface_script_mode()
         self._setup_buttons()
-        self._setup_navigation_controller()
         self._device_controller = DeviceController(
             self._logger,
             song=self.song(),
             controls=[self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]
         )
         self.set_device_component(self._device_controller._device)
+        self._setup_navigation_controller()
         self._setup_track_controller()
         self._transport_controller = TransportController(
             self._logger,
@@ -156,15 +156,19 @@ class RefaceCPControlSurface(ControlSurface):
         self._all_controls.append(self._delay_toggle_button)
 
     def _setup_navigation_controller(self):
-        navigation_controller = NavigationController(
+        track_navigation_button = EncoderElement(MIDI_CC_TYPE, self._channel, DRIVE_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(track_navigation_button)
+        clip_browser_button = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(clip_browser_button)
+        device_navigation_button = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_RATE_KNOB, Live.MidiMap.MapMode.absolute)
+        self._all_controls.append(device_navigation_button)
+        self._navigation_controller = NavigationController(
             self._logger,
             self.song(),
-            channel=self._channel,
-            track_navigation_button=self._drive_knob,
-            clip_navigation_button=self._tremolo_depth_knob,
-            device_navigation_button=self._tremolo_rate_knob
+            track_navigation_button=track_navigation_button,
+            clip_navigation_button=clip_browser_button,
+            device_navigation_button=device_navigation_button
         )
-        self._navigation_controller = navigation_controller
 
     def _setup_track_controller(self):
         volume_control = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
