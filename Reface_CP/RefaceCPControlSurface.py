@@ -87,13 +87,13 @@ class RefaceCPControlSurface(ControlSurface):
         self._logger.log("RefaceCP Identification Succeeded.")
         self._enable_reface_script_mode()
         self._setup_buttons()
-        self._setup_navigation_controller()
         self._device_controller = DeviceController(
             self._logger,
             song=self.song(),
             controls=[self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]
         )
         self.set_device_component(self._device_controller._device)
+        self._setup_navigation_controller()
         self._setup_track_controller()
         self._transport_controller = TransportController(
             self._logger,
@@ -156,92 +156,66 @@ class RefaceCPControlSurface(ControlSurface):
         self._all_controls.append(self._delay_toggle_button)
 
     def _setup_navigation_controller(self):
-        navigation_controller = NavigationController(
+        self._navigation_controller = NavigationController(
             self._logger,
             self.song(),
-            channel=self._channel,
             track_navigation_button=self._drive_knob,
             clip_navigation_button=self._tremolo_depth_knob,
             device_navigation_button=self._tremolo_rate_knob
         )
-        self._navigation_controller = navigation_controller
 
     def _setup_track_controller(self):
-        volume_control = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(volume_control)
-        pan_control = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_RATE_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(pan_control)
-        send1_control = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(send1_control)
-        send2_control = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_SPEED_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(send2_control)
-        self._mute_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB)
-        self._all_controls.append(self._mute_button)
-        self._solo_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB)
-        self._all_controls.append(self._solo_button)
-        self._arm_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB)
-        self._all_controls.append(self._arm_button)
+        mute_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB)
+        self._all_controls.append(mute_button)
+        solo_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB)
+        self._all_controls.append(solo_button)
+        arm_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB)
+        self._all_controls.append(arm_button)
         self._track_controller = TrackController(
             self._logger,
             song=self.song(),
             selected_parameter_control=self._drive_knob,
-            volume_control=volume_control,
-            pan_control=pan_control,
-            send_controls=[send1_control, send2_control],
-            mute_control=self._mute_button,
-            solo_control=self._solo_button,
-            arm_control=self._arm_button,
+            volume_control=self._tremolo_depth_knob,
+            pan_control=self._tremolo_rate_knob,
+            send_controls=[self._chorus_depth_knob, self._chorus_speed_knob],
+            mute_control=mute_button,
+            solo_control=solo_button,
+            arm_control=arm_button,
             on_track_arm_changed=self._on_track_arm_changed
         )
 
     def _setup_note_repeat(self):
-        repeat_rate_button = EncoderElement(MIDI_CC_TYPE, self._channel, DELAY_TIME_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(repeat_rate_button)
-        notes_per_bar_button = EncoderElement(MIDI_CC_TYPE, self._channel, DELAY_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(notes_per_bar_button)
         self._note_repeat_controller = NoteRepeatController(
             self._logger, 
-            self._c_instance.note_repeat, 
-            repeat_rate_button=repeat_rate_button,
-            notes_per_bar_button=notes_per_bar_button
+            self._c_instance.note_repeat,
+            repeat_rate_button=self._delay_time_knob,
+            notes_per_bar_button=self._delay_depth_knob
         )
 
     def _setup_scale_controller(self):
-        root_note_button = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(root_note_button)
-        scale_mode_button = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_SPEED_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(scale_mode_button)
         scale_edit_mode_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, REVERB_DEPTH_KNOB)
         self._all_controls.append(scale_edit_mode_button)
         self._scale_controller = ScaleModeController(
             self._logger,
             song=self.song(),
-            root_note_button=root_note_button,
-            scale_mode_button=scale_mode_button,
+            root_note_button=self._chorus_depth_knob,
+            scale_mode_button=self._chorus_speed_knob,
             edit_mode_button=scale_edit_mode_button,
             on_edit_mode_changed=self._on_scale_edit_mode_changed,
             on_note_event = self._play_note
         )
 
     def _setup_clip_launcher(self):
-        trigger_quantization_button = EncoderElement(MIDI_CC_TYPE, self._channel, DRIVE_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(trigger_quantization_button)
-        horizontal_offset_button = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(horizontal_offset_button)
-        vertical_offset_button = EncoderElement(MIDI_CC_TYPE, self._channel, TREMOLO_RATE_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(vertical_offset_button)
-        note_layout_button = EncoderElement(MIDI_CC_TYPE, self._channel, CHORUS_DEPTH_KNOB, Live.MidiMap.MapMode.absolute)
-        self._all_controls.append(note_layout_button)
         clip_scene_target_button = RotaryToggleElement(0, MIDI_CC_TYPE, self._channel, CHORUS_SPEED_KNOB)
         self._all_controls.append(clip_scene_target_button)
         self._clip_launcher_controller = ClipLauncherController(
             logger=self._logger, 
             parent=self, 
             channel=self._channel,
-            trigger_quantization_button=trigger_quantization_button,
-            horizontal_offset_button=horizontal_offset_button,
-            vertical_offset_button=vertical_offset_button,
-            note_layout_button=note_layout_button,
+            trigger_quantization_button=self._drive_knob,
+            horizontal_offset_button=self._tremolo_depth_knob,
+            vertical_offset_button=self._tremolo_rate_knob,
+            note_layout_button=self._chorus_depth_knob,
             clip_scene_target_button=clip_scene_target_button
         )
 
