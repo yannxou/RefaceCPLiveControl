@@ -67,19 +67,24 @@ class NavigationController:
         selected_track = all_tracks[track_index]
         if self._song.view.selected_track != selected_track:
             self._song.view.selected_track = selected_track
-            self._logger.log(f"Select track: {selected_track.name}")
+            # self._logger.log(f"Select track: {selected_track.name}")
 
     def _on_clip_navigation_button_changed(self, value):
+        selected_track = self._song.view.selected_track
+
         view = Live.Application.get_application().view
         if not view.is_view_visible("Detail/Clip"):
             view.show_view("Detail/Clip")
 
-        selected_track = self._song.view.selected_track
-        total_clip_slots = len(selected_track.clip_slots)
-        if total_clip_slots > 0:
-            clip_index = int((value / 127.0) * (total_clip_slots - 1))
-            selected_clip_slot = selected_track.clip_slots[clip_index]
-            self._song.view.highlighted_clip_slot = selected_clip_slot
+        if selected_track == self._song.master_track:
+            total_scenes = len(self._song.scenes)
+            scene_index = int((value / 127.0) * (total_scenes - 1))
+            self._song.view.selected_scene = self._song.scenes[scene_index]
+        else:
+            total_clip_slots = len(selected_track.clip_slots)
+            if total_clip_slots > 0:
+                clip_index = int((value / 127.0) * (total_clip_slots - 1))
+                self._song.view.highlighted_clip_slot = selected_track.clip_slots[clip_index]
 
     def _on_device_navigation_button_changed(self, value):
         view = Live.Application.get_application().view
