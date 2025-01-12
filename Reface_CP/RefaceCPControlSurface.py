@@ -33,6 +33,7 @@ from .NoteRepeatController import NoteRepeatController
 from .ScaleModeController import ScaleModeController
 from .ClipLauncherController import ClipLauncherController
 from .AudioTrackMonitoringListener import AudioTrackMonitoringListener
+from .DeviceRandomizer import DeviceRandomizer
 
 # Live Routing Category values
 ROUTING_CATEGORY_NONE = 6
@@ -103,6 +104,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._setup_note_repeat()
         self._setup_scale_controller()
         self._setup_clip_launcher()
+        self._setup_device_randomizer()
         self._refaceCP.request_current_values()
 
     def _receive_tone_parameter(self, parameter: ToneParameter, value):
@@ -219,6 +221,15 @@ class RefaceCPControlSurface(ControlSurface):
             clip_scene_target_button=clip_scene_target_button
         )
 
+    def _setup_device_randomizer(self):
+        self._device_randomizer = DeviceRandomizer(
+            self._logger,
+            song=self.song(),
+            morphing_amount_button=self._drive_knob,
+            morphing_length_button=self._tremolo_depth_knob,
+            param_randomization_button=self._tremolo_rate_knob
+        )
+
     @property
     def _is_initialized(self):
         return self._tremolo_toggle_value >= 0 and self._chorus_toggle_value >= 0 and self._delay_toggle_value >= 0
@@ -290,15 +301,23 @@ class RefaceCPControlSurface(ControlSurface):
 
     def _reface_type_select_changed(self, value):
         index = reface_type_map.get(value, 0)
-        self._logger.log(f"Type changed: {value} -> {index}")
+        self._logger.log(f"Wave type changed: {value} -> {index}")
+        
+        if self.is_device_lock_mode_enabled:
+            if index < 5:
+                self._device_randomizer.set_enabled(False)
+                self._device_controller.set_enabled(True)
+                index = self._device_controller.set_bank_index(index)
+            else:
+                self._device_controller.set_enabled(False)
+                self._device_randomizer.set_enabled(True)
+                self._device_randomizer.set_device(self._device_controller._locked_device)
+                self._logger.show_message("Device randomization enabled.")
+            self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == index)))
+            return
 
         if self._scale_controller._enabled and self._scale_controller._edit_mode_enabled:
             return # disable control while in scale edit mode
-        
-        if self.is_device_lock_mode_enabled:
-            new_index = self._device_controller.set_bank_index(index)
-            self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == new_index)))
-            return
 
         self.set_channel(index)
         self._arm_tracks_for_channel(index, select=True)
