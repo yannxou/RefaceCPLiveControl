@@ -224,7 +224,7 @@ class RefaceCPControlSurface(ControlSurface):
     def _setup_device_randomizer(self):
         self._device_randomizer = DeviceRandomizer(
             self._logger,
-            song=self.song(),
+            parent=self,
             morphing_amount_button=self._drive_knob,
             morphing_length_button=self._tremolo_depth_knob,
             param_randomization_button=self._tremolo_rate_knob

@@ -11,22 +11,26 @@
 
 import Live.Device
 from Live.DeviceParameter import ParameterState
+import Live.DeviceParameter
 import Live.Song
 from .Logger import Logger
 import random
+from functools import partial
+from _Framework.ControlSurface import ControlSurface
+import _Framework.Task as Task
 
 class DeviceRandomizer:
     
     def __init__(self,
                  logger: Logger,
-                 song: Live.Song.Song,
+                 parent: ControlSurface,
                  device: Live.Device.Device = None,
                  morphing_amount_button = None,
                  morphing_length_button = None,
                  param_randomization_button = None,
                  ):
         self._logger = logger
-        self._song = song
+        self._song: Live.Song.Song = parent.song()
         self._enabled = False
         self._morphing_amount_button = morphing_amount_button
         self._morphing_length_button = morphing_length_button
@@ -37,7 +41,10 @@ class DeviceRandomizer:
         self._target_parameters = []
         self._morphing_amount = 0
         self._morphing_length = 0
-        self._excluded_params = ["Device On"]
+        self._excluded_params = ["Device On", "Chain Selector"]
+        self._parameter_listeners = {}
+        self._user_values = {} # Dict of param_name:value used to lock (exclude from randomization) parameters to specific values set by the user
+        self._control_gesture_task = parent._tasks.add(Task.sequence(Task.delay(1), self._on_control_gesture_ended)).kill()
 
     def set_enabled(self, enabled):
         """Enables/Disables the device randomization functionality."""
@@ -45,13 +52,10 @@ class DeviceRandomizer:
             return
         if enabled:
             self._setup_button_listeners()
-            if self._device is not None:
-                self._capture_initial_values()
-                if len(self._target_preset) == 0:
-                    self._randomize_target_values()
         else:
             self._disable_button_listeners()
             self._device = None
+            self._user_values = {}
         self._enabled = enabled
 
     def set_device(self, device):
@@ -60,10 +64,11 @@ class DeviceRandomizer:
         self._device = device
         if device is None:
             return
-        self._logger.log(f"Randomizing device: {device.name}")
-        if self._enabled:
-            self._capture_initial_values()
-            self._randomize_target_values()
+        self._logger.log(f"Randomizing enabled for device: {device.name}")
+        self._user_values = {}
+        self._capture_initial_values()
+        self._randomize_target_values()
+        self._update_parameter_listeners()
 
     def _setup_button_listeners(self):
         if self._morphing_amount_button and not self._morphing_amount_button.value_has_listener(self._on_morphing_amount_button_changed):
@@ -81,9 +86,41 @@ class DeviceRandomizer:
         if self._param_randomization_button and self._param_randomization_button.value_has_listener(self._on_param_randomization_button_changed):
             self._param_randomization_button.remove_value_listener(self._on_param_randomization_button_changed)
 
+    def _update_parameter_listeners(self):
+        device = self._device
+        if device is None:
+            return
+        self._remove_parameter_listeners()
+        for parameter in device.parameters:
+            listener = partial(self._on_parameter_value_changed, parameter)
+            self._parameter_listeners[parameter] = listener
+            parameter.add_value_listener(listener)
+        self._logger.log(f"added {len(device.parameters)} parameter listeners.")
+    
+    def _remove_parameter_listeners(self):
+        removed = 0 # debug
+        for parameter, listener in self._parameter_listeners.items():
+            if parameter.value_has_listener(listener):
+                parameter.remove_value_listener(listener)
+                removed = removed + 1
+        self._logger.log(f"Remove parameter listeners. count: {removed}")
+        self._parameter_listeners = {}
+
+    def _on_control_gesture_ended(self, args=None):
+        if self._enabled:
+            self._logger.log("Gesture ended")
+
+    def _on_parameter_value_changed(self, parameter: Live.DeviceParameter.DeviceParameter):
+        if self._control_gesture_task.state == Task.RUNNING:
+            return
+        self._logger.log(f"Parameter changed: {parameter.name}:{parameter.value}")
+        self._user_values[parameter.name] = parameter.value
+
     def _on_morphing_amount_button_changed(self, value):
         if self._device is None:
             return
+        self._control_gesture_task.kill()
+        self._control_gesture_task.restart()
         self._morphing_amount = value / 127.0
         self._logger.log(f"Morphing amount: {self._morphing_amount}")
         self._morph_parameters()
@@ -91,6 +128,8 @@ class DeviceRandomizer:
     def _on_morphing_length_button_changed(self, value):
         if self._device is None:
             return
+        self._control_gesture_task.kill()
+        self._control_gesture_task.restart()
         self._morphing_length = int((value / 127.0) * (len(self._target_parameters) - 1))
         self._logger.log(f"Morphing length: {self._morphing_length}")
         self._morph_parameters() # Call only needed if we restore non-target params when morphing
@@ -98,6 +137,8 @@ class DeviceRandomizer:
     def _on_param_randomization_button_changed(self, value):
         if self._device is None:
             return
+        self._control_gesture_task.kill()
+        self._control_gesture_task.restart()        
         self._logger.log("Randomizing preset")
         self._randomize_target_values()
         self._morph_parameters()
@@ -115,6 +156,9 @@ class DeviceRandomizer:
             self._initial_preset[parameter.name] = parameter.value
 
     def _randomize_target_values(self):
+        """
+        Randomizes the target parameters and their values.
+        """
         self._target_preset = self._make_random_preset(self._device)
         self._target_parameters = list(self._target_preset.keys())
         random.shuffle(self._target_parameters)
@@ -135,6 +179,7 @@ class DeviceRandomizer:
     def _morph_parameters(self):
         """
         Morphs between an initial preset and a target preset based on a morphing percentage.
+        Values changed by the user override values from the target preset.
         """
         # Ensure morph_percentage is clamped between 0 and 1
         morph_percentage = max(0, min(1, self._morphing_amount))
@@ -143,10 +188,11 @@ class DeviceRandomizer:
         for parameter in self._device.parameters:
             # Skip parameters that cannot be changed
             if parameter.is_enabled:
-                if parameter.name in target_parameters:
+                is_user_override = parameter.name in self._user_values
+                if parameter.name in target_parameters or is_user_override:
                     # Perform linear interpolation between initial and target values
                     initial_value = self._initial_preset[parameter.name]
-                    target_value = self._target_preset[parameter.name]
+                    target_value = self._user_values[parameter.name] if is_user_override else self._target_preset[parameter.name]
                     parameter.value = initial_value + (target_value - initial_value) * morph_percentage
                 else:
                     # Restore initial values for non-target params?
@@ -193,6 +239,7 @@ class DeviceRandomizer:
 
     def disconnect(self):
         self.set_enabled(False)
+        self._remove_parameter_listeners()
         self._logger = None
         self._song = None
         self._morphing_amount_button = None
@@ -202,4 +249,7 @@ class DeviceRandomizer:
         self._initial_preset = None
         self._target_preset = None
         self._target_parameters = None
+        self._user_values = None
+        self._control_gesture_task.kill()
+        self._control_gesture_task = None
 
