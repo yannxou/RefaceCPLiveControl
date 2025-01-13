@@ -100,9 +100,12 @@ class DeviceRandomizer:
     def _remove_parameter_listeners(self):
         removed = 0 # debug
         for parameter, listener in self._parameter_listeners.items():
-            if parameter.value_has_listener(listener):
-                parameter.remove_value_listener(listener)
-                removed = removed + 1
+            try:
+                if parameter.value_has_listener(listener):
+                    parameter.remove_value_listener(listener)
+                    removed = removed + 1
+            except:
+                pass
         self._logger.log(f"Remove parameter listeners. count: {removed}")
         self._parameter_listeners = {}
 
