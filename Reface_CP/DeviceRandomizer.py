@@ -109,9 +109,14 @@ class DeviceRandomizer:
         self._logger.log(f"Remove parameter listeners. count: {removed}")
         self._parameter_listeners = {}
 
+    def _start_control_gesture(self):
+        if not self._control_gesture_task.state == Task.RUNNING:
+            self._song.begin_undo_step()
+        self._control_gesture_task.restart()
+
     def _on_control_gesture_ended(self, args=None):
-        if self._enabled:
-            self._logger.log("Gesture ended")
+        self._song.end_undo_step()
+        self._logger.log("Gesture ended")
 
     def _on_parameter_value_changed(self, parameter: Live.DeviceParameter.DeviceParameter):
         if self._control_gesture_task.state == Task.RUNNING:
@@ -122,8 +127,7 @@ class DeviceRandomizer:
     def _on_morphing_amount_button_changed(self, value):
         if self._device is None:
             return
-        self._control_gesture_task.kill()
-        self._control_gesture_task.restart()
+        self._start_control_gesture()
         self._morphing_amount = value / 127.0
         self._logger.log(f"Morphing amount: {self._morphing_amount}")
         self._morph_parameters()
@@ -131,8 +135,7 @@ class DeviceRandomizer:
     def _on_morphing_length_button_changed(self, value):
         if self._device is None:
             return
-        self._control_gesture_task.kill()
-        self._control_gesture_task.restart()
+        self._start_control_gesture()
         self._morphing_length = int((value / 127.0) * (len(self._target_parameters) - 1))
         self._logger.log(f"Morphing length: {self._morphing_length}")
         self._morph_parameters() # Call only needed if we restore non-target params when morphing
@@ -140,8 +143,7 @@ class DeviceRandomizer:
     def _on_param_randomization_button_changed(self, value):
         if self._device is None:
             return
-        self._control_gesture_task.kill()
-        self._control_gesture_task.restart()        
+        self._start_control_gesture()   
         self._logger.log("Randomizing preset")
         self._randomize_target_values()
         self._morph_parameters()
