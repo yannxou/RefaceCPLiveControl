@@ -604,3 +604,12 @@ class ClipLauncherController:
         self._remove_button_listeners()
         self._remove_note_key_listeners()
         self._note_key_buttons = []
+        self._parent = None
+        self._logger = None
+        self._clip_rename_task.kill()
+        self._clip_rename_task = None
+        self._trigger_quantization_button = None
+        self._horizontal_offset_button = None
+        self._vertical_offset_button = None
+        self._note_layout_button = None
+        self._clip_scene_target_button = None
