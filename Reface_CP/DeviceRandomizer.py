@@ -40,7 +40,7 @@ class DeviceRandomizer:
         self._target_preset = {}
         self._target_parameters = []
         self._morphing_amount = 0
-        self._morphing_length = 0
+        self._morphing_length = 1
         self._excluded_params = ["Device On", "Chain Selector"]
         self._parameter_listeners = {}
         self._user_values = {} # Dict of param_name:value used to lock (exclude from randomization) parameters to specific values set by the user
@@ -54,6 +54,7 @@ class DeviceRandomizer:
             self._setup_button_listeners()
         else:
             self._disable_button_listeners()
+            self._remove_parameter_listeners()
             self._device = None
             self._user_values = {}
         self._enabled = enabled
