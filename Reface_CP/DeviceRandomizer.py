@@ -39,8 +39,8 @@ class DeviceRandomizer:
         self._initial_preset = {}
         self._target_preset = {}
         self._target_parameters = []
-        self._morphing_amount = 0
-        self._morphing_length = 1
+        self._morphing_amount = 0 # 0..1
+        self._morphing_length = 1 # 0..1
         self._excluded_params = ["Device On", "Chain Selector"]
         self._parameter_listeners = {}
         self._user_values = {} # Dict of param_name:value used to lock (exclude from randomization) parameters to specific values set by the user
@@ -130,22 +130,24 @@ class DeviceRandomizer:
             return
         self._start_control_gesture()
         self._morphing_amount = value / 127.0
-        self._logger.log(f"Morphing amount: {self._morphing_amount}")
+        #self._logger.log(f"Morphing amount: {self._morphing_amount}")
+        self._logger.show_message(f"{self._device.name} > Morphing amount: {int(self._morphing_amount*100)}%")
         self._morph_parameters()
 
     def _on_morphing_length_button_changed(self, value):
         if self._device is None:
             return
         self._start_control_gesture()
-        self._morphing_length = int((value / 127.0) * (len(self._target_parameters) - 1))
-        self._logger.log(f"Morphing length: {self._morphing_length}")
+        self._morphing_length = value / 127.0
+        #self._logger.log(f"Morphing length: {self._morphing_length}")
+        self._logger.show_message(f"{self._device.name} > Morphing length: {int(self._morphing_length*100)}%")
         self._morph_parameters() # Call only needed if we restore non-target params when morphing
 
     def _on_param_randomization_button_changed(self, value):
         if self._device is None:
             return
         self._start_control_gesture()   
-        self._logger.log("Randomizing preset")
+        self._logger.show_message(f"{self._device.name} > Randomized target values.")
         self._randomize_target_values()
         self._morph_parameters()
         # self._debug_parameter(self._song.view.selected_parameter, value)
@@ -189,7 +191,8 @@ class DeviceRandomizer:
         """
         # Ensure morph_percentage is clamped between 0 and 1
         morph_percentage = max(0, min(1, self._morphing_amount))
-        target_parameters = self._target_parameters[:self._morphing_length]
+        length = int(self._morphing_length * (len(self._target_parameters) - 1))
+        target_parameters = self._target_parameters[:length]
 
         for parameter in self._device.parameters:
             # Skip parameters that cannot be changed
