@@ -631,6 +631,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._device_controller.set_enabled(False)
             self._transport_controller.set_enabled(False)
             self._navigation_controller.set_enabled(False)
+            self._device_randomizer.set_enabled(False)
             speaker_on = properties.get('speaker', '').lower() == "on"
             self._restore_reface_state(speaker_on=speaker_on)  
         return super().set_enabled(enable)
@@ -655,6 +656,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._note_repeat_controller.disconnect()
         self._scale_controller.disconnect()
         self._clip_launcher_controller.disconnect()
+        self._device_randomizer.disconnect()
 
         self._type_select_button.remove_value_listener(self._reface_type_select_changed)
         self._tremolo_toggle_button.remove_value_listener(self._reface_tremolo_toggle_changed)
