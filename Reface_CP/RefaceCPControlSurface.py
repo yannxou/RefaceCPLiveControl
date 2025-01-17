@@ -467,7 +467,8 @@ class RefaceCPControlSurface(ControlSurface):
 
     def _enable_device_lock_mode(self):
         selected_device = self.get_selected_device()
-        self._logger.log(f"Device locked: {selected_device.name}")
+        if selected_device is not None:
+            self._logger.log(f"Device locked: {selected_device.name}")
 
         self._note_repeat_controller.set_controls_enabled(False)
         self._scale_controller.disable_edit_mode()
