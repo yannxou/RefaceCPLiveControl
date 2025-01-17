@@ -311,10 +311,12 @@ class RefaceCPControlSurface(ControlSurface):
                 self._device_controller.set_enabled(True)
                 index = self._device_controller.set_bank_index(index)
             else:
-                self._device_controller.set_enabled(False)
-                self._device_randomizer.set_enabled(True)
-                self._device_randomizer.set_device(self._device_controller._locked_device)
-                self._logger.show_message("Device randomization enabled.")
+                device = self._device_controller._locked_device
+                if device is not None:
+                    self._device_controller.set_enabled(False)
+                    self._device_randomizer.set_enabled(True)
+                    self._device_randomizer.set_device(device)
+                    self._logger.show_message(f"Device randomization enabled: {device.name}")
             self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == index)))
             return
 
@@ -424,7 +426,6 @@ class RefaceCPControlSurface(ControlSurface):
             return
         
         if value == REFACE_TOGGLE_UP:
-            self._track_controller.set_enabled(False)
             self._enable_device_lock_mode()
         elif value == REFACE_TOGGLE_DOWN:
             self._unlock_from_device()
@@ -452,7 +453,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._scale_controller.disable_edit_mode()
         self._scale_controller.set_controls_enabled(False)
         self._clip_launcher_controller.set_controls_enabled(False)
-
+        self._device_randomizer.set_enabled(False)
         self._track_controller.set_enabled(False)
         self._unlock_from_device()
         self._device_controller.set_enabled(True)
@@ -473,6 +474,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._scale_controller.set_controls_enabled(False)
         self._clip_launcher_controller.set_controls_enabled(False)
         self._track_controller.set_enabled(False)
+        self._device_randomizer.set_enabled(False)
         self._device_controller.set_enabled(True)
         self._lock_to_device(selected_device)
         self._send_midi((0xB0 | self._rx_channel, TREMOLO_WAH_TOGGLE, 64))  # Update led in device since we disabled local control
@@ -485,6 +487,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._scale_controller.set_controls_enabled(False)
         self._clip_launcher_controller.set_controls_enabled(False)
         self._device_controller.set_enabled(False)
+        self._device_randomizer.set_enabled(False)
         self._track_controller.set_enabled(True)
         self._logger.show_message("Track mode enabled.")
 
@@ -511,6 +514,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._track_controller.set_enabled(False)
             self._device_controller.set_enabled(False)
             self._clip_launcher_controller.set_enabled(False)
+            self._device_randomizer.set_enabled(False)
             self._scale_controller.set_enabled(True)
             self._logger.show_message("Scale mode enabled.")
             # Update device leds
@@ -523,6 +527,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._track_controller.set_enabled(False)
             self._device_controller.set_enabled(False)
             self._scale_controller.set_enabled(False)
+            self._device_randomizer.set_enabled(False)
             self._clip_launcher_controller.set_enabled(True)
             self._logger.show_message("Clip trigger mode enabled.")
              # Update device leds
@@ -581,6 +586,7 @@ class RefaceCPControlSurface(ControlSurface):
             self._scale_controller.disable_edit_mode()
             self._scale_controller.set_controls_enabled(False)
             self._clip_launcher_controller.set_enabled(False)
+            self._device_randomizer.set_enabled(False)
             self._note_repeat_controller.set_enabled(True)
             self._logger.show_message("Note repeat enabled.")
             self._send_midi((0xB0 | self._rx_channel, DELAY_TOGGLE, 64))  # Update led in device since we disabled local control
@@ -602,6 +608,7 @@ class RefaceCPControlSurface(ControlSurface):
         self._clip_launcher_controller.set_enabled(False)
         self._track_controller.set_enabled(False)
         self._device_controller.set_enabled(False)
+        self._device_randomizer.set_enabled(False)
         self._transport_controller.set_enabled(True)
         self._navigation_controller.set_enabled(True)
         self._logger.show_message("Transport/Navigation mode enabled.")
