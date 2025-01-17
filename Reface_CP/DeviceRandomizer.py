@@ -191,7 +191,7 @@ class DeviceRandomizer:
         """
         # Ensure morph_percentage is clamped between 0 and 1
         morph_percentage = max(0, min(1, self._morphing_amount))
-        length = int(self._morphing_length * (len(self._target_parameters) - 1))
+        length = int(self._morphing_length * (len(self._target_parameters)))
         target_parameters = self._target_parameters[:length] if length > 0 else []
 
         for parameter in self._device.parameters:
