@@ -65,7 +65,7 @@ class DeviceRandomizer:
         self._device = device
         if device is None:
             return
-        self._logger.log(f"Randomizing enabled for device: {device.name}")
+        # self._logger.log(f"Randomizing enabled for device: {device.name}")
         self._user_values = {}
         self._capture_initial_values()
         self._randomize_target_values()
@@ -96,18 +96,14 @@ class DeviceRandomizer:
             listener = partial(self._on_parameter_value_changed, parameter)
             self._parameter_listeners[parameter] = listener
             parameter.add_value_listener(listener)
-        self._logger.log(f"added {len(device.parameters)} parameter listeners.")
     
     def _remove_parameter_listeners(self):
-        removed = 0 # debug
         for parameter, listener in self._parameter_listeners.items():
             try:
                 if parameter.value_has_listener(listener):
                     parameter.remove_value_listener(listener)
-                    removed = removed + 1
             except:
                 pass
-        self._logger.log(f"Remove parameter listeners. count: {removed}")
         self._parameter_listeners = {}
 
     def _start_control_gesture(self):
@@ -117,12 +113,11 @@ class DeviceRandomizer:
 
     def _on_control_gesture_ended(self, args=None):
         self._song.end_undo_step()
-        self._logger.log("Gesture ended")
 
     def _on_parameter_value_changed(self, parameter: Live.DeviceParameter.DeviceParameter):
         if self._control_gesture_task.state == Task.RUNNING:
             return
-        self._logger.log(f"Parameter changed: {parameter.name}:{parameter.value}")
+        # self._logger.log(f"Parameter changed: {parameter.name}:{parameter.value}")
         self._user_values[parameter.name] = parameter.value
 
     def _on_morphing_amount_button_changed(self, value):
@@ -130,7 +125,6 @@ class DeviceRandomizer:
             return
         self._start_control_gesture()
         self._morphing_amount = value / 127.0
-        #self._logger.log(f"Morphing amount: {self._morphing_amount}")
         self._logger.show_message(f"{self._device.name} > Morphing amount: {int(self._morphing_amount*100)}%")
         self._morph_parameters()
 
@@ -139,9 +133,13 @@ class DeviceRandomizer:
             return
         self._start_control_gesture()
         self._morphing_length = value / 127.0
-        #self._logger.log(f"Morphing length: {self._morphing_length}")
         self._logger.show_message(f"{self._device.name} > Morphing length: {int(self._morphing_length*100)}%")
         self._morph_parameters() # Call only needed if we restore non-target params when morphing
+
+        #DEBUG
+        #length = int(self._morphing_length * (len(self._target_parameters)))
+        #target_parameters = self._target_parameters[:length] if length > 0 else []
+        #self._logger.log(f"Target parameters: {target_parameters}")
 
     def _on_param_randomization_button_changed(self, value):
         if self._device is None:
@@ -150,7 +148,6 @@ class DeviceRandomizer:
         self._logger.show_message(f"{self._device.name} > Randomized target values.")
         self._randomize_target_values()
         self._morph_parameters()
-        # self._debug_parameter(self._song.view.selected_parameter, value)
 
     def _capture_initial_values(self):
         """
@@ -170,7 +167,6 @@ class DeviceRandomizer:
         self._target_preset = self._make_random_preset(self._device)
         self._target_parameters = list(self._target_preset.keys())
         random.shuffle(self._target_parameters)
-        self._logger.log(f"Target params: {self._target_parameters}")
 
     def _make_random_preset(self, device) -> dict:
         if device is None:
@@ -233,19 +229,6 @@ class DeviceRandomizer:
             index = num_items - 1
 
         return index #value_items[index]
-
-    def _debug_parameter(self, param, value):
-        if param is None:
-            return
-        newvalue = value / 127.0
-        self._logger.log(f"param: {param.name}, is_enabled: {param.is_enabled} is_quantized: {param.is_quantized} state: {param.state} value: {param.value}")
-        if param.is_quantized:
-            self._logger.log(f"param: {param.name}, value_items: {len(param.value_items)}")
-            newvalue = self._map_to_value_item(newvalue, param.value_items)
-        else:
-            newvalue = param.min + (param.max - param.min) * newvalue
-        param.value = newvalue
-        self._logger.log(f"setting param: {param.name}, newvalue: {newvalue}")
 
     def disconnect(self):
         self.set_enabled(False)
