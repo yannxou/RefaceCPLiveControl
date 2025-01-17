@@ -41,7 +41,7 @@ class DeviceRandomizer:
         self._target_parameters = []
         self._morphing_amount = 0 # 0..1
         self._morphing_length = 1 # 0..1
-        self._excluded_params = ["Device On", "Chain Selector"]
+        self._excluded_params = ["Device On", "Chain Selector", "Macro 1", "Macro 2", "Macro 3", "Macro 4", "Macro 5", "Macro 6", "Macro 7", "Macro 8", "Macro 9", "Macro 10", "Macro 11", "Macro 12", "Macro 13", "Macro 14", "Macro 15", "Macro 16"]
         self._parameter_listeners = {}
         self._user_values = {} # Dict of param_name:value used to lock (exclude from randomization) parameters to specific values set by the user
         self._control_gesture_task = parent._tasks.add(Task.sequence(Task.delay(1), self._on_control_gesture_ended)).kill()
