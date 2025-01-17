@@ -200,12 +200,13 @@ class DeviceRandomizer:
                 is_user_override = parameter.name in self._user_values
                 if parameter.name in target_parameters or is_user_override:
                     # Perform linear interpolation between initial and target values
-                    initial_value = self._initial_preset[parameter.name]
-                    target_value = self._user_values[parameter.name] if is_user_override else self._target_preset[parameter.name]
-                    parameter.value = initial_value + (target_value - initial_value) * morph_percentage
+                    initial_value = self._initial_preset.get(parameter.name)
+                    if initial_value is not None:
+                        target_value = self._user_values[parameter.name] if is_user_override else self._target_preset[parameter.name]
+                        parameter.value = initial_value + (target_value - initial_value) * morph_percentage
                 else:
                     # Restore initial values for non-target params?
-                    value = self._initial_preset[parameter.name]
+                    value = self._initial_preset.get(parameter.name)
                     if value is not None:
                         parameter.value = value
 

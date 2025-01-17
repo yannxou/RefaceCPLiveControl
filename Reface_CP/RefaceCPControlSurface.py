@@ -316,7 +316,7 @@ class RefaceCPControlSurface(ControlSurface):
                     self._device_controller.set_enabled(False)
                     self._device_randomizer.set_enabled(True)
                     self._device_randomizer.set_device(device)
-                    self._logger.show_message(f"Device randomization enabled: {device.name}")
+                    self._logger.show_message(f"{device.name} > Device randomization enabled.")
             self._send_midi((0xB0 | self._rx_channel, TYPE_SELECT_KNOB, next(key for key, value in reface_type_map.items() if value == index)))
             return
 
