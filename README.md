@@ -5,15 +5,18 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
 ## Table of Contents
 
 1. [Installation](#installation)
-2. [Controls](#controls)
-	1. [Wave type knob (MIDI Channel Change)](#wave-type-knob)
-	2. [Tremolo/Wah toggle (Device control)](#tremolowah-toggle)
-	3. [Chorus toggle (Scale mode)](#chorus-toggle)
+2. [Features](#features)
+	1. [MIDI Transmit Channel](#midi-transmit-channel)
+	2. [Device Control Mode](#device-control-mode)
+	3. [Device Lock Mode](#device-control-mode)
+	4. [Track Mode](#track-mode)
+	5. [Device Randomization Mode](#device-randomization-mode)
+	6. [Scale Mode](#scale-mode)
 		1. [Scale Play Mode](#scale-play-mode)
 		2. [Scale Edit Mode](#scale-edit-mode)
-	4. [Phaser toggle (Clip trigger mode)](#phaser-toggle)
-	5. [D.Delay toggle (Note repeat)](#ddelay-toggle)
-	6. [A.Delay toggle (Navigation/Transport mode)](#adelay-toggle)
+	7. [Clip Trigger Mode](#clip-trigger-mode)
+	8. [Note Repeat Mode](#note-repeat-mode)
+	9. [Navigation/Transport Mode](#navigationtransport-mode)
 		1. [C  (*Stop actions*)](#c--stop-actions)
 		2. [C# (*Recording actions*)](#c--recording-actions)
 		3. [D  (*Play actions*)](#d--play-actions)
@@ -46,42 +49,93 @@ This can also be done automatically with the provided `make install` command.
 
 For more help, see [Installing third-party remote scripts](https://help.ableton.com/hc/en-us/articles/209072009-Installing-third-party-remote-scripts) from Ableton.
 
-## Controls
+## Features
 
-### Wave type knob:
+### MIDI Transmit Channel:
 
-Changes the MIDI transmit channel from 1 (Rdl type) to 6 (CP type). MIDI tracks with an input routing from the `reface CP` source and the selected MIDI channel are automatically selected and armed. This is useful to quickly change and play instruments from tracks on specific MIDI channels. 
+In most of the available modes, the **Wave type knob** can be used to change the MIDI transmit channel from 1 (Rdl type) to 6 (CP type). 
+
+MIDI tracks with an input routing from the `reface CP` source and the selected MIDI channel are automatically selected and armed. This is useful to quickly change and play instruments from tracks on specific MIDI channels. 
 
 This also provides a lot more of flexibility to the custom MIDI mappings since each control can be mapped to any Live parameter across all 6 MIDI channels, effectively bringing up to 48 knobs, 18 toggles and 510 note keys for MIDI mapping in a Live Set.
 
 *Note*: When mapping a control or key from the Reface using the custom user mapping Live overrides any special behaviour added by the script but in this case its functionality can still be reached by changing to any of the remaining unmapped MIDI channels for that control. Just prevent MIDI mapping the `type` knob so the channel can be changed.
 
-### Tremolo/Wah toggle:
+### Device Control Mode:
 
-* **Off**: When the switch is in the middle position (off), the 8 right-most knobs follow and control the selected device.
+Turn *off* the Tremolo/Wah switch (middle position) to enable the Device Control Mode. 
+In this mode, the 8 right-most knobs from the Reface follow and control the first bank parameters of the currently selected device.
 
 <p align="center">
 	<img src="Images/device_mode.jpg" alt="Device Mode" width="50%" />
 </p>
 
+Under this mode, the **Wave type knob** can be used to change the MIDI transmit channel. 
 
-* **Tremolo On**: When the switch is enabled, the 8 right-most knobs are locked to control a specific device.
+### Device Lock Mode:
+
+Turn *on* the Tremolo switch (up position) to enable the Device Lock Mode. 
+This locks the currently selected device so the 8 right-most knobs of the Reface can be used to control that specific device even when the selection in Live changes afterwards.
 
 <p align="center">
 	<img src="Images/locked_device_mode.jpg" alt="Locked Device Mode" width="50%" />
 </p>
 
-While the device is locked, the **Wave type knob** can be used to select the device parameter bank. 
+While a device is locked, the **Wave type knob** can be used to select the device parameter bank from 1 (Rdl) to 5 (Toy).
+Wave type 6 (CP) is reserved to select the [Device Randomization Mode](#device-randomization-mode).
 
-* **Wah On**: Enables the **Track mode**. This allows changing the selected track's volume, panning, sends A and B as well as the Mute, Solo and Arm buttons. In this mode the `Drive` knob is connected to the currently selected parameter in Live which can be very handy for quick automations.
+### Track Mode:
+
+Turn *on* the Wah switch (down position) to enable the Track Mode. 
+This allows changing the selected track's volume, panning, sends A and B as well as the Mute, Solo and Arm buttons. 
+
+In this mode the `Drive` knob is connected to the currently selected parameter in Live which can be very handy for quick automations.
+
+The following controls apply in this mode:
+* **Wave type**: Set MIDI Transmit channel.
+* **Drive**: Current selected parameter.
+* **Tremolo Depth**: Selected track volume.
+* **Tremolo Rate**: Selected track panning.
+* **Chorus Depth**: Selected track send A.
+* **Chorus Speed**: Selected track send B.
+* **Delay Depth**: Selected track mute.
+* **Delay Time**: Selected track solo.
+* **Reverb Depth**: Selected track arm.
 
 <p align="center">
 	<img src="Images/track_mode.jpg" alt="Track Mode" width="50%" />
 </p>
 
-### Chorus toggle:
+### Device Randomization Mode
 
-Enables the **Scale mode**. This includes two sub-modes (Play/Edit) which can be toggled by turning the **Reverb Depth** knob left/right.
+To enable this mode, first lock the controls to a device by turning *on* the Tremolo switch (up position) and then select the last **Wave Type** 6 (CP). 
+This mode can be used to create new presets for the device by morphing between the current preset and a target preset.
+
+When entering this mode, the current values of all the device's parameters are stored and a new random variation is created. 
+Using the **Drive** knob it applies a morphing amount between the original and the target preset and thus allows transitioning between all intermediate values.
+Everytime the **Tremolo Rate** knob is turned left or right a new set of random values are created and used as a target preset.
+The number of parameters that are affected can be changed with the **Tremolo Depth** knob.
+
+Any parameter can be excluded from the randomization by selecting the desired value in the device. When a parameter is manually changed in the device it will become a fixed value in the target preset.
+This can be used to load another preset and then morph between both.
+This list of excluded parameters is cleared out when the Device Randomization Mode is disabled.
+
+Note that with more complex devices like instruments or those with toggle controls are more difficult to morph smoothly and it works better with linear parameters. Excluding some of those parameters might help when finding a new preset to morph to.
+
+The following controls apply in this mode:
+* **Wave type**: Select device parameter bank (1-5) or enable the Device Randomization Mode (6-CP)
+* **Drive**: Morphing Amount.
+* **Tremolo Depth**: Morphing Length.
+* **Tremolo Rate**: Randomize target values.
+
+<p align="center">
+	<img src="Images/device_randomization_mode.jpg" alt="Device Randomization Mode" width="50%" />
+</p>
+
+### Scale Mode:
+
+Turn *on* the Chorus switch (up position) to enable the Scale Mode.
+This mode includes two sub-modes (Play/Edit) which can be toggled by turning the **Reverb Depth** knob left/right.
 
 #### Scale Play Mode:
 
@@ -90,10 +144,10 @@ In this mode, only the note keys that are part of the current scale will reach L
 By default, when enabling the scale mode it always starts with the Scale Play mode.
 
 The following controls apply while in the Scale Play Mode:
-
+* **Wave type**: Set MIDI Transmit channel.
 * **Chorus Depth**: Root note. Move the knob to select the current root note.
-
 * **Chorus Speed**: Scale mode. Move the knob to select the current scale mode.
+* **Reverb Depth**: Enter Scale Edit Mode (right).
 
 <p align="center">
 	<img src="Images/scale_play_mode.jpg" alt="Scale Play Mode" width="50%" />
@@ -105,15 +159,18 @@ In this mode, the first note pressed on the keyboard sets the root note. While h
 
 Once all keys are released a list of all the possible scales that include all the entered notes will be populated and the first root and scale match is automatically changed in Live.
 
+The following controls apply while in the Scale Edit Mode:
 * **Chorus Depth**: Matching scales. Move the knob to cycle between all the matching root/scales found that include all the entered notes.
+* **Reverb Depth**: Exit Scale Edit Mode (left).
 
 <p align="center">
 	<img src="Images/scale_edit_mode.jpg" alt="Scale Edit Mode" width="50%" />
 </p>
 
-### Phaser toggle:
+### Clip Trigger Mode:
 
-Enables the **Clip trigger mode**. This allows clip/scene triggering using all MIDI note keys except keys C# and D# which are reserved for special functions:
+Turn *on* the Phaser switch (down position) to enable the Clip trigger mode.
+This allows clip/scene triggering using all MIDI note keys except keys C# and D# which are reserved for special functions:
 
 * Press and hold C# + clip note key to stop the clip.
 * Press and hold C# + upper/lower C# to stop all clips.
@@ -122,13 +179,9 @@ Enables the **Clip trigger mode**. This allows clip/scene triggering using all M
 Pressing a new key while another one is being held down allows playing the different clips from the same track in legato mode. This also works with the stop key (C#) so it can be used as some sort of temporal mute when triggering clips. This feature can be enabled/disabled with the `CLIP_TRIGGER_DEFAULT_LEGATO_ENABLED` setting.
 
 The following controls apply in this mode:
-
 * **Drive**: Global clip trigger quantization.
-
 * **Tremolo Depth**: Horizontal grid offset. Use this knob to move the clip grid highlight horizontally.
-
 * **Tremolo Rate**: Vertical grid offset. Use this knob to move the clip grid highlight vertically.
-
 * **Chorus Depth**: Note Key Layout. There are multiple keyboard layouts available for triggering clips. Move this knob to switch between these:
 	* 1 octave per track (allow triggering up to 10 clips per track)
 	* 2 octaves per track (allow triggering up to 20 clips per track)
@@ -138,7 +191,6 @@ The following controls apply in this mode:
 	* 3 octaves per scene (allow triggering clips from same scene across 30 tracks)
 	* 2 octaves per scene (allow triggering clips from same scene across 20 tracks)
 	* 1 octave per scene (allow triggering clips from same scene across 10 tracks)
-
 * **Chorus Speed**: Clip/Scene triggering. Move this knob to the left to target clips for triggering. Move it to the right to target scenes.
 
 By default, when enabling the Clip trigger mode, the clip names are renamed to show the MIDI key that can be used to fire each clip. This behaviour can be disabled by changing the `CLIP_TRIGGER_NAME_PREFIXES_ENABLED` setting to `False`.
@@ -147,12 +199,13 @@ By default, when enabling the Clip trigger mode, the clip names are renamed to s
 	<img src="Images/clip_trigger_mode.jpg" alt="Clip Trigger Mode" width="50%" />
 </p>
 
-### D.Delay toggle:
+### Note Repeat Mode:
 
-Enables the **Note repeat mode**. In this mode, the MIDI notes from the keyboard are repeated automatically while they're pressed. Once enabled, the knobs control some settings for the note repeat:
+Turn *on* the D.Delay switch (up position) to enable the Note Repeat Mode.
+In this mode, the MIDI notes from the keyboard are repeated automatically while they're pressed. 
 
+The following controls apply in this mode:
 * **Delay Time**: Sets the note repeat rate using fixed values from 1/32T to 1 bar.
-
 * **Delay Depth**: Sets the note repeat rate by specifying the number of notes per bar.
 
 <p align="center">
@@ -161,14 +214,14 @@ Enables the **Note repeat mode**. In this mode, the MIDI notes from the keyboard
 
 Selecting the track/device mode after enabling the note repeat allows using the knobs for automation and the note repeat functionality at the same time. To change the note repeat settings again using the knobs it needs to be disabled and enabled again.
 
-### A.Delay toggle:
+### Navigation/Transport Mode:
 
-Enables the **Navigation/Transport mode**. In this mode the knobs are used for navigation and the note keys for transport actions and more.
+Turn *on* the A.Delay switch (down position) to enable the Navigation/Transport Mode.
+In this mode the knobs are used for navigation and the note keys for transport actions and more.
 
+The following controls apply in this mode:
 * **Drive**: Track navigation. Move the knob to change the track selection including sends and the master track. Since the knobs in the Reface CP are not endless the navigation will only work well for up to 127 tracks. If you have more than 127 tracks in your Live Set then some of the tracks won't be accessible using this knob but usually this doesn't happen unless you're Jacob Collier. In any case, the track can still be selected manually or using some of the actions from the list below.
-
 * **Tremolo Depth**: Clip navigation. Move the knob to change the clip selection in the current track. Again, since the knobs in the Reface CP are not endless the clip selection works fine for up to 127 scenes. Still, some simple navigation can be performed using some of the actions from the list below.
-
 * **Tremolo Rate**: Device navigation. Move the knob to change the device selection in the current track. This also has the 127 device limit.
 
 <p align="center">
