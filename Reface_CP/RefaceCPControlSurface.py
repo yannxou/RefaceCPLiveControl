@@ -23,6 +23,7 @@ from _Framework.EncoderElement import *
 from _Framework.ButtonElement import ButtonElement
 from _Framework.SliderElement import SliderElement
 from _Framework.InputControlElement import MIDI_NOTE_TYPE, MIDI_NOTE_ON_STATUS, MIDI_NOTE_OFF_STATUS, MIDI_CC_STATUS, MIDI_CC_TYPE
+import _Framework.Task as Task
 from ableton.v2.base import listens, liveobj_valid, liveobj_changed
 from .RotaryToggleElement import RotaryToggleElement
 from .DeviceController import DeviceController
@@ -66,6 +67,25 @@ class RefaceCPControlSurface(ControlSurface):
             self._suggested_input_port = MODEL_NAME
             self._suggested_output_port = MODEL_NAME
 
+            self._setup_buttons()
+            self._device_controller = DeviceController(
+                self._logger,
+                song=self.song(),
+                controls=[self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]
+            )
+            self.set_device_component(self._device_controller._device)
+            self._setup_navigation_controller()
+            self._setup_track_controller()
+            self._transport_controller = TransportController(
+                self._logger,
+                self.song(),
+                channel=self._channel
+            )
+            self._setup_note_repeat()
+            self._setup_scale_controller()
+            self._setup_clip_launcher()
+            self._setup_device_randomizer()
+
             self._audioTrackMonitoringListener = AudioTrackMonitoringListener(
                 self._logger,
                 song=self.song(),
@@ -74,38 +94,21 @@ class RefaceCPControlSurface(ControlSurface):
             )
 
             self._waiting_for_first_response = True
-            self.schedule_message(10, self._continue_init) # delay call otherwise it silently fails during init stage
-
+            self._start_device_detection_task = self._tasks.add(Task.sequence(Task.wait(1.0), Task.run(self._start_device_detection))).kill()
             self._logger.log("RefaceCP Init.")
 
 
 # --- Setup
 
-    def _continue_init(self):
+    def _start_device_detection(self):
+        self._start_device_detection_task.kill()
+        self.set_enabled(False)
         self._refaceCP.request_identity()
+        self.update()
 
     def _on_device_identified(self):
         self._logger.log("RefaceCP Identification Succeeded.")
-        self._enable_reface_script_mode()
-        self._setup_buttons()
-        self._device_controller = DeviceController(
-            self._logger,
-            song=self.song(),
-            controls=[self._drive_knob, self._tremolo_depth_knob, self._tremolo_rate_knob, self._chorus_depth_knob, self._chorus_speed_knob, self._delay_depth_knob, self._delay_time_knob, self._reverb_depth_knob]
-        )
-        self.set_device_component(self._device_controller._device)
-        self._setup_navigation_controller()
-        self._setup_track_controller()
-        self._transport_controller = TransportController(
-            self._logger,
-            self.song(),
-            channel=self._channel
-        )
-        self._setup_note_repeat()
-        self._setup_scale_controller()
-        self._setup_clip_launcher()
-        self._setup_device_randomizer()
-        self._refaceCP.request_current_values()
+        self.set_enabled(True)
 
     def _receive_tone_parameter(self, parameter: ToneParameter, value):
         if parameter == ToneParameter.REFACE_PARAM_TYPE:
@@ -620,6 +623,16 @@ class RefaceCPControlSurface(ControlSurface):
         self._send_midi((0xB0 | self._rx_channel, REVERB_DEPTH_KNOB, 0))
 
 # --- Live (ControlSurface Inherited)
+
+    def port_settings_changed(self):
+        u""" Live -> Script
+            Is called when either the user changes the MIDI ports that are assigned
+            to the script, or the ports state changes due to unplugging/replugging the
+            device.
+            Will always be called initially when setting up the script.
+        """
+        super(RefaceCPControlSurface, self).port_settings_changed()
+        self._start_device_detection_task.restart()
 
     def set_enabled(self, enable, properties: dict = {}):
         """Enables/Disables the script"""
