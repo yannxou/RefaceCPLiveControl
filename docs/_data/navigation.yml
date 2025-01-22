@@ -7,3 +7,15 @@ docs:
     children:
       - title: "Installation"
         url: docs/installation/
+  - title: Features
+    children:
+      - title: "MIDI Transmit Channel"
+        url: docs/midi-transmit-channel/
+      - title: "Device Control Mode"
+        url: docs/device-control-mode/
+      - title: "Device Lock Mode"
+        url: docs/device-lock-mode/
+      - title: "Device Randomization Mode"
+        url: docs/device-randomization-mode/
+      - title: "Track Mode"
+        url: docs/track-mode/
