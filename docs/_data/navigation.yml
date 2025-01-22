@@ -1,0 +1,9 @@
+#main:
+#  - title: "Quick-Start Guide"
+#    url: /docs/quick-start-guide/
+
+docs:
+  - title: Getting Started
+    children:
+      - title: "Installation"
+        url: docs/installation/

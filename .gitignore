@@ -1,3 +1,9 @@
 RefaceSurfaceDemo Project/Backup
 Icon?
 MySettings.py
+Gemfile.lock
+_site
+.sass-cache
+.jekyll-cache
+.jekyll-metadata
+vendor
