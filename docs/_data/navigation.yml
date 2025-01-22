@@ -19,3 +19,7 @@ docs:
         url: docs/device-randomization-mode/
       - title: "Track Mode"
         url: docs/track-mode/
+      - title: "Scale Mode"
+        url: docs/scale-mode/
+      - title: "Clip Trigger Mode"
+        url: docs/clip-trigger-mode/
