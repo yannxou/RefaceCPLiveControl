@@ -1,6 +1,6 @@
-#main:
-#  - title: "Quick-Start Guide"
-#    url: /docs/quick-start-guide/
+main:
+  - title: "About"
+    url: /about/
 
 docs:
   - title: Getting Started
@@ -23,3 +23,13 @@ docs:
         url: docs/scale-mode/
       - title: "Clip Trigger Mode"
         url: docs/clip-trigger-mode/
+      - title: "Note Repeat Mode"
+        url: docs/note-repeat-mode/
+      - title: "Navigation/Transport Mode"
+        url: docs/navigation-transport-mode/
+  - title: Customization
+    children:
+      - title: "User Settings"
+        url: docs/user-settings/
+      - title: "Tips & Tricks"
+        url: docs/tips-and-tricks/

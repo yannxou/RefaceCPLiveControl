@@ -2,7 +2,6 @@
 title: "Installation"
 permalink: /docs/installation/
 excerpt: "How to quickly install RefaceCPLiveControl for use with Ableton Live."
-# toc: true
 ---
 
 1. Manually create a folder called `Remote Scripts` within your User Library if it does not already exist. The default User Library locations are:
