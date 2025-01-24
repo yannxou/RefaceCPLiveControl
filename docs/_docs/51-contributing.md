@@ -4,7 +4,7 @@ permalink: /docs/contributing/
 excerpt: "Contribute to the RefaceCPLiveControl project."
 ---
 
-This script has been developed and tested while using Live 12. I cannot guarantee that it works correctly in previous versions.
+This script has been developed and tested while using Ableton Live 12. I cannot guarantee that it works correctly in previous versions.
 
 If you'd like to contribute by adding a feature or fixing a bug, please submit a [github issue](https://github.com/yannxou/RefaceCPLiveControl/issues).
 
