@@ -1,10 +1,14 @@
-main:
-  - title: "About"
-    url: /about/
+# Top bar navigation:
+#main:
+#  - title: "About"
+#    url: /about/
 
+# Sidebar navigation
 docs:
   - title: Getting Started
     children:
+      - title: "Overview"
+        url: docs/overview/
       - title: "Installation"
         url: docs/installation/
   - title: Features
@@ -33,3 +37,9 @@ docs:
         url: docs/user-settings/
       - title: "Tips & Tricks"
         url: docs/tips-and-tricks/
+  - title: Resources
+    children:
+      - title: "Troubleshooting"
+        url: docs/troubleshooting/
+      - title: "Contributing"
+        url: docs/contributing/

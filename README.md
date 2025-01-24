@@ -13,7 +13,7 @@ RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Ref
 * Track control mode
 * Transport actions and more using MIDI keys
 
-See more details in the [manual](https://yannxou.github.io/RefaceCPLiveControl).
+See full details in the [manual](https://yannxou.github.io/RefaceCPLiveControl/docs/overview/).
 
 ## Installation
 
@@ -44,16 +44,17 @@ Control surface scripting in Ableton Live can be very powerful but I found some 
 
 In case your Reface CP does not produce any sound after using the script you can restore it to factory defaults by holding down the right-most C-key on the keyboard while pressing the Power (Standby/On) switch. This could happen in case of application crash or if the device is disconnected before closing Live. To avoid this, make sure Live application is closed before turning off the Reface. The script will restore the settings (like the speaker output) automatically when closing.
 
-## Support
+## Contributing
 
-If you'd like to receive support, please send your feedback in the form of suggestions or bug reporting using the github issues.
+This script has been developed and tested while using Live 12. I cannot guarantee that it works correctly in previous versions.
 
-If you’d like to send support for this project or other hundreds of ideas you can bring the drinks using the button below.
-I will happily implement something similar for other synths if I receive enough feedback or someone gifts me a unit.
+If you'd like to contribute by adding a feature or fixing a bug, please submit a [github issue](https://github.com/yannxou/RefaceCPLiveControl/issues).
 
-You can also just star this project if you find it useful. This might serve as a quick feedback and encourage me to add more features.
+If you’d like to support this project or other hundreds of ideas you can bring the drinks using the button below:
 
 <a href="https://www.buymeacoffee.com/yannxou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
+You can also just star this project if you find it useful. This might serve as a quick feedback and encourage me to add more features.
 
 ## Links
 
