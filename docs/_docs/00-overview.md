@@ -2,6 +2,7 @@
 title: "Overview"
 permalink: /docs/overview/
 excerpt: "Introduction to the RefaceCPLiveControl script for Ableton Live."
+# classes: wide
 ---
 
 RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Reface CP keyboard.

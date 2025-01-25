@@ -18,38 +18,59 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: RefaceCPLiveControl
-subtitle: "Ableton Live script for the Yamaha Reface CP"
-#email: your-email@example.com
-description: >- # this means to ignore newlines until "baseurl:"
+# Theme Settings
+remote_theme            : "mmistakes/minimal-mistakes@4.26.2"
+minimal_mistakes_skin   : "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+
+# Site settings
+title                   : RefaceCPLiveControl
+subtitle                : "Ableton Live script for the Yamaha Reface CP"
+name                    : &name "Joan Duat" # &name is a YAML anchor which can be *referenced later
+description             : >- # this means to ignore newlines until "baseurl:"
   RefaceCPLiveControl is an Ableton Live Control Surface script for the Yamaha Reface CP keyboard.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: yannxou
-github_username:  yannxou
+url                     : https://yannxou.github.io # the base hostname & protocol for your site
+baseurl                 : "/RefaceCPLiveControl" # the subpath of your site, e.g. "/blog"
+repository              : "yannxou/RefaceCPLiveControl"
+twitter_username        : yannxou
+github_username         : yannxou
+enable_copy_code_button : true
+atom_feed:
+  hide                  : true
 
-enable_copy_code_button  : true
+# Site Author
+author:
+  name             : *name # *name is a YAML reference pointing to the &anchor earlier
+  avatar           : "/assets/images/yannxou.jpg"
+  bio              : "iOS developer and occasional open-source contributor. In my free time, I enjoy composing music and diving deeper into programming, mixing both when possible."
+  location         : "Barcelona"
+  links:
+    - label: "X"
+      icon: "fab fa-fw fa-x-twitter"
+      url: "https://x.com/yannxou"
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/yannxou"
+    - label: "Soundcloud"
+      icon: "fab fa-fw fa-soundcloud"
+      url: "https://soundcloud.com/bachstripvoice"
 
-# Build settings
-remote_theme: "mmistakes/minimal-mistakes@4.26.2"
+# Site Footer
+footer:
+  links:
+    - label: ""
+      icon: "fab fa-fw fa-x-twitter"
+      url: "https://x.com/yannxou"
+    - label: ""
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/yannxou"
+    - label: ""
+      icon: "fab fa-fw fa-soundcloud"
+      url: "https://soundcloud.com/bachstripvoice"
 
-# Plugins (previously gems:)
-plugins:
-  - jekyll-paginate
-  - jekyll-sitemap
-  - jekyll-gist
-  - jekyll-feed
-  - jemoji
-  - jekyll-include-cache
-
-# mimic GitHub Pages with --safe
-whitelist:
-  - jekyll-paginate
-  - jekyll-sitemap
-  - jekyll-gist
-  - jekyll-feed
-  - jemoji
-  - jekyll-include-cache
+# Reading Files
+include:
+  - _docs
+  - _pages
 
 # Collections
 collections:
@@ -57,6 +78,7 @@ collections:
     output: true
     permalink: /:collection/:path/
 
+# Defaults
 defaults:
   # _docs
   - scope:
@@ -79,42 +101,23 @@ defaults:
       layout: single
       author_profile: true
 
-include:
-  - _docs
-  - _pages
+# Build settings
 
-atom_feed:
-  hide: true
+# Plugins (previously gems:)
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-gist
+  - jekyll-feed
+  - jemoji
+  - jekyll-include-cache
 
-# Site Footer
-footer:
-  links:
-    - label: ""
-      icon: "fab fa-fw fa-x-twitter"
-      url: "https://x.com/yannxou"
-    - label: ""
-      icon: "fab fa-fw fa-github"
-      url: "https://github.com/yannxou"
-    - label: ""
-      icon: "fab fa-fw fa-soundcloud"
-      url: "https://soundcloud.com/bachstripvoice"
+# mimic GitHub Pages with --safe
+whitelist:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-gist
+  - jekyll-feed
+  - jemoji
+  - jekyll-include-cache
 
-# Exclude from processing.
-# The following items will not be processed, by default.
-# Any item listed under the `exclude:` key here will be automatically added to
-# the internal "default list".
-#
-# Excluded items can be processed by explicitly listing the directories or
-# their entries' file path in the `include:` list.
-#
-# exclude:
-#   - .sass-cache/
-#   - .jekyll-cache/
-#   - gemfiles/
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules/
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/

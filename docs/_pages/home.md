@@ -4,8 +4,10 @@ permalink: /
 hidden: true
 title: RefaceCPLiveControl
 header:
-  overlay_color: "#373439"
+  overlay_color: rgb(55, 52, 57)
   # overlay_image: /assets/images/home-page-feature.jpg
+  # overlay_filter: rgba(55, 52, 57, 0.9)
+  # overlay_filter: linear-gradient(rgba(55, 52, 57, 1), rgba(55, 52, 57, 0.97))
   actions:
     - label: "<i class='fas fa-download'></i> Install Now"
       url: "/docs/overview"
