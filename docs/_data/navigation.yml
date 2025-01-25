@@ -1,7 +1,9 @@
 # Top bar navigation:
-#main:
-#  - title: "About"
-#    url: /about/
+main:
+  - title: "Documentation"
+    url: docs/overview/
+  #- title: "About"
+  #  url: /about/
 
 # Sidebar navigation
 docs:

@@ -41,7 +41,7 @@ atom_feed:
 author:
   name             : *name # *name is a YAML reference pointing to the &anchor earlier
   avatar           : "/assets/images/yannxou.jpg"
-  bio              : "iOS developer and occasional open-source contributor. In my free time, I enjoy composing music and diving deeper into programming, mixing both when possible."
+  bio              : "iOS developer, music enthusiast and occasional open-source contributor."
   location         : "Barcelona"
   links:
     - label: "X"

@@ -4,6 +4,12 @@ permalink: /docs/installation/
 excerpt: "How to quickly install RefaceCPLiveControl for use with Ableton Live."
 ---
 
+RefaceCPLiveControl is installed as a *Remote Script* in Ableton Live.
+
+This ensures the Reface CP can be used as a *Control Surface* in Live in a similar way as other controllers do, bringing new controls to the application itself automatically and anytime, regardless of the opened Live Set document.
+
+## How to install
+
 1. Manually create a folder called `Remote Scripts` within your User Library if it does not already exist. The default User Library locations are:
    - **Windows:** `\Users\[username]\Documents\Ableton\User Library`
    - **Mac:** `Macintosh HD/Users/[username]/Music/Ableton/User Library`
