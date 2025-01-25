@@ -21,7 +21,10 @@ The different knobs in the Reface CP are mapped automatically to specific Live p
 * Lock devices for automation
 * Device parameter morphing and randomization
 * Clip/Scene triggering using MIDI keys
+* Legato clip triggering and stopping
 * MIDI note key filtering using Live's scale
-* Note repeat
+* Note repeat functionality
 * Track control mode
 * Transport actions and more using MIDI keys
+* Quick-recording actions
+* Quick-resampling actions
