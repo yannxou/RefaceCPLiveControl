@@ -37,6 +37,13 @@ enable_copy_code_button : true
 atom_feed:
   hide                  : true
 
+# Analytics
+analytics:
+  provider               : "google-universal" # false (default), "google", "google-universal", "google-gtag", "custom"
+  google:
+    tracking_id          : "G-7EVG1JEY4W" # Replace this with your ID, or delete
+    anonymize_ip         : true
+
 # Site Author
 author:
   name             : *name # *name is a YAML reference pointing to the &anchor earlier
