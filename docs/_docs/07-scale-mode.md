@@ -15,9 +15,13 @@ Turn *on* the Chorus switch (up position) to enable the Scale Mode.
 
 ## Scale Play Mode
 
-In this mode, only the note keys that are part of the current scale will reach Live's input and keys outside the scale are muted.
+The Scale Play Mode is always enabled by default when turning on the Chorus switch.
 
-By default, when enabling the scale mode it always starts with the Scale Play mode.
+<p align="center">
+    <img src="{{ '/assets/images/scale_play_mode.jpg' | relative_url }}" alt="Scale Play Mode" width="70%">
+</p>
+
+In this mode, only the note keys that are part of the current scale will reach Live's input and keys outside the scale are muted.
 
 The following controls apply while in the Scale Play Mode:
 
@@ -28,15 +32,19 @@ The following controls apply while in the Scale Play Mode:
 | **Chorus Speed** | Scale mode. Move the knob to select the current scale mode |
 | **Reverb Depth** | Enter Scale Edit Mode (right) |
 
-<p align="center">
-    <img src="{{ '/assets/images/scale_play_mode.jpg' | relative_url }}" alt="Scale Play Mode" width="70%">
-</p>
-
 ## Scale Edit Mode
+
+Once the Scale Mode is enabled, turn right the Reverb Depth knob to enter the Scale Edit Mode. The Reverb Depth knob led indicator will also turn on to indicate that the Scale Edit Mode is enabled.
+
+To exit the Scale Edit Mode, turn left the Reverb Depth Knob. The Reverb Depth knob will turn off to indicate that the Scale Play Mode is enabled.
+
+<p align="center">
+    <img src="{{ '/assets/images/scale_edit_mode.jpg' | relative_url }}" alt="Scale Edit Mode" width="70%">
+</p>
 
 In this mode, the first note pressed on the keyboard sets the root note. While holding down the root key, additional notes can be added to a list that defines the target scale. 
 
-Once all keys are released a list of all the possible scales that include all the entered notes will be populated and the first root and scale match is automatically changed in Live.
+Once all keys are released, an in-memory list of all the possible scales that include all the entered notes will be populated and the first root and scale match is automatically changed in Live. Use the Chorus Depth knob to select other matching root/scales from that list.
 
 The following controls apply while in the Scale Edit Mode:
 
@@ -44,7 +52,3 @@ The following controls apply while in the Scale Edit Mode:
 | --- | --- |
 | **Chorus Depth** | Matching scales. Move the knob to cycle between all the matching root/scales found that include all the entered notes |
 | **Reverb Depth** | Exit Scale Edit Mode (left) |
-
-<p align="center">
-    <img src="{{ '/assets/images/scale_edit_mode.jpg' | relative_url }}" alt="Scale Edit Mode" width="70%">
-</p>

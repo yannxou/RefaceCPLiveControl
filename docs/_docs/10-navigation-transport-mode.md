@@ -9,6 +9,10 @@ In this mode, the knobs are used for navigation and the note keys for transport 
 
 Turn *on* the A.Delay switch (down position) to enable the Navigation/Transport Mode.
 
+<p align="center">
+    <img src="{{ '/assets/images/navigation_transport_mode.jpg' | relative_url }}" alt="Navigation/Transport Mode" width="70%">
+</p>
+
 **Note**: This mode overrides any other active mode. This means that while this mode is enabled the other toggle controls (tremolo/chorus) used to enable the other modes have no effect.
 {: .notice--warning}
 
@@ -22,10 +26,6 @@ The following controls apply in this mode:
 | **Drive** | Track navigation. Move the knob to change the track selection including sends and the master track. Since the knobs in the Reface CP are not endless the navigation will only work well for up to 127 tracks. If you have more than 127 tracks in your Live Set then some of the tracks won't be accessible using this knob but usually this doesn't happen unless you're Jacob Collier. In any case, the track can still be selected manually or using some of the actions from the list below. |
 | **Tremolo Depth** | Clip navigation. Move the knob to change the clip selection in the current track. Again, since the knobs in the Reface CP are not endless the clip selection works fine for up to 127 scenes. Still, some simple navigation can be performed using some of the actions from the list below. |
 | **Tremolo Rate** | Device navigation. Move the knob to change the device selection in the current track. This also has the 127 device limit. |
-
-<p align="center">
-    <img src="{{ '/assets/images/navigation_transport_mode.jpg' | relative_url }}" alt="Navigation/Transport Mode" width="70%">
-</p>
 
 ## Note-key Actions
 

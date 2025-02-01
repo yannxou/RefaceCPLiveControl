@@ -28,4 +28,4 @@ The different knobs in the Reface CP are mapped automatically to specific Live p
 * Track control mode
 * Transport actions and more using MIDI keys
 * Quick-recording actions
-* Quick-resampling actions
+* Quick MIDI/Audio resampling actions

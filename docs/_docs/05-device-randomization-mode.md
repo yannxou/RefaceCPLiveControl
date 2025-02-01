@@ -6,6 +6,10 @@ excerpt: "How to use the Yamaha Reface CP to randomize and morph presets on a sp
 
 To enable this mode, first lock the controls to a device by turning *on* the Tremolo switch (up position) and then select the last **Wave Type** 6 (CP). 
 
+<p align="center">
+    <img src="{{ '/assets/images/device_randomization_mode.jpg' | relative_url }}" alt="Device Randomization Mode" width="70%">
+</p>
+
 This mode can be used to create new presets for the device by morphing between the current preset and a target preset.
 
 When entering this mode, the current values of all the device's parameters are stored and a new random variation is created. 
@@ -31,7 +35,3 @@ The following controls apply in this mode:
 | **Drive** | Morphing Amount. How close to the target values each parameters changes. 0% - Original. 100% - Target |
 | **Tremolo Depth** | Morphing Length. How many parameters change. 0..number of device parameters |
 | **Tremolo Rate** | Randomize target values. Create a new target set of random parameters and values on each knob turn. |
-
-<p align="center">
-    <img src="{{ '/assets/images/device_randomization_mode.jpg' | relative_url }}" alt="Device Randomization Mode" width="70%">
-</p>

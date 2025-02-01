@@ -8,6 +8,10 @@ This mode allows using the Yamaha Reface CP note keys to play clips and scenes i
 
 Turn *on* the Phaser switch (down position) to enable the Clip Trigger Mode.
 
+<p align="center">
+    <img src="{{ '/assets/images/clip_trigger_mode.jpg' | relative_url }}" alt="Clip Trigger Mode" width="70%">
+</p>
+
 When enabled, all MIDI note keys (except keys C# and D# which are reserved for special functions) can be used for clip/scene triggering.
 
 * Press and hold C# + clip note key to stop the clip.
@@ -44,7 +48,3 @@ The following controls apply in this mode:
 | **Chorus Speed** | Clip/Scene triggering. Move this knob to the left to target clips for triggering. Move it to the right to target scenes |
 
 By default, when enabling the Clip trigger mode, the clip names are renamed to show the MIDI key that can be used to fire each clip. This behaviour can be disabled by changing the `CLIP_TRIGGER_NAME_PREFIXES_ENABLED` setting to `False`.
-
-<p align="center">
-    <img src="{{ '/assets/images/clip_trigger_mode.jpg' | relative_url }}" alt="Clip Trigger Mode" width="70%">
-</p>
