@@ -21,6 +21,10 @@ We do not directly collect or store any personal information from users. However
 * These cookies allow Google and its partners to serve ads that are relevant to your interests.
 * These ads help support the maintenance of the Script and this site.
 
+### GitHub
+
+Our hosting company (GitHub) may record and store the IP address of all visitors to this website. Please refer to the [GitHub privacy policy](https://docs.github.com/en/github/site-policy/github-privacy-statement) for details.
+
 ## Cookies
 
 The site uses cookies primarily through Google Analytics and Google AdSense. You can manage or disable cookies through your browser settings.
