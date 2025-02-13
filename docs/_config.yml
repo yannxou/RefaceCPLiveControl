@@ -56,7 +56,7 @@ author:
       url: "https://github.com/yannxou"
     - label: "Soundcloud"
       icon: "fab fa-fw fa-soundcloud"
-      url: "https://soundcloud.com/bachstripvoice"
+      url: "https://soundcloud.com/yannxou"
     - label: ""
       icon: "fab fa-fw fa-x-twitter"
       url: "https://x.com/yannxou"
@@ -72,7 +72,7 @@ footer:
       url: "https://github.com/yannxou"
     - label: ""
       icon: "fab fa-fw fa-soundcloud"
-      url: "https://soundcloud.com/bachstripvoice"
+      url: "https://soundcloud.com/yannxou"
 
 # Reading Files
 include:
