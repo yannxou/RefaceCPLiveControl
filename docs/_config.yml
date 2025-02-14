@@ -37,6 +37,9 @@ enable_copy_code_button : true
 atom_feed:
   hide                  : true
 
+# SEO Related
+google_site_verification : "765SRmhnIMAPjBzphmHf4FGyqbAGk51MVrdIRgxamXI"
+
 # Analytics (disabled until Google provides a unified (and free) CMP experience for both Adsense+Analytics)
 # analytics:
 #  provider               : "google-gtag" # false (default), "google", "google-universal", "google-gtag", "custom"
