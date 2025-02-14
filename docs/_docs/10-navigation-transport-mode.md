@@ -22,10 +22,13 @@ The following controls apply in this mode:
 
 | Control | Description |
 | --- | --- |
-| **Wave Type** | Set MIDI Transmit channel |
-| **Drive** | Track navigation. Move the knob to change the track selection including sends and the master track. Since the knobs in the Reface CP are not endless the navigation will only work well for up to 127 tracks. If you have more than 127 tracks in your Live Set then some of the tracks won't be accessible using this knob but usually this doesn't happen unless you're Jacob Collier. In any case, the track can still be selected manually or using some of the actions from the list below. |
-| **Tremolo Depth** | Clip navigation. Move the knob to change the clip selection in the current track. Again, since the knobs in the Reface CP are not endless the clip selection works fine for up to 127 scenes. Still, some simple navigation can be performed using some of the actions from the list below. |
-| **Tremolo Rate** | Device navigation. Move the knob to change the device selection in the current track. This also has the 127 device limit. |
+| **Wave Type** | Set MIDI Transmit channel. |
+| **Drive** | Track navigation. Move the knob to change the track selection including sends and the master track. |
+| **Tremolo Depth** | Clip navigation. Move the knob to change the clip selection in the current track. |
+| **Tremolo Rate** | Device navigation. Move the knob to change the device selection in the current track. |
+
+**Note**: Since the knobs in the Reface CP are not endless and send fixed MIDI CC values, the track/clip/device navigation will only allow selecting up to 127 elements. For instance, if you have more than 127 tracks in your Live Set then some of the intermediate tracks won't be accessible using this knob. But usually this doesn't happen unless you're Jacob Collier... ;) In any case, the track can still be selected manually or using some of the actions from the list below and the knobs can be used to get closer to them faster.
+{: .notice--warning}
 
 ## Note-key Actions
 

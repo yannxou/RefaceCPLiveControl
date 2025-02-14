@@ -5,7 +5,7 @@ excerpt: "How to use the Yamaha Reface CP note keys to play clips/scenes in Able
 toc: true
 ---
 
-This mode allows using the Yamaha Reface CP note keys to play clips and scenes in Ableton Live.
+This mode allows using the note keys in the Yamaha Reface CP to play clips and scenes in Ableton Live.
 
 Turn *on* the Phaser switch (down position) to enable the Clip Trigger Mode.
 

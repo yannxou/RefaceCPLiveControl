@@ -16,3 +16,7 @@ Once the first things started working it was very engaging and somewhat inevitab
 More features are planned but this is a side project and I need some spare time to work on those. There are also limitations that prevent implementing some ideas, like the Reface CP not sending MIDI CC for Volume and Octave faders or certain aspects of Live that are not possible to control from the script at this time. 
 
 But some new features will be progressively added, maybe I even try to port this to other Reface models if I can get my hands on them. To some extent I will look at the project's success to see whether it's worth it or not.
+
+**If you enjoy this, please consider sponsoring me to continue developing and maintaining it.**
+
+<a href="https://www.buymeacoffee.com/yannxou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
