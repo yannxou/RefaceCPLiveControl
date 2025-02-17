@@ -9,7 +9,9 @@ This mode allows using the Yamaha Reface CP note keys to play quantized note rep
 Turn *on* the D.Delay switch (up position) to enable the Note Repeat Mode.
 
 <p align="center">
-    <img src="{{ '/assets/images/note_repeat.jpg' | relative_url }}" alt="Note Repeat Mode" width="70%">
+    <a href="{{ '/assets/images/note_repeat.jpg' | relative_url }}"> 
+      <img src="{{ '/assets/images/note_repeat.jpg' | relative_url }}" alt="Note Repeat Mode" width="70%"/>
+    </a>
 </p>
 
 When enabled, the MIDI notes from the keyboard are repeated automatically while they're pressed according a repetition rate. 

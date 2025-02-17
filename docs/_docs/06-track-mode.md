@@ -7,7 +7,9 @@ excerpt: "How to use the Yamaha Reface CP to control Tracks in Ableton Live devi
 Turn *on* the Wah switch (down position) to enable the Track Mode.
 
 <p align="center">
-    <img src="{{ '/assets/images/track_mode.jpg' | relative_url }}" alt="Track Mode" width="70%">
+    <a href="{{ '/assets/images/track_mode.jpg' | relative_url }}"> 
+      <img src="{{ '/assets/images/track_mode.jpg' | relative_url }}" alt="Track Mode" width="70%"/>
+    </a>
 </p>
 
 This allows changing the selected track's volume, panning, sends A and B as well as the Mute, Solo and Arm buttons. 

@@ -10,7 +10,9 @@ This mode allows using the note keys in the Yamaha Reface CP to play clips and s
 Turn *on* the Phaser switch (down position) to enable the Clip Trigger Mode.
 
 <p align="center">
-    <img src="{{ '/assets/images/clip_trigger_mode.jpg' | relative_url }}" alt="Clip Trigger Mode" width="70%">
+    <a href="{{ '/assets/images/clip_trigger_mode.jpg' | relative_url }}"> 
+      <img src="{{ '/assets/images/clip_trigger_mode.jpg' | relative_url }}" alt="Clip Trigger Mode" width="70%"/>
+    </a>
 </p>
 
 When enabled, all MIDI note keys (except keys C# and D# which are reserved for special functions) can be used for clip/scene triggering.
@@ -19,7 +21,7 @@ When enabled, all MIDI note keys (except keys C# and D# which are reserved for s
 * Press and hold C# + upper/lower C# to stop all clips.
 * Press and hold D# + clip note key to play the clip's scene.
 
-**Tip:** Pressing a new key while another one is being held down allows playing the different clips from the same track in **legato** mode. This also works with the stop key (C#) so it can be used as some sort of temporal mute when triggering clips. This feature can be enabled/disabled in the [user settings]({{ "/docs/user-settings/" | relative_url }}).
+**Tip:** Pressing a new key while another one is being held down allows playing the different clips from the same track in **legato** mode. This also works with the stop key (C#) so it can be used as some sort of quantized mute when triggering clips. This feature can be enabled/disabled in the [user settings]({{ "/docs/user-settings/" | relative_url }}).
 {: .notice--info}
 
 ## Clip Renaming
@@ -27,7 +29,7 @@ When enabled, all MIDI note keys (except keys C# and D# which are reserved for s
 By default, when enabling the Clip trigger mode, the clip names are renamed to show the MIDI key that can be used to fire each clip. This behaviour can be disabled by changing the `CLIP_TRIGGER_NAME_PREFIXES_ENABLED` setting to `False`.
 
 <p align="center">
-    <img src="{{ '/assets/images/feature-clip-triggering.png' | relative_url }}" alt="Clip Trigger Mode" width="70%">
+    <img src="{{ '/assets/images/feature-clip-triggering.png' | relative_url }}" alt="Auto-rename in Clip Trigger Mode" width="70%"/>
 </p>
 
 ## Layouts

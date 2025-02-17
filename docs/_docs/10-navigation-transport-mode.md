@@ -10,7 +10,9 @@ In this mode, the knobs are used for navigation and the note keys for transport 
 Turn *on* the A.Delay switch (down position) to enable the Navigation/Transport Mode.
 
 <p align="center">
-    <img src="{{ '/assets/images/navigation_transport_mode.jpg' | relative_url }}" alt="Navigation/Transport Mode" width="70%">
+    <a href="{{ '/assets/images/navigation_transport_mode.jpg' | relative_url }}"> 
+      <img src="{{ '/assets/images/navigation_transport_mode.jpg' | relative_url }}" alt="Navigation/Transport Mode" width="70%"/>
+    </a>
 </p>
 
 **Note**: This mode overrides any other active mode. This means that while this mode is enabled the other toggle controls (tremolo/chorus) used to enable the other modes have no effect.

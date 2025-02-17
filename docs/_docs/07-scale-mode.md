@@ -18,7 +18,9 @@ Turn *on* the Chorus switch (up position) to enable the Scale Mode.
 The Scale Play Mode is always enabled by default when turning on the Chorus switch.
 
 <p align="center">
-    <img src="{{ '/assets/images/scale_play_mode.jpg' | relative_url }}" alt="Scale Play Mode" width="70%">
+    <a href="{{ '/assets/images/scale_play_mode.jpg' | relative_url }}"> 
+      <img src="{{ '/assets/images/scale_play_mode.jpg' | relative_url }}" alt="Scale Play Mode" width="70%"/>
+    </a>
 </p>
 
 In this mode, only the note keys that are part of the current scale will reach Live's input and keys outside the scale are muted.
@@ -39,7 +41,9 @@ Once the Scale Mode is enabled, turn right the Reverb Depth knob to enter the Sc
 To exit the Scale Edit Mode, turn left the Reverb Depth Knob. The Reverb Depth knob will turn off to indicate that the Scale Play Mode is enabled.
 
 <p align="center">
-    <img src="{{ '/assets/images/scale_edit_mode.jpg' | relative_url }}" alt="Scale Edit Mode" width="70%">
+    <a href="{{ '/assets/images/scale_edit_mode.jpg' | relative_url }}"> 
+      <img src="{{ '/assets/images/scale_edit_mode.jpg' | relative_url }}" alt="Scale Edit Mode" width="70%"/>
+    </a>
 </p>
 
 In this mode, the first note pressed on the keyboard sets the root note. While holding down the root key, additional notes can be added to a list that defines the target scale. 
