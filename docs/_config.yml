@@ -76,6 +76,9 @@ footer:
     - label: ""
       icon: "fab fa-fw fa-soundcloud"
       url: "https://soundcloud.com/yannxou"
+    - label: ""
+      icon: "fab fa-fw fa-spotify"
+      url: "https://open.spotify.com/artist/1ze7rDFwMvzH5HHzSvesJA"
 
 # Reading Files
 include:
